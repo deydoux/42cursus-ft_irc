@@ -29,6 +29,9 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 .PHONY: all clean fclean re
 
+run: $(NAME)
+	./$<
+
 all: $(NAME)
 
 clean:
