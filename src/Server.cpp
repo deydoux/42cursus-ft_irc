@@ -13,10 +13,12 @@ Server::Server(uint16_t port, std::string password, bool verbose):
 		.sin_port = htons(port),
 		.sin_addr = {INADDR_ANY}
 	})
-{}
+{
+	log("Server constructed", debug);
+}
 
 Server::~Server() {
-	//TODO
+	log("Server destroyed", debug);
 }
 
 void Server::start() {
@@ -28,6 +30,4 @@ void Server::start() {
 	if (bind(_socket, (sockaddr *)&_address, sizeof(_address)) == -1)
 		throw std::runtime_error("Failed to bind socket");
 	log("Socket bound", debug);
-
-
 }
