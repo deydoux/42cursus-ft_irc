@@ -1,14 +1,13 @@
 NAME = ircserv
 
 SRC = \
-	ft_irc.cpp
+	main.cpp
 
 SRC_DIR = src
-INC_DIR = include
 BUILD_DIR = build
 
 CXX = c++
-CXXFLAGS = -I$(INC_DIR) -MD -Wall -Wextra -Werror -std=c++98 -g
+CXXFLAGS = -MD -Wall -Wextra -Werror -std=c++98 -g
 
 RM = rm -rf
 MKDIR = mkdir -p
