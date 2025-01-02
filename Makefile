@@ -1,4 +1,4 @@
-NAME = ft_irc
+NAME = ircserv
 
 SRC = \
 	ft_irc.cpp
