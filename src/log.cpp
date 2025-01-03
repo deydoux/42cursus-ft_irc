@@ -4,21 +4,21 @@
 #include <iostream>
 
 void log(const std::string &context, const std::string &message, const log_level level) {
-	std::string prefix;
+	std::string level_str;
 	switch (level) {
 		case debug:
-			prefix = MAG "DEBUG" RESET;
+			level_str = MAG "DEBUG" RESET;
 			break;
 		case info:
-			prefix = BLU "INFO" RESET;
+			level_str = BLU "INFO" RESET;
 			break;
 		case warning:
-			prefix = BYEL "WARNING" RESET;
+			level_str = BYEL "WARNING" RESET;
 			break;
 		case error:
-			prefix = BRED "ERROR" RESET;
+			level_str = BRED "ERROR" RESET;
 			break;
 	}
 
-	std::cerr << '[' << prefix << "][" << context << "] " << message << std::endl;
+	std::cerr << '[' << level_str << "][" << context << "] " << message << std::endl;
 }
