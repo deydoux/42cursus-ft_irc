@@ -25,8 +25,7 @@ void Server::_init() {
 	});
 }
 
-void Server::_loop()
-{
+void Server::_loop() {
 	log("Polling sockets", debug);
 	if (poll(_poll_fds.data(), _poll_fds.size(), -1) == -1)
 		throw std::runtime_error("Failed to poll sockets");
