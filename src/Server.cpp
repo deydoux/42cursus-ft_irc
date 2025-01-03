@@ -2,7 +2,7 @@
 
 void Server::log(const std::string &message, const log_level level) const {
 	if (_verbose || level != debug)
-		program_log(message, level);
+		::log("Server", message, level);
 }
 
 Server::Server(uint16_t port, std::string password, bool verbose):
@@ -14,11 +14,11 @@ Server::Server(uint16_t port, std::string password, bool verbose):
 		.sin_addr = {INADDR_ANY}
 	})
 {
-	log("Server constructed", debug);
+	log("Constructed", debug);
 }
 
 Server::~Server() {
-	log("Server destroyed", debug);
+	log("Destroyed", debug);
 }
 
 void Server::start() {
