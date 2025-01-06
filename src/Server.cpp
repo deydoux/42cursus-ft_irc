@@ -2,13 +2,18 @@
 
 #include <unistd.h>
 
+#include <sstream>
 #include <stdexcept>
 
 void Server::_init()
 {
+	std::ostringstream oss_port;
+	oss_port << _port;
+
 	_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (_socket == -1)
 		throw std::runtime_error("Failed to create socket");
+	_pollfds.push_back(_init_pollfd(_socket));
 	log("Socket created", debug);
 
 	if (bind(_socket, (sockaddr *)&_address, sizeof(_address)) == -1)
@@ -17,9 +22,7 @@ void Server::_init()
 
 	if (listen(_socket, SOMAXCONN) == -1)
 		throw std::runtime_error("Failed to listen on socket");
-	log("Socket listening", debug);
-
-	_pollfds.push_back(_init_pollfd(_socket));
+	log("Listening on port " + oss_port.str());
 }
 
 void Server::_loop()
