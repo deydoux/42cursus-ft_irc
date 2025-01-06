@@ -31,8 +31,9 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 .PHONY: all clean fclean re
 
+ARGS = -v 6697 slay
 run: $(NAME)
-	./$<
+	./$< $(ARGS)
 
 all: $(NAME)
 
