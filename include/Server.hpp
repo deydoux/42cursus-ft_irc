@@ -10,7 +10,8 @@
 
 #define CRLF "\r\n"
 
-class Server {
+class Server
+{
 public:
 	typedef uint16_t port_t;
 	typedef std::vector<struct pollfd> pollfds_t;
