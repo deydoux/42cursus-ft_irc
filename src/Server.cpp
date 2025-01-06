@@ -69,6 +69,17 @@ void Server::_read()
 	}
 }
 
+sockaddr_in Server::_init_address(uint16_t port)
+{
+	return (sockaddr_in) {
+		.sin_family = AF_INET,
+		.sin_port = htons(port),
+		.sin_addr = (struct in_addr) {
+			.s_addr = INADDR_ANY
+		}
+	};
+}
+
 pollfd Server::_init_pollfd(int fd)
 {
 	return (struct pollfd) {
@@ -79,15 +90,10 @@ pollfd Server::_init_pollfd(int fd)
 }
 
 Server::Server(uint16_t port, std::string password, bool verbose):
-	_verbose(verbose),
-	_address((sockaddr_in) {
-		.sin_family = AF_INET,
-		.sin_port = htons(port),
-		.sin_addr = (struct in_addr) {
-			.s_addr = INADDR_ANY
-		}
-	}),
-	_password(password)
+	_port(port),
+	_address(_init_address(_port)),
+	_password(password),
+	_verbose(verbose)
 {
 	log("Constructed", debug);
 }
