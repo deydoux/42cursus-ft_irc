@@ -5,6 +5,37 @@
 #include <sstream>
 #include <stdexcept>
 
+Server::Server(port_t port, std::string password, bool verbose):
+	_port(port),
+	_address(_init_address(_port)),
+	_password(password),
+	_verbose(verbose)
+{
+	log("Constructed", debug);
+}
+
+Server::~Server()
+{
+	for (_pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it)
+		close(it->fd);
+
+	log("Destroyed", debug);
+}
+
+void Server::start()
+{
+	_init();
+
+	while (true)
+		_loop();
+}
+
+void Server::log(const std::string &message, const log_level level) const
+{
+	if (_verbose || level != debug)
+		::log("Server", message, level);
+}
+
 void Server::_init()
 {
 	std::ostringstream oss_port;
@@ -72,7 +103,7 @@ void Server::_read()
 	}
 }
 
-sockaddr_in Server::_init_address(uint16_t port)
+sockaddr_in Server::_init_address(port_t port)
 {
 	return (sockaddr_in) {
 		.sin_family = AF_INET,
@@ -90,35 +121,4 @@ pollfd Server::_init_pollfd(int fd)
 		.events = POLLIN,
 		.revents = 0
 	};
-}
-
-Server::Server(uint16_t port, std::string password, bool verbose):
-	_port(port),
-	_address(_init_address(_port)),
-	_password(password),
-	_verbose(verbose)
-{
-	log("Constructed", debug);
-}
-
-Server::~Server()
-{
-	for (_pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it)
-		close(it->fd);
-
-	log("Destroyed", debug);
-}
-
-void Server::start()
-{
-	_init();
-
-	while (true)
-		_loop();
-}
-
-void Server::log(const std::string &message, const log_level level) const
-{
-	if (_verbose || level != debug)
-		::log("Server", message, level);
 }
