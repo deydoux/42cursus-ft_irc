@@ -30,6 +30,7 @@ private:
 
 	static sockaddr_in _init_address(uint16_t port);
 	static struct pollfd _init_pollfd(int fd);
+
 public:
 	Server(uint16_t port, std::string password, bool verbose = false);
 	~Server();
