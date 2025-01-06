@@ -16,7 +16,7 @@ Server::Server(port_t port, std::string password, bool verbose):
 
 Server::~Server()
 {
-	for (pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it)
+	for (_pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it)
 		close(it->fd);
 
 	log("Destroyed", debug);
@@ -85,7 +85,7 @@ void Server::_accept()
 
 void Server::_read()
 {
-	for (pollfds_t::iterator it = _pollfds.begin() + 1; it != _pollfds.end(); ++it) {
+	for (_pollfds_t::iterator it = _pollfds.begin() + 1; it != _pollfds.end(); ++it) {
 		if (!(it->revents & POLLIN))
 			continue;
 
