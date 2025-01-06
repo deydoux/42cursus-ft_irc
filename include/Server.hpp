@@ -22,6 +22,7 @@ public:
 	const sockaddr_in &get_address() const;
 	const std::string &get_password() const;
 	const bool &is_verbose() const;
+	const int &get_socket() const;
 	pollfds_t &get_pollfds();
 
 	void start();

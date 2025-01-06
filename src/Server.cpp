@@ -37,6 +37,11 @@ const bool &Server::is_verbose() const
 	return _verbose;
 }
 
+const int &Server::get_socket() const
+{
+	return _socket;
+}
+
 Server::pollfds_t &Server::get_pollfds()
 {
 	return _pollfds;
