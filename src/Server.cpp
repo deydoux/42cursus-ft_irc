@@ -22,31 +22,6 @@ Server::~Server()
 	log("Destroyed", debug);
 }
 
-const sockaddr_in &Server::get_address() const
-{
-	return _address;
-}
-
-const std::string &Server::get_password() const
-{
-	return _password;
-}
-
-const bool &Server::is_verbose() const
-{
-	return _verbose;
-}
-
-const int &Server::get_socket() const
-{
-	return _socket;
-}
-
-Server::pollfds_t &Server::get_pollfds()
-{
-	return _pollfds;
-}
-
 void Server::start()
 {
 	_init();
