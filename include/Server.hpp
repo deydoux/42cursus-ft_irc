@@ -22,6 +22,7 @@ public:
 	const sockaddr_in &get_address() const;
 	const std::string &get_password() const;
 	const bool &is_verbose() const;
+	pollfds_t &get_pollfds();
 
 	void start();
 	void log(const std::string &message, const log_level level = info) const;

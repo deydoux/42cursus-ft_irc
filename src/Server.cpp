@@ -37,6 +37,11 @@ const bool &Server::is_verbose() const
 	return _verbose;
 }
 
+Server::pollfds_t &Server::get_pollfds()
+{
+	return _pollfds;
+}
+
 void Server::start()
 {
 	_init();
