@@ -26,6 +26,8 @@ private:
 	void _loop();
 	void _accept();
 	void _read();
+
+	static struct pollfd _init_pollfd(int fd);
 public:
 	Server(uint16_t port, std::string password, bool verbose = false);
 	~Server();

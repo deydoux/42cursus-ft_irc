@@ -19,11 +19,7 @@ void Server::_init()
 		throw std::runtime_error("Failed to listen on socket");
 	log("Socket listening", debug);
 
-	_pollfds.push_back((struct pollfd) {
-		.fd = _socket,
-		.events = POLLIN,
-		.revents = 0
-	});
+	_pollfds.push_back(_init_pollfd(_socket));
 }
 
 void Server::_loop()
@@ -50,11 +46,7 @@ void Server::_accept()
 		throw std::runtime_error("Failed to accept connection");
 	log("Accepted connection");
 
-	_pollfds.push_back((struct pollfd) {
-		.fd = fd,
-		.events = POLLIN,
-		.revents = 0
-	});
+	_pollfds.push_back(_init_pollfd(fd));
 }
 
 void Server::_read()
@@ -75,6 +67,15 @@ void Server::_read()
 
 		log("Received message:\n" + std::string(buffer, bytes_read));
 	}
+}
+
+pollfd Server::_init_pollfd(int fd)
+{
+	return (struct pollfd) {
+		.fd = fd,
+		.events = POLLIN,
+		.revents = 0
+	};
 }
 
 Server::Server(uint16_t port, std::string password, bool verbose):
