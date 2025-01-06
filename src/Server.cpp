@@ -14,7 +14,7 @@ void Server::_init() {
 		throw std::runtime_error("Failed to bind socket");
 	log("Socket bound", debug);
 
-	if (listen(_socket, 100) == -1)
+	if (listen(_socket, SOMAXCONN) == -1)
 		throw std::runtime_error("Failed to listen on socket");
 	log("Socket listening", debug);
 
