@@ -4,7 +4,8 @@
 
 #include <stdexcept>
 
-void Server::_init() {
+void Server::_init()
+{
 	_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (_socket == -1)
 		throw std::runtime_error("Failed to create socket");
@@ -25,7 +26,8 @@ void Server::_init() {
 	});
 }
 
-void Server::_loop() {
+void Server::_loop()
+{
 	log("Polling sockets", debug);
 	if (poll(_pollfds.data(), _pollfds.size(), -1) == -1)
 		throw std::runtime_error("Failed to poll sockets");
@@ -35,7 +37,8 @@ void Server::_loop() {
 	_read();
 }
 
-void Server::_accept() {
+void Server::_accept()
+{
 	if (!(_pollfds[0].revents & POLLIN))
 		return;
 
@@ -54,7 +57,8 @@ void Server::_accept() {
 	});
 }
 
-void Server::_read() {
+void Server::_read()
+{
 	for (_pollfds_t::iterator it = _pollfds.begin() + 1; it != _pollfds.end(); ++it) {
 		if (!(it->revents & POLLIN))
 			continue;
@@ -87,21 +91,24 @@ Server::Server(uint16_t port, std::string password, bool verbose):
 	log("Constructed", debug);
 }
 
-Server::~Server() {
+Server::~Server()
+{
 	for (_pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it)
 		close(it->fd);
 
 	log("Destroyed", debug);
 }
 
-void Server::start() {
+void Server::start()
+{
 	_init();
 
 	while (true)
 		_loop();
 }
 
-void Server::log(const std::string &message, const log_level level) const {
+void Server::log(const std::string &message, const log_level level) const
+{
 	if (_verbose || level != debug)
 		::log("Server", message, level);
 }
