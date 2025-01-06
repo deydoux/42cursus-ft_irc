@@ -13,6 +13,7 @@
 class Server {
 public:
 	typedef uint16_t port_t;
+	typedef std::vector<struct pollfd> pollfds_t;
 
 	Server(port_t port = 6697, std::string password = "", bool verbose = false);
 	~Server();
@@ -21,7 +22,6 @@ public:
 	void log(const std::string &message, const log_level level = info) const;
 
 private:
-	typedef std::vector<struct pollfd> _pollfds_t;
 
 	const port_t _port;
 	const sockaddr_in _address;
@@ -29,7 +29,7 @@ private:
 	const bool _verbose;
 
 	int _socket;
-	_pollfds_t _pollfds;
+	pollfds_t _pollfds;
 
 	void _init();
 	void _loop();
