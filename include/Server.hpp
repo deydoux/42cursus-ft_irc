@@ -13,9 +13,9 @@
 
 class Server {
 private:
-	typedef std::vector<struct pollfd> _poll_fds_t;
+	typedef std::vector<struct pollfd> _pollfds_t;
 
-	_poll_fds_t _poll_fds;
+	_pollfds_t _pollfds;
 	const bool _verbose;
 	const sockaddr_in _address;
 	const std::string _password;

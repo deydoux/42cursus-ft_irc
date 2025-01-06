@@ -18,7 +18,7 @@ void Server::_init() {
 		throw std::runtime_error("Failed to listen on socket");
 	log("Socket listening", debug);
 
-	_poll_fds.push_back((struct pollfd) {
+	_pollfds.push_back((struct pollfd) {
 		.fd = _socket,
 		.events = POLLIN,
 		.revents = 0
@@ -27,7 +27,7 @@ void Server::_init() {
 
 void Server::_loop() {
 	log("Polling sockets", debug);
-	if (poll(_poll_fds.data(), _poll_fds.size(), -1) == -1)
+	if (poll(_pollfds.data(), _pollfds.size(), -1) == -1)
 		throw std::runtime_error("Failed to poll sockets");
 	log("Polled sockets", debug);
 
@@ -36,7 +36,7 @@ void Server::_loop() {
 }
 
 void Server::_accept() {
-	if (!(_poll_fds[0].revents & POLLIN))
+	if (!(_pollfds[0].revents & POLLIN))
 		return;
 
 	sockaddr_in address;
@@ -47,7 +47,7 @@ void Server::_accept() {
 		throw std::runtime_error("Failed to accept connection");
 	log("Accepted connection");
 
-	_poll_fds.push_back((struct pollfd) {
+	_pollfds.push_back((struct pollfd) {
 		.fd = fd,
 		.events = POLLIN,
 		.revents = 0
@@ -55,7 +55,7 @@ void Server::_accept() {
 }
 
 void Server::_read() {
-	for (_poll_fds_t::iterator it = _poll_fds.begin() + 1; it != _poll_fds.end(); ++it) {
+	for (_pollfds_t::iterator it = _pollfds.begin() + 1; it != _pollfds.end(); ++it) {
 		if (!(it->revents & POLLIN))
 			continue;
 
@@ -64,7 +64,7 @@ void Server::_read() {
 
 		if (bytes_read <= 0) {
 			close(it->fd);
-			_poll_fds.erase(it--);
+			_pollfds.erase(it--);
 			log("Closed connection");
 			continue;
 		}
@@ -88,7 +88,7 @@ Server::Server(uint16_t port, std::string password, bool verbose):
 }
 
 Server::~Server() {
-	for (_poll_fds_t::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+	for (_pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it)
 		close(it->fd);
 
 	log("Destroyed", debug);
