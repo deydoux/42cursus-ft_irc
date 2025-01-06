@@ -22,7 +22,6 @@ public:
 	void log(const std::string &message, const log_level level = info) const;
 
 private:
-
 	const port_t _port;
 	const sockaddr_in _address;
 	const std::string _password;
