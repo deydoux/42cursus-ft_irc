@@ -19,6 +19,10 @@ public:
 	Server(port_t port = 6697, std::string password = "", bool verbose = false);
 	~Server();
 
+	const sockaddr_in &get_address() const;
+	const std::string &get_password() const;
+	const bool &is_verbose() const;
+
 	void start();
 	void log(const std::string &message, const log_level level = info) const;
 
