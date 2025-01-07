@@ -3,6 +3,8 @@
 #include <iostream>
 #include <sstream>
 
+std::string to_string(int n);
+
 static void help(int status = 1)
 {
 	std::cerr << "Usage: ./ircserv [options]... [port] [password]" << std::endl
@@ -67,11 +69,8 @@ static Server *init_server(int argc, char *argv[])
 
 	Server *server = new Server(port, password, verbose);
 
-	if (!port_set) {
-		std::ostringstream oss_port;
-		oss_port << port;
-		server->log("Using default port: " + oss_port.str(), warning);
-	}
+	if (!port_set)
+		server->log("Using default port: " + to_string(port), warning);
 
 	if (!password_set)
 		server->log("No password set", warning);

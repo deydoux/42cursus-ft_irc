@@ -2,8 +2,9 @@
 
 #include <unistd.h>
 
-#include <sstream>
 #include <stdexcept>
+
+std::string to_string(int n);
 
 Server::Server(port_t port, std::string password, bool verbose):
 	_port(port),
@@ -38,9 +39,6 @@ void Server::start()
 
 void Server::_init()
 {
-	std::ostringstream oss_port;
-	oss_port << _port;
-
 	_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (_socket == -1)
 		throw std::runtime_error("Failed to create socket");
@@ -53,7 +51,7 @@ void Server::_init()
 
 	if (listen(_socket, SOMAXCONN) == -1)
 		throw std::runtime_error("Failed to listen on socket");
-	log("Listening on port " + oss_port.str());
+	log("Listening on port " + to_string(_port));
 }
 
 void Server::_loop()
