@@ -37,7 +37,7 @@ private:
 
 	_clients_t	_clients;
 
-	void	_init_signal_handler();
+	void	_set_signal_handler();
 	void	_init_socket();
 	void	_bind();
 	void	_listen();

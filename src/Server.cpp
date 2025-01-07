@@ -39,7 +39,7 @@ void Server::start()
 
 bool Server::stop = false;
 
-void Server::_init_signal_handler()
+void Server::_set_signal_handler()
 {
 	struct sigaction act = {};
 	act.sa_handler = _signal_handler;
@@ -71,7 +71,7 @@ void Server::_listen()
 
 void Server::_init()
 {
-	_init_signal_handler();
+	_set_signal_handler();
 	_init_socket();
 	_bind();
 	_listen();
