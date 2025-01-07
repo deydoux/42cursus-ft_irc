@@ -81,6 +81,7 @@ void Server::_accept()
 	log("Accepted connection");
 
 	_pollfds.push_back(_init_pollfd(fd));
+	_clients[fd] = Client();
 }
 
 void Server::_read()
