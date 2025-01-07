@@ -23,6 +23,8 @@ public:
 
 	static bool	stop;
 
+	static Server	parse_args(int argc, char *argv[]);
+
 private:
 	typedef std::vector<struct pollfd>	_pollfds_t;
 	typedef std::map<int, Client>		_clients_t;
@@ -46,6 +48,8 @@ private:
 	void	_accept();
 	void	_read();
 
+	static port_t			_parse_port(const std::string &port_str);
+	static void				_print_usage(int status = 1);
 	static sockaddr_in		_init_address(port_t port);
 	static struct pollfd	_init_pollfd(int fd);
 	static void				_signal_handler(int sig);

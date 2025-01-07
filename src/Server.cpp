@@ -3,6 +3,8 @@
 #include <signal.h>
 #include <unistd.h>
 
+#include <iostream>
+#include <sstream>
 #include <stdexcept>
 
 std::string to_string(int n);
@@ -35,6 +37,56 @@ void Server::start()
 	while (!stop)
 		_loop();
 	log("Stopped");
+}
+
+Server Server::parse_args(int argc, char *argv[])
+{
+	Server::port_t port = 6697;
+	std::string password;
+	bool verbose = false;
+
+	bool port_set = false;
+	bool password_set = false;
+
+	for (int i = 1; i < argc; i++) {
+		std::string arg = argv[i];
+
+		if (arg == "-h" || arg == "--help")
+			_print_usage(0);
+		else if (arg == "-P" || arg == "--pass" || arg == "--password") {
+			if (++i >= argc)
+				_print_usage();
+
+			password = arg;
+			password_set = true;
+		} else if (arg == "-p" || arg == "--port") {
+			if (++i >= argc)
+				_print_usage();
+
+			port = _parse_port(argv[i]);
+			port_set = true;
+		} else if (arg == "-v" || arg == "--verbose")
+			verbose = true;
+		else if (!port_set) {
+			port = _parse_port(arg);
+			port_set = true;
+		} else if (!password_set) {
+			password = arg;
+			password_set = true;
+		}
+		else
+			_print_usage();
+	}
+
+	Server server = Server(port, password, verbose);
+
+	if (!port_set)
+		server.log("Using default port: " + to_string(port), warning);
+
+	if (!password_set)
+		server.log("No password set", warning);
+
+	return server;
 }
 
 bool Server::stop = false;
@@ -132,6 +184,29 @@ void Server::_read()
 
 		log("Received message on fd " + to_string(it->fd) + '\n' + message);
 	}
+}
+
+Server::port_t Server::_parse_port(const std::string &port_str)
+{
+	std::istringstream iss(port_str);
+	Server::port_t port;
+	iss >> port;
+
+	if (!iss.eof() || iss.fail())
+		_print_usage();
+
+	return port;
+}
+
+void Server::_print_usage(int status)
+{
+	std::cerr << "Usage: ./ircserv [options]... [port] [password]" << std::endl
+			  << "  -h, --help                         Show this help message" << std::endl
+			  << "  -P, --pass, --password <password>  Password required to connect (default: None)" << std::endl
+			  << "  -p, --port <port>                  Port to listen on (default: 6697)" << std::endl
+			  << "  -v, --verbose                      Enable verbose output" << std::endl;
+
+	throw status;
 }
 
 sockaddr_in Server::_init_address(port_t port)
