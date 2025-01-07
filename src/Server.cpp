@@ -77,7 +77,7 @@ void Server::_accept()
 
 	int fd = accept(_socket, (sockaddr *)&address, &address_len);
 	if (fd == -1)
-		throw std::runtime_error("Failed to accept connection");
+		return log("Failed to accept connection", error);
 	log("Accepted connection");
 
 	_pollfds.push_back(_init_pollfd(fd));
