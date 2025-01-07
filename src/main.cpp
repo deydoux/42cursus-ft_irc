@@ -28,7 +28,7 @@ static Server::port_t parse_port(const std::string &port_str)
 	return port;
 }
 
-static Server *init_server(int argc, char *argv[])
+static Server init_server(int argc, char *argv[])
 {
 	Server::port_t port = 6697;
 	std::string password;
@@ -67,35 +67,32 @@ static Server *init_server(int argc, char *argv[])
 			help();
 	}
 
-	Server *server = new Server(port, password, verbose);
+	Server server = Server(port, password, verbose);
 
 	if (!port_set)
-		server->log("Using default port: " + to_string(port), warning);
+		server.log("Using default port: " + to_string(port), warning);
 
 	if (!password_set)
-		server->log("No password set", warning);
+		server.log("No password set", warning);
 
 	return server;
 }
 
 int main(int argc, char *argv[])
 {
-	Server *server;
-
 	try {
-		server = init_server(argc, argv);
+		Server server = init_server(argc, argv);
+
+		try {
+			server.start();
+		} catch (const std::exception &e) {
+			server.log(e.what(), error);
+			return 1;
+		}
+
 	} catch (int status) {
 		return status;
 	}
-
-	try {
-		server->start();
-	} catch (const std::exception &e) {
-		server->log(e.what(), error);
-		return 1;
-	}
-
-	delete server;
 
 	return 0;
 }
