@@ -99,7 +99,7 @@ void Server::_accept()
 	int fd = accept(_socket, (sockaddr *)&address, &address_len);
 	if (fd == -1)
 		return log("Failed to accept connection", error);
-	log("Accepted connection");
+	log("Accepted connection on fd " + to_string(fd));
 
 	_pollfds.push_back(_init_pollfd(fd));
 	_clients[fd] = Client();
@@ -117,12 +117,20 @@ void Server::_read()
 		if (bytes_read <= 0) {
 			close(it->fd);
 			_clients.erase(it->fd);
+			log("Closed connection on fd " + to_string(it->fd));
 			_pollfds.erase(it--);
-			log("Closed connection");
 			continue;
 		}
 
-		log("Received message:\n" + std::string(buffer, bytes_read));
+		std::string message(buffer, bytes_read);
+		for (size_t pos = 0; (pos = message.find('\t', pos)) != std::string::npos; pos += 2)
+			message.replace(pos, 1, "\\t");
+		for (size_t pos = 0; (pos = message.find('\n', pos)) != std::string::npos; pos += 2)
+			message.replace(pos, 1, "\\n");
+		for (size_t pos = 0; (pos = message.find('\r', pos)) != std::string::npos; pos += 2)
+			message.replace(pos, 1, "\\r");
+
+		log("Received message on fd " + to_string(it->fd) + '\n' + message);
 	}
 }
 

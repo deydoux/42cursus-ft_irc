@@ -24,8 +24,8 @@ public:
 	static bool	stop;
 
 private:
-	typedef std::map<int, Client>		_clients_t;
 	typedef std::vector<struct pollfd>	_pollfds_t;
+	typedef std::map<int, Client>		_clients_t;
 
 	const port_t		_port;
 	const sockaddr_in	_address;
