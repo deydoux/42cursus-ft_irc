@@ -1,5 +1,6 @@
 #include "Server.hpp"
 
+#include <signal.h>
 #include <unistd.h>
 
 #include <stdexcept>
@@ -19,7 +20,6 @@ Server::~Server()
 {
 	for (_pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it)
 		close(it->fd);
-
 	log("Destroyed", debug);
 }
 
@@ -32,32 +32,55 @@ void Server::log(const std::string &message, const log_level level) const
 void Server::start()
 {
 	_init();
-
-	while (true)
+	while (!stop)
 		_loop();
+	log("Stopped");
 }
 
-void Server::_init()
+bool Server::stop = false;
+
+void Server::_init_signal_handler()
+{
+	struct sigaction act = {};
+	act.sa_handler = _signal_handler;
+	sigaction(SIGINT, &act, NULL);
+}
+
+void Server::_init_socket()
 {
 	_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (_socket == -1)
 		throw std::runtime_error("Failed to create socket");
 	_pollfds.push_back(_init_pollfd(_socket));
 	log("Socket created", debug);
+}
 
+void Server::_bind()
+{
 	if (bind(_socket, (sockaddr *)&_address, sizeof(_address)) == -1)
 		throw std::runtime_error("Failed to bind socket");
 	log("Socket bound", debug);
+}
 
+void Server::_listen()
+{
 	if (listen(_socket, SOMAXCONN) == -1)
 		throw std::runtime_error("Failed to listen on socket");
 	log("Listening on port " + to_string(_port));
 }
 
+void Server::_init()
+{
+	_init_signal_handler();
+	_init_socket();
+	_bind();
+	_listen();
+}
+
 void Server::_loop()
 {
 	log("Polling sockets", debug);
-	if (poll(_pollfds.data(), _pollfds.size(), -1) == -1)
+	if (poll(_pollfds.data(), _pollfds.size(), -1) == -1 && !stop)
 		throw std::runtime_error("Failed to poll sockets");
 	log("Polled sockets", debug);
 
@@ -121,4 +144,9 @@ pollfd Server::_init_pollfd(int fd)
 		.events = POLLIN,
 		.revents = 0
 	};
+}
+
+void Server::_signal_handler(int)
+{
+	stop = true;
 }
