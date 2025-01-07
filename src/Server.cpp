@@ -22,18 +22,18 @@ Server::~Server()
 	log("Destroyed", debug);
 }
 
+void Server::log(const std::string &message, const log_level level) const
+{
+	if (_verbose || level != debug)
+		::log("Server", message, level);
+}
+
 void Server::start()
 {
 	_init();
 
 	while (true)
 		_loop();
-}
-
-void Server::log(const std::string &message, const log_level level) const
-{
-	if (_verbose || level != debug)
-		::log("Server", message, level);
 }
 
 void Server::_init()
