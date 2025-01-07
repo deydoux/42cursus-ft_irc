@@ -6,10 +6,10 @@
 static void help(int status = 1)
 {
 	std::cerr << "Usage: ./ircserv [options]... [port] [password]" << std::endl
-		<< "  -h, --help                         Show this help message" << std::endl
-		<< "  -P, --pass, --password <password>  Password required to connect (default: None)" << std::endl
-		<< "  -p, --port <port>                  Port to listen on (default: 6697)" << std::endl
-		<< "  -v, --verbose                      Enable verbose output" << std::endl;
+			  << "  -h, --help                         Show this help message" << std::endl
+			  << "  -P, --pass, --password <password>  Password required to connect (default: None)" << std::endl
+			  << "  -p, --port <port>                  Port to listen on (default: 6697)" << std::endl
+			  << "  -v, --verbose                      Enable verbose output" << std::endl;
 
 	throw status;
 }
