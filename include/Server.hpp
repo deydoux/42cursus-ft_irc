@@ -53,6 +53,7 @@ private:
 	static sockaddr_in		_init_address(port_t port);
 	static struct pollfd	_init_pollfd(int fd);
 	static void				_signal_handler(int sig);
+	static std::string		_to_string(int n);
 };
 
 #endif // SERVER_HPP
