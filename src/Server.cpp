@@ -95,6 +95,7 @@ void Server::_read()
 
 		if (bytes_read <= 0) {
 			close(it->fd);
+			_clients.erase(it->fd);
 			_pollfds.erase(it--);
 			log("Closed connection");
 			continue;
