@@ -8,8 +8,6 @@
 
 #include <vector>
 
-#define CRLF "\r\n"
-
 class Server
 {
 public:
