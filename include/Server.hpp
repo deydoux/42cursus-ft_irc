@@ -1,6 +1,8 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#define CRLF "\r\n"
+
 #include "Channel.hpp"
 #include "Client.hpp"
 #include "log.h"
@@ -24,7 +26,10 @@ public:
 	void	log(const std::string &message, const log_level level = info) const;
 	void	start();
 
-	bool	is_verbose() const;
+	const std::string	&get_password() const;
+	bool				is_verbose() const;
+
+	void	disconnect_client(int fd);
 
 	static bool	stop;
 

@@ -4,6 +4,8 @@
 #include "log.h"
 #include "Server.hpp"
 
+#include <string>
+
 class Server;
 
 class Client
@@ -14,10 +16,15 @@ public:
 
 	void	log(const std::string &message, const log_level level = info) const;
 	void	init();
-	void	handle_message(std::string &message);
+
+	void	handle_messages(std::string messages);
 private:
 	const int	_fd;
 	Server		&_server;
+
+	std::string	_buffer;
+
+	void _handle_message(std::string message);
 };
 
 #endif // CLIENT_HPP

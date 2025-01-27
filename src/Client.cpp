@@ -6,7 +6,6 @@
 #include <unistd.h>
 
 #include <stdexcept>
-#include <string>
 #include <iostream>
 
 Client::Client(const int fd, Server &server):
@@ -36,14 +35,28 @@ void Client::init()
 		throw std::runtime_error("Failed to send message");
 }
 
-// maybe const back
-void Client::handle_message(std::string &message)
+void Client::handle_messages(std::string messages)
 {
-	for (size_t pos = 0; (pos = message.find('\t', pos)) != std::string::npos; pos += 2)
-		message.replace(pos, 1, "\\t");
-	for (size_t pos = 0; (pos = message.find('\n', pos)) != std::string::npos; pos += 2)
-		message.replace(pos, 1, "\\n");
-	for (size_t pos = 0; (pos = message.find('\r', pos)) != std::string::npos; pos += 2)
-		message.replace(pos, 1, "\\r");
-	log("Received message:\n" + message);
+	std::string debug_messages = messages;
+	for (size_t pos = 0; (pos = debug_messages.find('\t', pos)) != std::string::npos; pos += 2)
+		debug_messages.replace(pos, 1, "\\t");
+	for (size_t pos = 0; (pos = debug_messages.find('\n', pos)) != std::string::npos; pos += 2)
+		debug_messages.replace(pos, 1, "\\n");
+	for (size_t pos = 0; (pos = debug_messages.find('\r', pos)) != std::string::npos; pos += 2)
+		debug_messages.replace(pos, 1, "\\r");
+	log("Received messages:\n" + debug_messages, debug);
+
+	_buffer += messages;
+	size_t pos;
+	while ((pos = _buffer.find(CRLF)) != std::string::npos) {
+		_handle_message(_buffer.substr(0, pos));
+		_buffer.erase(0, pos + 2);
+	}
+}
+
+void Client::_handle_message(std::string message)
+{
+	if (message.size() > 510) {
+		// TODO: "ERROR :Closing connection: abc[~abc@z3r3p4.local] (Request too long)"
+	}
 }

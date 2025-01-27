@@ -42,9 +42,26 @@ void Server::start()
 	log("Stopped");
 }
 
+const std::string &Server::get_password() const
+{
+	return _password;
+}
+
 bool Server::is_verbose() const
 {
 	return _verbose;
+}
+
+void Server::disconnect_client(int fd)
+{
+	delete _clients[fd];
+	_clients.erase(fd);
+	for (_pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it) {
+		if (it->fd == fd) {
+			_pollfds.erase(it);
+			break;
+		}
+	}
 }
 
 Server Server::parse_args(int argc, char *argv[])
@@ -172,9 +189,7 @@ void Server::_accept()
 		_clients[fd]->init();
 	} catch (std::runtime_error &e) {
 		_clients[fd]->log(e.what(), error);
-		delete _clients[fd];
-		_clients.erase(fd);
-		_pollfds.pop_back();
+		disconnect_client(fd);
 	}
 }
 
@@ -188,14 +203,11 @@ void Server::_read()
 		ssize_t bytes_read = recv(it->fd, buffer, sizeof(buffer), MSG_DONTWAIT); // WAIT ✋ They don't love you like I love you
 
 		if (bytes_read <= 0) {
-			delete _clients[it->fd];
-			_clients.erase(it->fd);
-			_pollfds.erase(it--);
+			disconnect_client((it--)->fd);
 			continue;
 		}
 
-		std::string message(buffer, bytes_read);
-		_clients[it->fd]->handle_message(message);
+		_clients[it->fd]->handle_messages(std::string(buffer, bytes_read));
 	}
 }
 
