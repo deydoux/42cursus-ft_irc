@@ -1,4 +1,4 @@
-#include "Channel.hpp"
+#include "class/Channel.hpp"
 
 Channel::Channel(const std::string &name, const bool verbose):
 	_name(name),

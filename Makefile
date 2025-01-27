@@ -1,12 +1,12 @@
 NAME = ircserv
 
 SRC = \
-	Channel.cpp \
-	Client.cpp \
-	log.cpp \
-	main.cpp \
-	Server.cpp \
-	to_string.cpp
+	class/Channel.cpp \
+	class/Client.cpp \
+	class/Server.cpp \
+	lib/log.cpp \
+	lib/to_string.cpp \
+	main.cpp
 
 SRC_DIR = src
 INC_DIR = include
