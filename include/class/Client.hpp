@@ -1,7 +1,7 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
-#include "log.h"
+#include "lib.hpp"
 #include "Server.hpp"
 
 #include <string>

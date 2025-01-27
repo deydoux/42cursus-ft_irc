@@ -5,7 +5,7 @@
 
 #include "Channel.hpp"
 #include "Client.hpp"
-#include "log.h"
+#include "lib.hpp"
 
 #include <arpa/inet.h>
 #include <poll.h>

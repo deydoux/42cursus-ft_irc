@@ -1,5 +1,5 @@
 #include "color.h"
-#include "log.h"
+#include "lib.hpp"
 
 #include <iostream>
 

@@ -1,7 +1,7 @@
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-#include "log.h"
+#include "lib.hpp"
 
 #include <string>
 
