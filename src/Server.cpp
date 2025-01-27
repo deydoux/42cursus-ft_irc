@@ -111,6 +111,11 @@ void Server::_init_socket()
 	_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (_socket == -1)
 		throw std::runtime_error("Failed to create socket");
+
+	int opt = 1;
+	if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+		throw std::runtime_error("Failed to set socket options");
+
 	_pollfds.push_back(_init_pollfd(_socket));
 	log("Socket created", debug);
 }
