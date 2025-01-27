@@ -1,13 +1,12 @@
 #include "Server.hpp"
 
 #include <signal.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-
-std::string _to_string(int n);
 
 Server::Server(port_t port, std::string password, bool verbose):
 	_port(port),
@@ -163,7 +162,7 @@ void Server::_read()
 		if (!(it->revents & POLLIN))
 			continue;
 
-		char buffer[1024];
+		char buffer[BUFSIZ];
 		ssize_t bytes_read = recv(it->fd, buffer, sizeof(buffer), MSG_DONTWAIT); // WAIT ✋ They don't love you like I love you
 
 		if (bytes_read <= 0) {
