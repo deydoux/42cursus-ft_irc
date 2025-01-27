@@ -1,6 +1,7 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#include "Channel.hpp"
 #include "Client.hpp"
 #include "log.h"
 
@@ -26,8 +27,9 @@ public:
 	static Server	parse_args(int argc, char *argv[]);
 
 private:
-	typedef std::vector<struct pollfd>	_pollfds_t;
-	typedef std::map<int, Client *>		_clients_t;
+	typedef std::vector<struct pollfd>			_pollfds_t;
+	typedef std::map<int, Client *>				_clients_t;
+	typedef std::map<std::string, Channel *>	_channels_t;
 
 	const port_t		_port;
 	const sockaddr_in	_address;
@@ -38,6 +40,7 @@ private:
 	_pollfds_t	_pollfds;
 
 	_clients_t	_clients;
+	_channels_t	_channels;
 
 	void	_set_signal_handler();
 	void	_init_socket();

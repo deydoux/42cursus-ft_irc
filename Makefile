@@ -1,6 +1,7 @@
 NAME = ircserv
 
 SRC = \
+	Channel.cpp \
 	Client.cpp \
 	log.cpp \
 	main.cpp \

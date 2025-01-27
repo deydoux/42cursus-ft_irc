@@ -23,6 +23,8 @@ Server::~Server()
 	close(_socket);
 	for (_clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it)
 		delete it->second;
+	for (_channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it)
+		delete it->second;
 	log("Destroyed", debug);
 }
 
