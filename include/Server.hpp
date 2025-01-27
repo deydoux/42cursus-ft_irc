@@ -11,16 +11,20 @@
 #include <map>
 #include <vector>
 
+class Client;
+
 class Server
 {
 public:
 	typedef uint16_t	port_t;
 
-	Server(port_t port = 6697, std::string password = "", bool verbose = false);
+	Server(port_t port, std::string password, bool verbose);
 	~Server();
 
 	void	log(const std::string &message, const log_level level = info) const;
 	void	start();
+
+	bool	is_verbose() const;
 
 	static bool	stop;
 

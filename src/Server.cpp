@@ -42,6 +42,11 @@ void Server::start()
 	log("Stopped");
 }
 
+bool Server::is_verbose() const
+{
+	return _verbose;
+}
+
 Server Server::parse_args(int argc, char *argv[])
 {
 	Server::port_t port = 6697;
@@ -156,7 +161,7 @@ void Server::_accept()
 		return log("Failed to accept connection", error);
 
 	_pollfds.push_back(_init_pollfd(fd));
-	_clients[fd] = new Client(fd, _verbose);
+	_clients[fd] = new Client(fd, *this);
 
 	try {
 		_clients[fd]->init();

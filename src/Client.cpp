@@ -9,9 +9,9 @@
 #include <string>
 #include <iostream>
 
-Client::Client(const int fd, const bool verbose):
+Client::Client(const int fd, Server &server):
 	_fd(fd),
-	_verbose(verbose)
+	_server(server)
 {
 	log("Accepted connection");
 }
@@ -24,7 +24,7 @@ Client::~Client()
 
 void Client::log(const std::string &message, const log_level level) const
 {
-	if (_verbose || level != debug)
+	if (_server.is_verbose() || level != debug)
 		::log("Client " + to_string(_fd), message, level);
 }
 

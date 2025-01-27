@@ -2,11 +2,14 @@
 #define CLIENT_HPP
 
 #include "log.h"
+#include "Server.hpp"
+
+class Server;
 
 class Client
 {
 public:
-	Client(int fd, bool verbose = false);
+	Client(int fd, Server &server);
 	~Client();
 
 	void	log(const std::string &message, const log_level level = info) const;
@@ -14,7 +17,7 @@ public:
 	void	handle_message(const std::string &message);
 private:
 	const int	_fd;
-	const bool	_verbose;
+	Server		&_server;
 };
 
 #endif // CLIENT_HPP
