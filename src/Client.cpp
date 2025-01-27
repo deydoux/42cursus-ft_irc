@@ -36,7 +36,14 @@ void Client::init()
 		throw std::runtime_error("Failed to send message");
 }
 
-void Client::handle_message(const std::string &message)
+// maybe const back
+void Client::handle_message(std::string &message)
 {
+	for (size_t pos = 0; (pos = message.find('\t', pos)) != std::string::npos; pos += 2)
+		message.replace(pos, 1, "\\t");
+	for (size_t pos = 0; (pos = message.find('\n', pos)) != std::string::npos; pos += 2)
+		message.replace(pos, 1, "\\n");
+	for (size_t pos = 0; (pos = message.find('\r', pos)) != std::string::npos; pos += 2)
+		message.replace(pos, 1, "\\r");
 	log("Received message:\n" + message);
 }

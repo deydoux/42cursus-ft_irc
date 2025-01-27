@@ -14,7 +14,7 @@ public:
 
 	void	log(const std::string &message, const log_level level = info) const;
 	void	init();
-	void	handle_message(const std::string &message);
+	void	handle_message(std::string &message);
 private:
 	const int	_fd;
 	Server		&_server;

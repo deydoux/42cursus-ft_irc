@@ -189,7 +189,8 @@ void Server::_read()
 			continue;
 		}
 
-		_clients[it->fd]->handle_message(std::string(buffer, bytes_read));
+		std::string message(buffer, bytes_read);
+		_clients[it->fd]->handle_message(message);
 	}
 }
 
