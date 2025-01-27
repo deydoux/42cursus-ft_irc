@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "to_string.h"
 
 #include <signal.h>
 #include <stdio.h>
@@ -19,8 +20,9 @@ Server::Server(port_t port, std::string password, bool verbose):
 
 Server::~Server()
 {
-	for (_pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it)
-		close(it->fd);
+	close(_socket);
+	for (_clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it)
+		delete it->second;
 	log("Destroyed", debug);
 }
 
@@ -80,7 +82,7 @@ Server Server::parse_args(int argc, char *argv[])
 	Server server = Server(port, password, verbose);
 
 	if (!port_set)
-		server.log("Using default port: " + _to_string(port), warning);
+		server.log("Using default port: " + to_string(port), warning);
 
 	if (!password_set)
 		server.log("No password set", warning);
@@ -117,7 +119,7 @@ void Server::_listen()
 {
 	if (listen(_socket, SOMAXCONN) == -1)
 		throw std::runtime_error("Failed to listen on socket");
-	log("Listening on port " + _to_string(_port));
+	log("Listening on port " + to_string(_port));
 }
 
 void Server::_init()
@@ -150,10 +152,18 @@ void Server::_accept()
 	int fd = accept(_socket, (sockaddr *)&address, &address_len);
 	if (fd == -1)
 		return log("Failed to accept connection", error);
-	log("Accepted connection on fd " + _to_string(fd));
 
 	_pollfds.push_back(_init_pollfd(fd));
-	_clients[fd] = Client();
+	_clients[fd] = new Client(fd, _verbose);
+
+	try {
+		_clients[fd]->init();
+	} catch (std::runtime_error &e) {
+		_clients[fd]->log(e.what(), error);
+		delete _clients[fd];
+		_clients.erase(fd);
+		_pollfds.pop_back();
+	}
 }
 
 void Server::_read()
@@ -166,22 +176,13 @@ void Server::_read()
 		ssize_t bytes_read = recv(it->fd, buffer, sizeof(buffer), MSG_DONTWAIT); // WAIT ✋ They don't love you like I love you
 
 		if (bytes_read <= 0) {
-			close(it->fd);
+			delete _clients[it->fd];
 			_clients.erase(it->fd);
-			log("Closed connection on fd " + _to_string(it->fd));
 			_pollfds.erase(it--);
 			continue;
 		}
 
-		std::string message(buffer, bytes_read);
-		for (size_t pos = 0; (pos = message.find('\t', pos)) != std::string::npos; pos += 2)
-			message.replace(pos, 1, "\\t");
-		for (size_t pos = 0; (pos = message.find('\n', pos)) != std::string::npos; pos += 2)
-			message.replace(pos, 1, "\\n");
-		for (size_t pos = 0; (pos = message.find('\r', pos)) != std::string::npos; pos += 2)
-			message.replace(pos, 1, "\\r");
-
-		log("Received message on fd " + _to_string(it->fd) + '\n' + message);
+		_clients[it->fd]->handle_message(std::string(buffer, bytes_read));
 	}
 }
 
@@ -231,11 +232,4 @@ pollfd Server::_init_pollfd(int fd)
 void Server::_signal_handler(int)
 {
 	stop = true;
-}
-
-std::string Server::_to_string(int n)
-{
-	std::ostringstream oss;
-	oss << n;
-	return oss.str();
 }

@@ -4,7 +4,8 @@ SRC = \
 	Client.cpp \
 	log.cpp \
 	main.cpp \
-	Server.cpp
+	Server.cpp \
+	to_string.cpp
 
 SRC_DIR = src
 INC_DIR = include
