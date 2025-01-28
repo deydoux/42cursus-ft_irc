@@ -74,11 +74,8 @@ void Client::_handle_message(std::string message)
 	args_t args;
 	size_t pos;
 	while ((pos = message.find(' ')) != std::string::npos && message.find(':') != 0) {
-		if (pos == 0) {
-			message.erase(0, 1);
-			continue;
-		}
-		args.push_back(message.substr(0, pos));
+		if (pos > 0)
+			args.push_back(message.substr(0, pos));
 		message.erase(0, pos + 1);
 	}
 	if (!message.empty())
@@ -91,4 +88,6 @@ void Client::_handle_message(std::string message)
 			oss << ", ";
 	}
 	log("Parsed command: " + oss.str(), debug);
+
+	_server.execute_command(args, *this);
 }

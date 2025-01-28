@@ -12,4 +12,6 @@ void	log(const std::string &context, const std::string &message, const log_level
 
 std::string	to_string(int n);
 
+std::string	to_lower(const std::string &str);
+
 #endif // LIB_HPP

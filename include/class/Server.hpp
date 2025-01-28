@@ -23,11 +23,11 @@ public:
 
 	void	log(const std::string &message, const log_level level = info) const;
 	void	start();
+	void	disconnect_client(int fd);
+	void	execute_command(const args_t &cmd, Client &client);
 
 	const std::string	&get_password() const;
 	bool				is_verbose() const;
-
-	void	disconnect_client(int fd);
 
 	static bool	stop;
 
@@ -37,6 +37,9 @@ private:
 	typedef std::vector<struct pollfd>			_pollfds_t;
 	typedef std::map<int, Client *>				_clients_t;
 	typedef std::map<std::string, Channel *>	_channels_t;
+
+	typedef void	(Server::*_command_t)(const args_t &, Client &);
+	typedef std::map<std::string, _command_t>	_commands_t;
 
 	const port_t		_port;
 	const sockaddr_in	_address;
@@ -57,6 +60,10 @@ private:
 	void	_loop();
 	void	_accept();
 	void	_read();
+
+	void	_dummy_command(const args_t &args, Client &client);
+
+	_commands_t	_commands;
 
 	static port_t			_parse_port(const std::string &port_str);
 	static void				_print_usage(int status = 1);
