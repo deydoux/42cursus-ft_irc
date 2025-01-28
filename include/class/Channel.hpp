@@ -3,8 +3,6 @@
 
 #include "lib.hpp"
 
-#include <string>
-
 class Channel
 {
 public:

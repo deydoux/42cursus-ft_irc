@@ -14,11 +14,7 @@ Server::Server(port_t port, std::string password, bool verbose):
 	_password(password),
 	_verbose(verbose)
 {
-	_commands["pass"] = &Server::_dummy_command;
-	_commands["nick"] = &Server::_dummy_command;
-	_commands["user"] = &Server::_dummy_command;
-	// _commands["join"] = &Server::_dummy_command;
-	// _commands["part"] = &Server::_dummy_command;
+	Command();
 	log("Constructed", debug);
 }
 
@@ -68,23 +64,11 @@ void Server::disconnect_client(int fd)
 	}
 }
 
-void Server::execute_command(const args_t &args, Client &client)
-{
-	std::string name = to_lower(args[0]);
-
-	if (_commands.find(name) == _commands.end()) {
-		client.log("Unknown command: " + name, warning);
-		return;
-	}
-
-	(this->*_commands[name])(args, client);
-}
-
 Server Server::parse_args(int argc, char *argv[])
 {
-	Server::port_t port = 6697;
+	Server::port_t port = _default_port;
 	std::string password;
-	bool verbose = true;
+	bool verbose = _default_port;
 
 	bool port_set = false;
 	bool password_set = false;
@@ -226,11 +210,6 @@ void Server::_read()
 
 		_clients[it->fd]->handle_messages(std::string(buffer, bytes_read));
 	}
-}
-
-void Server::_dummy_command(const args_t &args, Client &client)
-{
-	client.log("Command not implemented: " + args[0], warning);
 }
 
 Server::port_t Server::_parse_port(const std::string &port_str)

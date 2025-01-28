@@ -1,4 +1,5 @@
 #include "class/Client.hpp"
+#include "class/Command.hpp"
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -89,5 +90,5 @@ void Client::_handle_message(std::string message)
 	}
 	log("Parsed command: " + oss.str(), debug);
 
-	_server.execute_command(args, *this);
+	Command::execute(args, *this);
 }

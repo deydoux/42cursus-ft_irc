@@ -6,8 +6,6 @@
 
 #include <unistd.h>
 
-#include <string>
-
 class Server;
 
 class Client
