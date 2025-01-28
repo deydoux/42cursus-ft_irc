@@ -2,11 +2,9 @@
 
 #include <signal.h>
 #include <stdio.h>
-#include <unistd.h>
 
 #include <iostream>
 #include <sstream>
-#include <stdexcept>
 
 Server::Server(port_t port, std::string password, bool verbose):
 	_port(port),

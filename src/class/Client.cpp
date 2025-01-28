@@ -1,11 +1,5 @@
 #include "class/Client.hpp"
-#include "class/Command.hpp"
 
-#include <sys/socket.h>
-#include <sys/types.h>
-
-#include <stdexcept>
-#include <iostream>
 #include <sstream>
 
 Client::Client(const int fd, Server &server):
