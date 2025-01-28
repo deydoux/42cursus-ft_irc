@@ -17,9 +17,11 @@ Command::Command()
 
 void Command::execute(const args_t &args, Client &client)
 {
-	_command_t command = _commands[args[0]];
+	std::string name = to_lower(args[0]);
+
+	_command_t command = _commands[name];
 	if (!command)
-		return client.log("Unknown command: " + args[0], error);
+		return client.log("Unknown command: " + name, error);
 	command(args, client);
 }
 
