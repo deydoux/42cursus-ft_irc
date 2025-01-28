@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <sstream>
 
 Client::Client(const int fd, Server &server):
 	_fd(fd),
@@ -83,11 +84,11 @@ void Client::_handle_message(std::string message)
 	if (!message.empty())
 		args.push_back(message);
 
-	std::cout << "[";
+	std::ostringstream oss;
 	for (args_t::iterator it = args.begin(); it != args.end(); ++it) {
-		std::cout << '"' << *it << "\"";
+		oss << '"' << *it << "\"";
 		if (it + 1 != args.end())
-			std::cout << ", ";
+			oss << ", ";
 	}
-	std::cout << "]" << std::endl;
+	log("Parsed command: " + oss.str(), debug);
 }
