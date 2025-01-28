@@ -45,7 +45,7 @@ void Client::handle_messages(std::string messages)
 	size_t pos;
 	while ((pos = _buffer.find('\n')) != std::string::npos) {
 		_handle_message(_buffer.substr(0, pos));
-		_buffer.erase(0, pos);
+		_buffer.erase(0, pos + 1);
 	}
 }
 
@@ -72,7 +72,7 @@ void Client::_handle_message(std::string message)
 
 	args_t args;
 	size_t pos;
-	while ((pos = message.find(' ')) != std::string::npos) {
+	while ((pos = message.find(' ')) != std::string::npos && message.find(':') != 0) {
 		if (pos == 0) {
 			message.erase(0, 1);
 			continue;
@@ -80,4 +80,14 @@ void Client::_handle_message(std::string message)
 		args.push_back(message.substr(0, pos));
 		message.erase(0, pos + 1);
 	}
+	if (!message.empty())
+		args.push_back(message);
+
+	std::cout << "[";
+	for (args_t::iterator it = args.begin(); it != args.end(); ++it) {
+		std::cout << '"' << *it << "\"";
+		if (it + 1 != args.end())
+			std::cout << ", ";
+	}
+	std::cout << "]" << std::endl;
 }
