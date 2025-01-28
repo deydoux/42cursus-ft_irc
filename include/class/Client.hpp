@@ -4,6 +4,8 @@
 #include "lib.hpp"
 #include "Server.hpp"
 
+#include <unistd.h>
+
 #include <string>
 
 class Server;
@@ -24,7 +26,10 @@ private:
 
 	std::string	_buffer;
 
+	ssize_t _send(const std::string &message) const;
 	void _handle_message(std::string message);
+
+	static const size_t	_max_message_size = 512;
 };
 
 #endif // CLIENT_HPP

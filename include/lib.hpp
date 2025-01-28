@@ -2,6 +2,9 @@
 #define LIB_HPP
 
 #include <string>
+#include <vector>
+
+typedef std::vector<std::string>	args_t;
 
 typedef enum {debug, info, warning, error}	log_level;
 

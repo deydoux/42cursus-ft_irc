@@ -2,7 +2,6 @@
 
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 #include <stdexcept>
 #include <iostream>
@@ -28,10 +27,7 @@ void Client::log(const std::string &message, const log_level level) const
 
 void Client::init()
 {
-	const std::string message = "Hello, world!\r\n";
-	ssize_t bytes_sent = send(_fd, message.c_str(), message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
-	if (bytes_sent == -1)
-		throw std::runtime_error("Failed to send message");
+	_send("Hello, world!\r\n");
 }
 
 void Client::handle_messages(std::string messages)
@@ -47,15 +43,41 @@ void Client::handle_messages(std::string messages)
 
 	_buffer += messages;
 	size_t pos;
-	while ((pos = _buffer.find(CRLF)) != std::string::npos) {
+	while ((pos = _buffer.find('\n')) != std::string::npos) {
 		_handle_message(_buffer.substr(0, pos));
-		_buffer.erase(0, pos + 2);
+		_buffer.erase(0, pos);
 	}
+}
+
+ssize_t Client::_send(const std::string &message) const
+{
+	ssize_t bytes_sent = send(_fd, message.c_str(), message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
+	if (bytes_sent == -1)
+		throw std::runtime_error("Failed to send message");
+	return bytes_sent;
 }
 
 void Client::_handle_message(std::string message)
 {
-	if (message.size() > 510) {
+	if (message.empty())
+		return;
+
+	if (message.size() > _max_message_size - 1) {
 		// TODO: "ERROR :Closing connection: abc[~abc@z3r3p4.local] (Request too long)"
+		log("TODO: Request too long", error);
+	}
+
+	if (message[message.size() - 1] == '\r')
+		message.erase(message.size() - 1);
+
+	args_t args;
+	size_t pos;
+	while ((pos = message.find(' ')) != std::string::npos) {
+		if (pos == 0) {
+			message.erase(0, 1);
+			continue;
+		}
+		args.push_back(message.substr(0, pos));
+		message.erase(0, pos + 1);
 	}
 }

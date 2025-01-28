@@ -1,8 +1,6 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#define CRLF "\r\n"
-
 #include "Channel.hpp"
 #include "Client.hpp"
 #include "lib.hpp"
