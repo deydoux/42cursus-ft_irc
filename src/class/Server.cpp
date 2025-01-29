@@ -15,7 +15,7 @@ Server::Server(port_t port, std::string password, bool verbose):
 	_password(password),
 	_verbose(verbose)
 {
-	Command();
+	Command::init();
 	log("Constructed", debug);
 }
 

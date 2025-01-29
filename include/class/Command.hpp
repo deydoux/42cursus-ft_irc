@@ -8,8 +8,7 @@ class Client;
 class Command
 {
 public:
-	Command();
-
+	static void init();
 	static void execute(const args_t &args, Client &client);
 private:
 	typedef void	(*_command_t)(const args_t &, Client &);

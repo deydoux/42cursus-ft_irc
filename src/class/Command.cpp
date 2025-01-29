@@ -1,7 +1,7 @@
 #include "class/Client.hpp"
 #include "class/Command.hpp"
 
-Command::Command()
+void Command::init()
 {
 	_commands["invite"] = &Command::_invite;
 	_commands["join"] = &Command::_join;
