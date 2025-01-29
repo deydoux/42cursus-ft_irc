@@ -240,7 +240,8 @@ sockaddr_in Server::_init_address(port_t port)
 		.sin_port = htons(port),
 		.sin_addr = (struct in_addr) {
 			.s_addr = INADDR_ANY
-		}
+		},
+		.sin_zero = {},
 	};
 }
 
