@@ -1,15 +1,10 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include "Channel.hpp"
-#include "Client.hpp"
-#include "Command.hpp"
 #include "lib.hpp"
 
 #include <arpa/inet.h>
 #include <poll.h>
-
-#include <map>
 
 class Client;
 
@@ -34,8 +29,6 @@ public:
 
 private:
 	typedef std::vector<struct pollfd>			_pollfds_t;
-	typedef std::map<int, Client *>				_clients_t;
-	typedef std::map<std::string, Channel *>	_channels_t;
 
 	const port_t		_port;
 	const sockaddr_in	_address;
@@ -45,8 +38,8 @@ private:
 	int			_socket;
 	_pollfds_t	_pollfds;
 
-	_clients_t	_clients;
-	_channels_t	_channels;
+	clients_t	_clients;
+	channels_t	_channels;
 
 	void	_set_signal_handler();
 	void	_init_socket();

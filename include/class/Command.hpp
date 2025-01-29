@@ -2,9 +2,6 @@
 #define COMMAND_HPP
 
 #include "lib.hpp"
-#include "Server.hpp"
-
-#include <map>
 
 class Client;
 

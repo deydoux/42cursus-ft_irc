@@ -1,4 +1,9 @@
 #include "class/Client.hpp"
+#include "class/Command.hpp"
+#include "class/Server.hpp"
+
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #include <sstream>
 

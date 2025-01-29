@@ -1,3 +1,6 @@
+#include "class/Channel.hpp"
+#include "class/Client.hpp"
+#include "class/Command.hpp"
 #include "class/Server.hpp"
 
 #include <signal.h>
@@ -19,9 +22,9 @@ Server::Server(port_t port, std::string password, bool verbose):
 Server::~Server()
 {
 	close(_socket);
-	for (_clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it)
 		delete it->second;
-	for (_channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it)
+	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it)
 		delete it->second;
 	log("Destroyed", debug);
 }

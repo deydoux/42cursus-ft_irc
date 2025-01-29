@@ -1,10 +1,16 @@
 #ifndef LIB_HPP
 #define LIB_HPP
 
+#include <map>
 #include <string>
 #include <vector>
 
-typedef std::vector<std::string>	args_t;
+class Channel;
+class Client;
+
+typedef std::map<int, Client *>				clients_t;
+typedef std::map<std::string, Channel *>	channels_t;
+typedef std::vector<std::string>			args_t;
 
 typedef enum {debug, info, warning, error}	log_level;
 

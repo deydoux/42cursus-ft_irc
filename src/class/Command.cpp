@@ -1,3 +1,4 @@
+#include "class/Client.hpp"
 #include "class/Command.hpp"
 
 Command::Command()
