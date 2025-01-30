@@ -1,12 +1,13 @@
+#include "class/Channel.hpp"
+#include "class/Client.hpp"
+#include "class/Command.hpp"
 #include "class/Server.hpp"
 
 #include <signal.h>
 #include <stdio.h>
-#include <unistd.h>
 
 #include <iostream>
 #include <sstream>
-#include <stdexcept>
 
 Server::Server(port_t port, std::string password, bool verbose):
 	_port(port),
@@ -14,15 +15,16 @@ Server::Server(port_t port, std::string password, bool verbose):
 	_password(password),
 	_verbose(verbose)
 {
+	Command::init();
 	log("Constructed", debug);
 }
 
 Server::~Server()
 {
 	close(_socket);
-	for (_clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it)
 		delete it->second;
-	for (_channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it)
+	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it)
 		delete it->second;
 	log("Destroyed", debug);
 }
@@ -65,9 +67,9 @@ void Server::disconnect_client(int fd)
 
 Server Server::parse_args(int argc, char *argv[])
 {
-	Server::port_t port = 6697;
+	Server::port_t port = _default_port;
 	std::string password;
-	bool verbose = false;
+	bool verbose = _default_port;
 
 	bool port_set = false;
 	bool password_set = false;
@@ -180,6 +182,7 @@ void Server::_accept()
 	int fd = accept(_socket, (sockaddr *)&address, &address_len);
 	if (fd == -1)
 		return log("Failed to accept connection", error);
+	log(inet_ntoa(address.sin_addr), debug);
 
 	_pollfds.push_back(_init_pollfd(fd));
 	_clients[fd] = new Client(fd, *this);

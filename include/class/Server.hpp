@@ -1,15 +1,10 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include "Channel.hpp"
-#include "Client.hpp"
 #include "lib.hpp"
 
 #include <arpa/inet.h>
 #include <poll.h>
-
-#include <map>
-#include <vector>
 
 class Client;
 
@@ -23,11 +18,10 @@ public:
 
 	void	log(const std::string &message, const log_level level = info) const;
 	void	start();
+	void	disconnect_client(int fd);
 
 	const std::string	&get_password() const;
 	bool				is_verbose() const;
-
-	void	disconnect_client(int fd);
 
 	static bool	stop;
 
@@ -35,8 +29,6 @@ public:
 
 private:
 	typedef std::vector<struct pollfd>			_pollfds_t;
-	typedef std::map<int, Client *>				_clients_t;
-	typedef std::map<std::string, Channel *>	_channels_t;
 
 	const port_t		_port;
 	const sockaddr_in	_address;
@@ -46,8 +38,8 @@ private:
 	int			_socket;
 	_pollfds_t	_pollfds;
 
-	_clients_t	_clients;
-	_channels_t	_channels;
+	clients_t	_clients;
+	channels_t	_channels;
 
 	void	_set_signal_handler();
 	void	_init_socket();
@@ -57,6 +49,9 @@ private:
 	void	_loop();
 	void	_accept();
 	void	_read();
+
+	static const port_t	_default_port = 6697;
+	static const bool	_default_verbose = true;
 
 	static port_t			_parse_port(const std::string &port_str);
 	static void				_print_usage(int status = 1);

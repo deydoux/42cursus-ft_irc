@@ -3,8 +3,10 @@ NAME = ircserv
 SRC = \
 	class/Channel.cpp \
 	class/Client.cpp \
+	class/Command.cpp \
 	class/Server.cpp \
 	lib/log.cpp \
+	lib/to_lower.cpp \
 	lib/to_string.cpp \
 	main.cpp
 

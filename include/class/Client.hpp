@@ -2,12 +2,10 @@
 #define CLIENT_HPP
 
 #include "lib.hpp"
-#include "Server.hpp"
 
 #include <unistd.h>
 
-#include <string>
-
+class Command;
 class Server;
 
 class Client
