@@ -53,6 +53,16 @@ bool Server::is_verbose() const
 	return _verbose;
 }
 
+Client *Server::get_client(const std::string &nickname) const
+{
+	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		if (it->second->get_nickname() == nickname)
+			return it->second;
+	}
+
+	return NULL;
+}
+
 void Server::disconnect_client(int fd)
 {
 	delete _clients[fd];

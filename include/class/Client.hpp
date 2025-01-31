@@ -21,8 +21,8 @@ public:
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 
 	const bool			&is_registered() const;
-	// const std::string	&get_username() const;
 	const std::string	&get_nickname(bool allow_empty = true) const;
+	// const std::string	&get_username() const;
 
 	void	set_nickname(const std::string &nickname);
 	void	set_username(const std::string &username);
@@ -33,11 +33,11 @@ private:
 	const char	*_ip;
 	Server		&_server;
 	bool		_registered;
-	std::string	_nickname;
 
+	std::string	_nickname;
 	std::string	_password;
-	std::string	_username;
 	// std::string	_realname;
+	std::string	_username;
 
 	std::string	_buffer;
 

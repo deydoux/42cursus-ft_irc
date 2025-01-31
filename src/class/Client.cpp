@@ -98,6 +98,9 @@ void Client::set_nickname(const std::string &nickname)
 	if (!_is_valid_nickname(nickname))
 		return reply(ERR_ERRONEUSNICKNAME, nickname, "Erroneous nickname");
 
+	if (_server.get_client(nickname) != NULL)
+		return reply(ERR_NICKNAMEINUSE, nickname, "Nickname is already in use");
+
 	_nickname = nickname;
 }
 

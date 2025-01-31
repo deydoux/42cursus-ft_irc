@@ -22,6 +22,7 @@ public:
 
 	const std::string	&get_password() const;
 	bool				is_verbose() const;
+	Client				*get_client(const std::string &nickname) const;
 
 	static bool	stop;
 
