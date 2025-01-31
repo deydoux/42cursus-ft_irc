@@ -21,17 +21,6 @@ Client::~Client()
 	log("Closed connection");
 }
 
-void Client::log(const std::string &message, const log_level level) const
-{
-	if (_server.is_verbose() || level != debug)
-		::log("Client " + to_string(_fd), message, level);
-}
-
-void Client::init()
-{
-	_send("Hello, world!\r\n");
-}
-
 void Client::handle_messages(std::string messages)
 {
 	std::string debug_messages = messages;
@@ -50,6 +39,12 @@ void Client::handle_messages(std::string messages)
 		_handle_message(_buffer.substr(0, pos));
 		_buffer.erase(0, pos + 1);
 	}
+}
+
+void Client::log(const std::string &message, const log_level level) const
+{
+	if (_server.is_verbose() || level != debug)
+		::log("Client " + to_string(_fd), message, level);
 }
 
 void Client::reply(reply_code code, const std::string &arg, const std::string &message) const

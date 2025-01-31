@@ -196,12 +196,6 @@ void Server::_accept()
 	_pollfds.push_back(_init_pollfd(fd));
 	char *ip = inet_ntoa(address.sin_addr);
 	_clients[fd] = new Client(fd, ip, *this);
-	try {
-		_clients[fd]->init();
-	} catch (std::runtime_error &e) {
-		_clients[fd]->log(e.what(), error);
-		disconnect_client(fd);
-	}
 }
 
 void Server::_read()

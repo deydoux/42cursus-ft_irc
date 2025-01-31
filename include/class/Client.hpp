@@ -14,10 +14,8 @@ public:
 	Client(int fd, char *ip, Server &server);
 	~Client();
 
-	void	log(const std::string &message, const log_level level = info) const;
-	void	init();
-
 	void	handle_messages(std::string messages);
+	void	log(const std::string &message, const log_level level = info) const;
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 
 	const bool			&is_registered() const;
