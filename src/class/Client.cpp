@@ -75,11 +75,6 @@ const bool &Client::is_registered() const
 	return _registered;
 }
 
-// const std::string &Client::get_username() const
-// {
-// 	return _username;
-// }
-
 const std::string &Client::get_nickname(bool allow_empty) const
 {
 	static const std::string empty_nick = "*";
