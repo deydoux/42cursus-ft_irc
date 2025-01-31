@@ -133,7 +133,7 @@ ssize_t Client::_send(const std::string &message) const
 		send_message += "[CUT]";
 	}
 
-	log("Sending message: " + send_message, debug);
+	log("Sending message:\n" + send_message, debug);
 	send_message += "\r\n";
 
 	ssize_t bytes_sent = send(_fd, send_message.c_str(), send_message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
