@@ -3,104 +3,39 @@
 
 void Command::init()
 {
-	_commands["invite"] = &Command::_invite;
-	_commands["join"] = &Command::_join;
-	_commands["kick"] = &Command::_kick;
-	_commands["mode"] = &Command::_mode;
-	_commands["nick"] = &Command::_nick;
-	_commands["pass"] = &Command::_pass;
-	_commands["ping"] = &Command::_ping;
-	_commands["privmsg"] = &Command::_privmsg;
-	_commands["topic"] = &Command::_topic;
-	_commands["user"] = &Command::_user;
-	_commands["who"] = &Command::_who;
+	_commands["nick"] = (_command_t) {&_nick, 1, false};
+	_commands["pass"] = (_command_t) {&_pass, 1, false};
 }
 
 void Command::execute(const args_t &args, Client &client)
 {
-	std::string name = to_lower(args[0]);
+	_commands_t::iterator command_it = _commands.find(to_lower(args[0]));
 
-	_command_t command = _commands[name];
-	if (!command)
-		return client.log("Unknown command: " + name, error);
-	command(args, client);
+	if (command_it == _commands.end()) {
+		if (client.is_registered())
+			client.reply(ERR_UNKNOWNCOMMAND, args[0], "Unknown command");
+		return;
+	}
+
+	_command_t command = command_it->second;
+
+	if (args.size() - 1 != command.args_size)
+		return client.reply(ERR_NEEDMOREPARAMS, args[0], "Syntax error");
+
+	if (command.need_registration && !client.is_registered())
+		return client.reply(ERR_NOTREGISTERED, "", "Connection not registered");
+
+	command.handler(args, client);
 }
 
 Command::_commands_t Command::_commands;
 
-void Command::_dummy_command(const args_t &args, Client &client)
-{
-	client.log("Command not implemented: " + args[0], error);
-}
-
-void Command::_invite(const args_t &args, Client &client)
-{
-	client.log("TODO command invite", warning);
-	(void)args;
-}
-
-void Command::_join(const args_t &args, Client &client)
-{
-	client.log("TODO command join", warning);
-	(void)args;
-}
-
-void Command::_kick(const args_t &args, Client &client)
-{
-	client.log("TODO command kick", warning);
-	(void)args;
-}
-
-void Command::_mode(const args_t &args, Client &client)
-{
-	client.log("TODO command mode", warning);
-	(void)args;
-}
-
 void Command::_nick(const args_t &args, Client &client)
 {
-	client.log("TODO command nick", warning);
-	(void)args;
+	client.set_nickname(args[1]);
 }
 
 void Command::_pass(const args_t &args, Client &client)
 {
-	if (args.size() != 2)
-		return client.reply(ERR_NEEDMOREPARAMS, "PASS", "Syntax error");
-
-	if (!client.get_username().empty() && !client.get_nickname().empty())
-		return client.reply(ERR_ALREADYREGISTRED, "Connection already registered");
-
 	client.set_password(args[1]);
 }
-
-void Command::_ping(const args_t &args, Client &client)
-{
-	client.log("TODO command ping", warning);
-	(void)args;
-}
-
-void Command::_privmsg(const args_t &args, Client &client)
-{
-	client.log("TODO command privmsg", warning);
-	(void)args;
-}
-
-void Command::_topic(const args_t &args, Client &client)
-{
-	client.log("TODO command topic", warning);
-	(void)args;
-}
-
-void Command::_user(const args_t &args, Client &client)
-{
-	client.log("TODO command user", warning);
-	(void)args;
-}
-
-void Command::_who(const args_t &args, Client &client)
-{
-	client.log("TODO command who", warning);
-	(void)args;
-}
-

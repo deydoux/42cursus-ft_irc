@@ -10,7 +10,8 @@
 Client::Client(const int fd, char *ip, Server &server):
 	_fd(fd),
 	_ip(ip),
-	_server(server)
+	_server(server),
+	_registered(false)
 {
 	log("Accepted connection from " + std::string(_ip));
 }
@@ -51,33 +52,33 @@ void Client::handle_messages(std::string messages)
 	}
 }
 
-void Client::reply(reply_code code, const std::string &arg1, const std::string &arg2) const
+void Client::reply(reply_code code, const std::string &arg, const std::string &message) const
 {
 	std::ostringstream oss;
 	oss << code << ' ' << get_nickname(false);
 
-	if (!arg1.empty()) {
-		if (arg1.find(' ') != std::string::npos)
-			oss << " :" << arg1;
-		else {
-			oss << ' ' << arg1;
+	if (!arg.empty())
+		oss << ' ' << arg;
 
-			if (!arg2.empty()) {
-				if (arg2.find(' ') != std::string::npos)
-					oss << " :" << arg2;
-				else
-					oss << ' ' << arg2;
-			}
-		}
+	if (!message.empty()) {
+		oss << ' ';
+		if (message.find(' ') != std::string::npos)
+			oss << ':';
+		oss << message;
 	}
 
 	_send(oss.str());
 }
 
-const std::string &Client::get_username() const
+const bool &Client::is_registered() const
 {
-	return _username;
+	return _registered;
 }
+
+// const std::string &Client::get_username() const
+// {
+// 	return _username;
+// }
 
 const std::string &Client::get_nickname(bool allow_empty) const
 {
@@ -91,11 +92,36 @@ const std::string &Client::get_nickname(bool allow_empty) const
 
 void Client::set_password(const std::string &password)
 {
+	if (!_username.empty() && !_nickname.empty())
+		return reply(ERR_ALREADYREGISTRED, "", "Connection already registered");
+
 	_password = password;
+}
+
+void Client::set_username(const std::string &username)
+{
+	_username = username;
+}
+
+void Client::set_nickname(const std::string &nickname)
+{
+	if (nickname.size() > Client::max_nickname_size)
+		return reply(ERR_ERRONEUSNICKNAME, nickname, "Nickname too long, max. 9 characters");
+
+	if (nickname.find(' ') != std::string::npos)
+		return reply(ERR_ERRONEUSNICKNAME, nickname, "Erroneous nickname");
+
+	_nickname = nickname;
 }
 
 ssize_t Client::_send(std::string message) const
 {
+	if (message.size() > _max_message_size - 2) {
+		message.erase(_max_message_size - 7);
+		message += "[CUT]";
+	}
+
+	log("Sending message: " + message, debug);
 	message += "\r\n";
 
 	ssize_t bytes_sent = send(_fd, message.c_str(), message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);

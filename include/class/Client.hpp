@@ -18,16 +18,22 @@ public:
 	void	init();
 
 	void	handle_messages(std::string messages);
-	void	reply(reply_code code, const std::string &arg1 = "", const std::string &arg2 = "") const;
+	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 
-	const std::string	&get_username() const;
+	const bool			&is_registered() const;
+	// const std::string	&get_username() const;
 	const std::string	&get_nickname(bool allow_empty = true) const;
 
 	void	set_password(const std::string &password);
+	void	set_username(const std::string &username);
+	void	set_nickname(const std::string &nickname);
+
+	static const size_t	max_nickname_size = 9;
 private:
 	const int	_fd;
 	const char	*_ip;
 	Server		&_server;
+	bool		_registered;
 
 	std::string	_password;
 	std::string	_username;
