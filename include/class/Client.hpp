@@ -11,7 +11,7 @@ class Server;
 class Client
 {
 public:
-	Client(int fd, Server &server);
+	Client(int fd, char *ip, Server &server);
 	~Client();
 
 	void	log(const std::string &message, const log_level level = info) const;
@@ -20,6 +20,7 @@ public:
 	void	handle_messages(std::string messages);
 private:
 	const int	_fd;
+	const char	*_ip;
 	Server		&_server;
 
 	std::string	_buffer;

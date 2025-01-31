@@ -182,11 +182,10 @@ void Server::_accept()
 	int fd = accept(_socket, (sockaddr *)&address, &address_len);
 	if (fd == -1)
 		return log("Failed to accept connection", error);
-	log(inet_ntoa(address.sin_addr), debug);
 
 	_pollfds.push_back(_init_pollfd(fd));
-	_clients[fd] = new Client(fd, *this);
-
+	char *ip = inet_ntoa(address.sin_addr);
+	_clients[fd] = new Client(fd, ip, *this);
 	try {
 		_clients[fd]->init();
 	} catch (std::runtime_error &e) {

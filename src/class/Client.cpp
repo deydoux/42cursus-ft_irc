@@ -7,11 +7,12 @@
 
 #include <sstream>
 
-Client::Client(const int fd, Server &server):
+Client::Client(const int fd, char *ip, Server &server):
 	_fd(fd),
+	_ip(ip),
 	_server(server)
 {
-	log("Accepted connection");
+	log("Accepted connection from " + std::string(_ip));
 }
 
 Client::~Client()
