@@ -117,6 +117,11 @@ void Client::set_password(const std::string &password)
 	_password = password;
 }
 
+void Client::set_realname(const std::string &realname)
+{
+	_realname = realname;
+}
+
 ssize_t Client::_send(std::string message) const
 {
 	if (message.size() > _max_message_size - 2) {

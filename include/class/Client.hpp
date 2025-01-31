@@ -26,6 +26,7 @@ public:
 
 	void	set_nickname(const std::string &nickname);
 	void	set_username(const std::string &username);
+	void	set_realname(const std::string &realname);
 	void	set_password(const std::string &password);
 
 private:
@@ -36,7 +37,7 @@ private:
 
 	std::string	_nickname;
 	std::string	_password;
-	// std::string	_realname;
+	std::string	_realname;
 	std::string	_username;
 
 	std::string	_buffer;
