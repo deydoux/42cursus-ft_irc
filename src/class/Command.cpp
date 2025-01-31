@@ -68,8 +68,10 @@ void Command::_pass(const args_t &args, Client &client)
 	if (args.size() != 2)
 		return client.reply(ERR_NEEDMOREPARAMS, "PASS", "Syntax error");
 
-	client.set_password(args[1]);
+	if (!client.get_username().empty() && !client.get_nickname().empty())
+		return client.reply(ERR_ALREADYREGISTRED, "Connection already registered");
 
+	client.set_password(args[1]);
 }
 
 void Command::_ping(const args_t &args, Client &client)
