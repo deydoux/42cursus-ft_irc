@@ -1,6 +1,8 @@
 #ifndef LIB_HPP
 #define LIB_HPP
 
+#include "responses.h"
+
 #include <map>
 #include <string>
 #include <vector>

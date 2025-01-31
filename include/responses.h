@@ -1,0 +1,7 @@
+#ifndef RESPONSES_H
+#define RESPONSES_H
+
+#define ERR_NEEDMOREPARAMS		461
+#define ERR_ALREADYREGISTRED	462
+
+#endif // RESPONSES_H

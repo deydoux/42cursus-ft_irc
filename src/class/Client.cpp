@@ -51,11 +51,45 @@ void Client::handle_messages(std::string messages)
 	}
 }
 
-ssize_t Client::_send(const std::string &message) const
+void Client::reply(int code, const std::string &arg, const std::string &message) const
 {
+	std::ostringstream oss;
+	oss << code << ' ' << get_nickname(false) << ' ' << arg;
+
+	if (!message.empty())
+		oss << " :" << message;
+
+	_send(oss.str());
+}
+
+const std::string &Client::get_username() const
+{
+	return _username;
+}
+
+const std::string &Client::get_nickname(bool allow_empty) const
+{
+	static const std::string empty_nick = "*";
+
+	if (!allow_empty && _nickname.empty())
+		return empty_nick;
+
+	return _nickname;
+}
+
+void Client::set_password(const std::string &password)
+{
+	_password = password;
+}
+
+ssize_t Client::_send(std::string message) const
+{
+	message += "\r\n";
+
 	ssize_t bytes_sent = send(_fd, message.c_str(), message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
 	if (bytes_sent == -1)
 		throw std::runtime_error("Failed to send message");
+
 	return bytes_sent;
 }
 

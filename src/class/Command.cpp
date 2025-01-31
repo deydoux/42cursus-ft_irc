@@ -65,8 +65,9 @@ void Command::_nick(const args_t &args, Client &client)
 
 void Command::_pass(const args_t &args, Client &client)
 {
-	client.log("TODO command pass", warning);
-	(void)args;
+	if (args.size() != 2) {
+		client.reply(ERR_NEEDMOREPARAMS, "PASS", "Syntax error");
+	}
 }
 
 void Command::_ping(const args_t &args, Client &client)
