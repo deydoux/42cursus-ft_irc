@@ -18,7 +18,7 @@ public:
 	void	init();
 
 	void	handle_messages(std::string messages);
-	void	reply(reply_code code, const std::string &arg1, const std::string &arg2) const;
+	void	reply(reply_code code, const std::string &arg1 = "", const std::string &arg2 = "") const;
 
 	const std::string	&get_username() const;
 	const std::string	&get_nickname(bool allow_empty = true) const;
