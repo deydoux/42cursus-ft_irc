@@ -79,8 +79,11 @@ void Client::_handle_message(std::string message)
 			args.push_back(message.substr(0, pos));
 		message.erase(0, pos + 1);
 	}
-	if (!message.empty())
+	if (!message.empty()) {
+		if (message[0] == ':')
+			message.erase(0, 1);
 		args.push_back(message);
+	}
 
 	std::ostringstream oss;
 	for (args_t::iterator it = args.begin(); it != args.end(); ++it) {
