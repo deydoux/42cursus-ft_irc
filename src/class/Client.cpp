@@ -100,6 +100,7 @@ void Client::set_nickname(const std::string &nickname)
 
 void Client::set_username(const std::string &username)
 {
+	// TODO: validate username
 	if (_registered)
 		return reply(ERR_ALREADYREGISTRED, "", "Connection already registered");
 
