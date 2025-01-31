@@ -24,19 +24,19 @@ public:
 	// const std::string	&get_username() const;
 	const std::string	&get_nickname(bool allow_empty = true) const;
 
-	void	set_password(const std::string &password);
-	void	set_username(const std::string &username);
 	void	set_nickname(const std::string &nickname);
+	void	set_username(const std::string &username);
+	void	set_password(const std::string &password);
 
 private:
 	const int	_fd;
 	const char	*_ip;
 	Server		&_server;
 	bool		_registered;
+	std::string	_nickname;
 
 	std::string	_password;
 	std::string	_username;
-	std::string	_nickname;
 	// std::string	_realname;
 
 	std::string	_buffer;

@@ -90,19 +90,6 @@ const std::string &Client::get_nickname(bool allow_empty) const
 	return _nickname;
 }
 
-void Client::set_password(const std::string &password)
-{
-	if (!_username.empty() && !_nickname.empty())
-		return reply(ERR_ALREADYREGISTRED, "", "Connection already registered");
-
-	_password = password;
-}
-
-void Client::set_username(const std::string &username)
-{
-	_username = username;
-}
-
 void Client::set_nickname(const std::string &nickname)
 {
 	if (nickname.size() > _max_nickname_size)
@@ -112,6 +99,19 @@ void Client::set_nickname(const std::string &nickname)
 		return reply(ERR_ERRONEUSNICKNAME, nickname, "Erroneous nickname");
 
 	_nickname = nickname;
+}
+
+void Client::set_username(const std::string &username)
+{
+	_username = username;
+}
+
+void Client::set_password(const std::string &password)
+{
+	if (!_username.empty() && !_nickname.empty())
+		return reply(ERR_ALREADYREGISTRED, "", "Connection already registered");
+
+	_password = password;
 }
 
 ssize_t Client::_send(std::string message) const
