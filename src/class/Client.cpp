@@ -51,13 +51,25 @@ void Client::handle_messages(std::string messages)
 	}
 }
 
-void Client::reply(int code, const std::string &arg, const std::string &message) const
+void Client::reply(reply_code code, const std::string &arg1, const std::string &arg2) const
 {
 	std::ostringstream oss;
-	oss << code << ' ' << get_nickname(false) << ' ' << arg;
+	oss << code << ' ' << get_nickname(false);
 
-	if (!message.empty())
-		oss << " :" << message;
+	if (!arg1.empty()) {
+		if (arg1.find(' ') != std::string::npos)
+			oss << " :" << arg1;
+		else {
+			oss << ' ' << arg1;
+
+			if (!arg2.empty()) {
+				if (arg2.find(' ') != std::string::npos)
+					oss << " :" << arg2;
+				else
+					oss << ' ' << arg2;
+			}
+		}
+	}
 
 	_send(oss.str());
 }

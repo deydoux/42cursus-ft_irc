@@ -65,9 +65,11 @@ void Command::_nick(const args_t &args, Client &client)
 
 void Command::_pass(const args_t &args, Client &client)
 {
-	if (args.size() != 2) {
-		client.reply(ERR_NEEDMOREPARAMS, "PASS", "Syntax error");
-	}
+	if (args.size() != 2)
+		return client.reply(ERR_NEEDMOREPARAMS, "PASS", "Syntax error");
+
+	client.set_password(args[1]);
+
 }
 
 void Command::_ping(const args_t &args, Client &client)
