@@ -26,6 +26,12 @@ public:
 	void	set_realname(const std::string &realname);
 	void	set_password(const std::string &password);
 
+	class Disconnect
+	{
+	public:
+		Disconnect();
+	};
+
 private:
 	const int	_fd;
 	const char	*_ip;

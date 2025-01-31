@@ -63,18 +63,6 @@ const bool &Server::is_verbose() const
 	return _verbose;
 }
 
-void Server::disconnect_client(int fd)
-{
-	delete _clients[fd];
-	_clients.erase(fd);
-	for (_pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it) {
-		if (it->fd == fd) {
-			_pollfds.erase(it);
-			break;
-		}
-	}
-}
-
 Server Server::parse_args(int argc, char *argv[])
 {
 	Server::port_t port = _default_port;
@@ -208,11 +196,27 @@ void Server::_read()
 		ssize_t bytes_read = recv(it->fd, buffer, sizeof(buffer), MSG_DONTWAIT); // WAIT ✋ They don't love you like I love you
 
 		if (bytes_read <= 0) {
-			disconnect_client((it--)->fd);
+			_disconnect_client((it--)->fd);
 			continue;
 		}
 
-		_clients[it->fd]->handle_messages(std::string(buffer, bytes_read));
+		try {
+			_clients[it->fd]->handle_messages(std::string(buffer, bytes_read));
+		} catch (Client::Disconnect) {
+			_disconnect_client((it--)->fd);
+		}
+	}
+}
+
+void Server::_disconnect_client(int fd)
+{
+	delete _clients[fd];
+	_clients.erase(fd);
+	for (_pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it) {
+		if (it->fd == fd) {
+			_pollfds.erase(it);
+			break;
+		}
 	}
 }
 

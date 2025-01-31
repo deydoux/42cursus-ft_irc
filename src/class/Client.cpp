@@ -121,6 +121,8 @@ void Client::set_realname(const std::string &realname)
 	_realname = realname;
 }
 
+Client::Disconnect::Disconnect() {}
+
 ssize_t Client::_send(const std::string &message) const
 {
 	std::string send_message = message;
@@ -150,7 +152,7 @@ void Client::_send_error(const std::string &message) const
 		oss << " (" << message << ')';
 	_send(oss.str());
 
-	_server.disconnect_client(_fd);
+	throw Disconnect();
 }
 
 void Client::_check_registration()

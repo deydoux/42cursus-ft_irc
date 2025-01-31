@@ -23,7 +23,6 @@ public:
 	Client		*get_client(const std::string &nickname) const;
 	const bool	&is_verbose() const;
 
-	void	disconnect_client(int fd);
 
 	static bool	stop;
 
@@ -51,6 +50,8 @@ private:
 	void	_loop();
 	void	_accept();
 	void	_read();
+
+	void	_disconnect_client(int fd);
 
 	static const port_t	_default_port = 6697;
 	static const bool	_default_verbose = true;
