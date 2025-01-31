@@ -41,7 +41,10 @@ private:
 
 	std::string	_buffer;
 
-	ssize_t	_send(std::string message) const;
+	ssize_t	_send(const std::string &message) const;
+	void	_send_error(const std::string &message) const;
+
+	void	_check_registration();
 	void	_handle_message(std::string message);
 
 	static const size_t	_max_message_size = 512;

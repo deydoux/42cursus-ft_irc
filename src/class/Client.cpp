@@ -7,11 +7,10 @@
 
 #include <sstream>
 
-Client::Client(const int fd, char *ip, Server &server):
-	_fd(fd),
-	_ip(ip),
-	_server(server),
-	_registered(false)
+Client::Client(const int fd, char *ip, Server &server) : _fd(fd),
+														 _ip(ip),
+														 _server(server),
+														 _registered(false)
 {
 	log("Accepted connection from " + std::string(_ip));
 }
@@ -46,7 +45,8 @@ void Client::handle_messages(std::string messages)
 
 	_buffer += messages;
 	size_t pos;
-	while ((pos = _buffer.find('\n')) != std::string::npos) {
+	while ((pos = _buffer.find('\n')) != std::string::npos)
+	{
 		_handle_message(_buffer.substr(0, pos));
 		_buffer.erase(0, pos + 1);
 	}
@@ -60,7 +60,8 @@ void Client::reply(reply_code code, const std::string &arg, const std::string &m
 	if (!arg.empty())
 		oss << ' ' << arg;
 
-	if (!message.empty()) {
+	if (!message.empty())
+	{
 		oss << ' ';
 		if (message.find(' ') != std::string::npos)
 			oss << ':';
@@ -97,11 +98,19 @@ void Client::set_nickname(const std::string &nickname)
 		return reply(ERR_NICKNAMEINUSE, nickname, "Nickname is already in use");
 
 	_nickname = nickname;
+
+	if (!_registered)
+		_check_registration();
 }
 
 void Client::set_username(const std::string &username)
 {
+	if (_registered)
+		return reply(ERR_ALREADYREGISTRED, "", "Connection already registered");
+
 	_username = username;
+
+	_check_registration();
 }
 
 void Client::set_password(const std::string &password)
@@ -117,21 +126,47 @@ void Client::set_realname(const std::string &realname)
 	_realname = realname;
 }
 
-ssize_t Client::_send(std::string message) const
+ssize_t Client::_send(const std::string &message) const
 {
-	if (message.size() > _max_message_size - 2) {
-		message.erase(_max_message_size - 7);
-		message += "[CUT]";
+	std::string send_message = message;
+
+	if (send_message.size() > _max_message_size - 2)
+	{
+		send_message.erase(_max_message_size - 7);
+		send_message += "[CUT]";
 	}
 
-	log("Sending message: " + message, debug);
-	message += "\r\n";
+	log("Sending message: " + send_message, debug);
+	send_message += "\r\n";
 
-	ssize_t bytes_sent = send(_fd, message.c_str(), message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
+	ssize_t bytes_sent = send(_fd, send_message.c_str(), send_message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
 	if (bytes_sent == -1)
 		throw std::runtime_error("Failed to send message");
 
 	return bytes_sent;
+}
+
+void Client::_send_error(const std::string &message) const
+{
+	std::ostringstream oss;
+
+	oss << "ERROR :Closing connection: " << get_nickname(false) << "[~" << _username << '@' << _ip << ']';
+	if (!message.empty())
+		oss << " (" << message << ')';
+	_send(oss.str());
+
+	_server.disconnect_client(_fd);
+}
+
+void Client::_check_registration()
+{
+	if (_nickname.empty() || _username.empty())
+		return ;
+
+	if (!_server.check_password(_password))
+		return _send_error("Access denied: Bad password?");
+
+	_registered = true;
 }
 
 void Client::_handle_message(std::string message)
@@ -139,29 +174,30 @@ void Client::_handle_message(std::string message)
 	if (message.empty())
 		return;
 
-	if (message.size() > _max_message_size - 1) {
-		// TODO: "ERROR :Closing connection: abc[~abc@z3r3p4.local] (Request too long)"
-		log("TODO: Request too long", error);
-	}
+	if (message.size() > _max_message_size - 1)
+		_send_error("Request too long");
 
 	if (message[message.size() - 1] == '\r')
 		message.erase(message.size() - 1);
 
 	args_t args;
 	size_t pos;
-	while ((pos = message.find(' ')) != std::string::npos && message.find(':') != 0) {
+	while ((pos = message.find(' ')) != std::string::npos && message.find(':') != 0)
+	{
 		if (pos > 0)
 			args.push_back(message.substr(0, pos));
 		message.erase(0, pos + 1);
 	}
-	if (!message.empty()) {
+	if (!message.empty())
+	{
 		if (message[0] == ':')
 			message.erase(0, 1);
 		args.push_back(message);
 	}
 
 	std::ostringstream oss;
-	for (args_t::iterator it = args.begin(); it != args.end(); ++it) {
+	for (args_t::iterator it = args.begin(); it != args.end(); ++it)
+	{
 		oss << '"' << *it << "\"";
 		if (it + 1 != args.end())
 			oss << ", ";
@@ -176,7 +212,8 @@ bool Client::_is_valid_nickname(const std::string &nickname)
 	if (std::isdigit(nickname[0]) || nickname[0] == '-')
 		return false;
 
-	for (std::string::const_iterator it = nickname.begin(); it != nickname.end(); ++it) {
+	for (std::string::const_iterator it = nickname.begin(); it != nickname.end(); ++it)
+	{
 		if (!std::isalnum(*it) && std::string("-[]\\`_^{|}").find(*it) != std::string::npos)
 			return false;
 	}

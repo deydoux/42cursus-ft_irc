@@ -18,18 +18,19 @@ public:
 
 	void	log(const std::string &message, const log_level level = info) const;
 	void	start();
-	void	disconnect_client(int fd);
 
-	const std::string	&get_password() const;
-	bool				is_verbose() const;
-	Client				*get_client(const std::string &nickname) const;
+	bool		check_password(const std::string &password) const;
+	Client		*get_client(const std::string &nickname) const;
+	const bool	&is_verbose() const;
+
+	void	disconnect_client(int fd);
 
 	static bool	stop;
 
 	static Server	parse_args(int argc, char *argv[]);
 
 private:
-	typedef std::vector<struct pollfd>			_pollfds_t;
+	typedef std::vector<struct pollfd>	_pollfds_t;
 
 	const port_t		_port;
 	const sockaddr_in	_address;

@@ -43,14 +43,9 @@ void Server::start()
 	log("Stopped");
 }
 
-const std::string &Server::get_password() const
+bool Server::check_password(const std::string &password) const
 {
-	return _password;
-}
-
-bool Server::is_verbose() const
-{
-	return _verbose;
+	return password == _password;
 }
 
 Client *Server::get_client(const std::string &nickname) const
@@ -61,6 +56,11 @@ Client *Server::get_client(const std::string &nickname) const
 	}
 
 	return NULL;
+}
+
+const bool &Server::is_verbose() const
+{
+	return _verbose;
 }
 
 void Server::disconnect_client(int fd)
