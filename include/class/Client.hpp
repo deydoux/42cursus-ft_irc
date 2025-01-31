@@ -28,7 +28,6 @@ public:
 	void	set_username(const std::string &username);
 	void	set_nickname(const std::string &nickname);
 
-	static const size_t	max_nickname_size = 9;
 private:
 	const int	_fd;
 	const char	*_ip;
@@ -46,6 +45,9 @@ private:
 	void	_handle_message(std::string message);
 
 	static const size_t	_max_message_size = 512;
+	static const size_t	_max_nickname_size = 9;
+
+	static bool	_is_valid_nickname(const std::string &nickname);
 };
 
 #endif // CLIENT_HPP

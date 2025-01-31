@@ -5,6 +5,7 @@ void Command::init()
 {
 	_commands["nick"] = (_command_t) {&_nick, 1, false};
 	_commands["pass"] = (_command_t) {&_pass, 1, false};
+	_commands["user"] = (_command_t) {&_user, 4, false};
 }
 
 void Command::execute(const args_t &args, Client &client)
@@ -38,4 +39,10 @@ void Command::_nick(const args_t &args, Client &client)
 void Command::_pass(const args_t &args, Client &client)
 {
 	client.set_password(args[1]);
+}
+
+void Command::_user(const args_t &args, Client &client)
+{
+	client.set_username(args[1]);
+	// client.set_realname(args[4]);
 }

@@ -105,10 +105,10 @@ void Client::set_username(const std::string &username)
 
 void Client::set_nickname(const std::string &nickname)
 {
-	if (nickname.size() > Client::max_nickname_size)
+	if (nickname.size() > _max_nickname_size)
 		return reply(ERR_ERRONEUSNICKNAME, nickname, "Nickname too long, max. 9 characters");
 
-	if (nickname.find(' ') != std::string::npos)
+	if (!_is_valid_nickname(nickname))
 		return reply(ERR_ERRONEUSNICKNAME, nickname, "Erroneous nickname");
 
 	_nickname = nickname;
@@ -166,4 +166,17 @@ void Client::_handle_message(std::string message)
 	log("Parsed command: " + oss.str(), debug);
 
 	Command::execute(args, *this);
+}
+
+bool Client::_is_valid_nickname(const std::string &nickname)
+{
+	if (std::isdigit(nickname[0]) || nickname[0] == '-')
+		return false;
+
+	for (std::string::const_iterator it = nickname.begin(); it != nickname.end(); ++it) {
+		if (!std::isalnum(*it) && std::string("-[]\\`_^{|}").find(*it) != std::string::npos)
+			return false;
+	}
+
+	return true;
 }
