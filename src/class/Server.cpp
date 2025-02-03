@@ -45,9 +45,24 @@ void Server::start()
 	log("Stopped");
 }
 
+const std::string &Server::get_name() const
+{
+	return _name;
+}
+
 bool Server::check_password(const std::string &password) const
 {
 	return password == _password;
+}
+
+const bool &Server::is_verbose() const
+{
+	return _verbose;
+}
+
+const std::string &Server::get_datetime() const
+{
+	return _datetime;
 }
 
 Client *Server::get_client(const std::string &nickname) const
@@ -60,19 +75,14 @@ Client *Server::get_client(const std::string &nickname) const
 	return NULL;
 }
 
-const bool &Server::is_verbose() const
+size_t Server::get_clients_count() const
 {
-	return _verbose;
+	return _clients.size();
 }
 
-const std::string &Server::get_name() const
+size_t Server::get_channels_count() const
 {
-	return _name;
-}
-
-const std::string &Server::get_datetime() const
-{
-	return _datetime;
+	return _channels.size();
 }
 
 Server Server::parse_args(int argc, char *argv[])

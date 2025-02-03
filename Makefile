@@ -8,7 +8,6 @@ SRC = \
 	class/Server.cpp \
 	lib/log.cpp \
 	lib/to_lower.cpp \
-	lib/to_string.cpp \
 	main.cpp
 
 SRC_DIR = src
