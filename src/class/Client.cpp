@@ -225,10 +225,13 @@ void Client::_check_registration()
 
 void Client::_greet() const
 {
-	std::string reply =
+	std::string reply = // https://modern.ircdocs.horse/#rplwelcome-001
 		_create_reply(RPL_WELCOME, "", "Welcome to the Internet Relay Network " + get_nickname() + '!' + _get_username() + '@' + _ip)
 		+ _create_reply(RPL_YOURHOST, "", "Your host is " + _server.get_name() + ", running version " VERSION)
-		+ _create_reply(RPL_CREATED, "", "This server has been started " + _server.get_datetime());
+		+ _create_reply(RPL_CREATED, "", "This server has been started " + _server.get_datetime())
+		+ _create_reply(RPL_MYINFO, _server.get_name() + " " VERSION " o iklt")
+		+ _create_reply(RPL_ISUPPORT, "RFC2812 IRCD=ft_irc CHARSET=UTF-8 CASEMAPPING=ascii PREFIX=(o)@ CHANTYPES=#& CHANMODES=,k,l,it", "are supported on this server")
+		+ _create_reply(RPL_ISUPPORT, "CHANLIMIT=#&:50 CHANNELLEN=50 NICKLEN=9 TOPICLEN=490 AWAYLEN=127 KICKLEN=400 MODES=5", "are supported on this server");
 
 	_send(reply);
 }
