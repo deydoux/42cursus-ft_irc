@@ -7,10 +7,11 @@
 
 #include <sstream>
 
-Client::Client(const int fd, char *ip, Server &server) : _fd(fd),
-														 _ip(ip),
-														 _server(server),
-														 _registered(false)
+Client::Client(const int fd, char *ip, Server &server) :
+	_fd(fd),
+	_ip(ip),
+	_server(server),
+	_registered(false)
 {
 	log("Accepted connection from " + std::string(_ip));
 }
@@ -50,7 +51,7 @@ void Client::log(const std::string &message, const log_level level) const
 void Client::reply(reply_code code, const std::string &arg, const std::string &message) const
 {
 	std::ostringstream oss;
-	oss << code << ' ' << get_nickname(false);
+	oss << ':' << _server.get_name() << ' ' <<  code << ' ' << get_nickname(false);
 
 	if (!arg.empty())
 		oss << ' ' << arg;
@@ -212,7 +213,7 @@ bool Client::_is_valid_nickname(const std::string &nickname)
 
 	for (std::string::const_iterator it = nickname.begin(); it != nickname.end(); ++it)
 	{
-		if (!std::isalnum(*it) && std::string("-[]\\`_^{|}").find(*it) != std::string::npos)
+		if (!std::isalnum(*it) && std::string("-[]\\`_^{|}").find(*it) == std::string::npos)
 			return false;
 	}
 

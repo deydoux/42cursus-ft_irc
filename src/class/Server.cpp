@@ -64,6 +64,11 @@ const bool &Server::is_verbose() const
 	return _verbose;
 }
 
+const std::string &Server::get_name() const
+{
+	return _name;
+}
+
 Server Server::parse_args(int argc, char *argv[])
 {
 	std::string name = "kittirc";
