@@ -1,4 +1,5 @@
 NAME = ircserv
+VERSION = $(shell git describe --tags --always --dirty)
 
 SRC = \
 	class/Channel.cpp \
@@ -15,7 +16,7 @@ INC_DIR = include
 BUILD_DIR = build
 
 CXX = c++
-CXXFLAGS = -I$(INC_DIR) -MD -Wall -Wextra -Werror -std=c++98 -g
+CXXFLAGS = -D 'VERSION="$(VERSION)"' -I$(INC_DIR) -MD -Wall -Wextra -Werror -std=c++98 -g
 
 RM = rm -rf
 MKDIR = mkdir -p

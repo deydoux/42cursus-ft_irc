@@ -1,6 +1,10 @@
 #ifndef LIB_HPP
 #define LIB_HPP
 
+#ifndef VERSION
+# define VERSION "unknown"
+#endif
+
 #include "reply_code.hpp"
 
 #include <map>

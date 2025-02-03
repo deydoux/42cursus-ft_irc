@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include <iomanip>
 #include <sstream>
 
 Client::Client(const int fd, char *ip, Server &server) :
@@ -58,11 +59,11 @@ void Client::send_error(const std::string &message)
 {
 	std::ostringstream oss;
 
-	oss << "ERROR :Closing connection: " << get_nickname(false) << "[~" << _get_username() << '@' << _ip << ']';
+	oss << "ERROR :Closing connection: " << get_nickname(false) << '[' << _get_username() << '@' << _ip << ']';
 	if (!message.empty())
 		oss << " (" << message << ')';
 
-	_send(oss.str());
+	_send(_create_line(oss.str()));
 
 	_disconnect_request = true;
 }
@@ -170,28 +171,30 @@ void Client::_handle_message(std::string message)
 
 ssize_t Client::_send(const std::string &message) const
 {
-	std::string send_message = message;
-
-	if (send_message.size() > _max_message_size - 2)
-	{
-		send_message.erase(_max_message_size - 7);
-		send_message += "[CUT]";
-	}
-
-	log("Sending message:\n" + send_message, debug);
-	send_message += "\r\n";
-
-	ssize_t bytes_sent = send(_fd, send_message.c_str(), send_message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
+	ssize_t bytes_sent = send(_fd, message.c_str(), message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
 	if (bytes_sent == -1)
 		throw std::runtime_error("Failed to send message");
 
 	return bytes_sent;
 }
 
+std::string Client::_create_line(const std::string &content) const
+{
+	std::string line = content;
+
+	if (line.size() > _max_message_size - 2) {
+		line.erase(_max_message_size - 7);
+		line += "[CUT]";
+	}
+	line += "\r\n";
+
+	return line;
+}
+
 std::string Client::_create_reply(reply_code code, const std::string &arg, const std::string &message) const
 {
 	std::ostringstream oss;
-	oss << ':' << _server.get_name() << ' ' <<  code << ' ' << get_nickname(false);
+	oss << ':' << _server.get_name() << ' ' << std::setfill('0') << std::setw(3) << code << ' ' << get_nickname(false);
 
 	if (!arg.empty())
 		oss << ' ' << arg;
@@ -204,7 +207,7 @@ std::string Client::_create_reply(reply_code code, const std::string &arg, const
 		oss << message;
 	}
 
-	return oss.str();
+	return _create_line(oss.str());
 }
 
 void Client::_check_registration()
@@ -216,14 +219,29 @@ void Client::_check_registration()
 		return send_error("Access denied: Bad password?");
 
 	_registered = true;
+
+	_greet();
+}
+
+void Client::_greet() const
+{
+	std::string reply =
+		_create_reply(RPL_WELCOME, "", "Welcome to the " + _server.get_name() + " network " + get_nickname() + '!' + _get_username() + '@' + _ip)
+		+ _create_reply(RPL_YOURHOST, "", "Your host is " + _server.get_name() + ", running version ft_irc-" VERSION);
+
+	_send(reply);
 }
 
 const std::string Client::_get_username(bool truncate) const
 {
-	if (truncate)
-		return _username.substr(0, 18);
+	std::string username = "~";
 
-	return _username;
+	if (truncate)
+		username += _username.substr(0, 18);
+	else
+		username += _username;
+
+	return username;
 }
 
 bool Client::_is_valid_nickname(const std::string &nickname)
