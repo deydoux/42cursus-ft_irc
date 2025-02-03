@@ -42,10 +42,10 @@ private:
 	std::string	_realname;
 	std::string	_username;
 
-	ssize_t	_send(const std::string &message) const;
-
-	void	_check_registration();
-	void	_handle_message(std::string message);
+	void		_handle_message(std::string message);
+	ssize_t		_send(const std::string &message) const;
+	std::string	_create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
+	void		_check_registration();
 
 	const std::string	_get_username(bool truncate = true) const;
 

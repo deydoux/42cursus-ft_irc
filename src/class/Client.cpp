@@ -51,21 +51,7 @@ void Client::log(const std::string &message, const log_level level) const
 
 void Client::reply(reply_code code, const std::string &arg, const std::string &message) const
 {
-	std::ostringstream oss;
-	oss << ':' << _server.get_name() << ' ' <<  code << ' ' << get_nickname(false);
-
-	if (!arg.empty())
-		oss << ' ' << arg;
-
-	if (!message.empty())
-	{
-		oss << ' ';
-		if (message.find(' ') != std::string::npos)
-			oss << ':';
-		oss << message;
-	}
-
-	_send(oss.str());
+	_send(_create_reply(code, arg, message));
 }
 
 void Client::send_error(const std::string &message)
@@ -144,37 +130,6 @@ void Client::set_realname(const std::string &realname)
 	_realname = realname;
 }
 
-ssize_t Client::_send(const std::string &message) const
-{
-	std::string send_message = message;
-
-	if (send_message.size() > _max_message_size - 2)
-	{
-		send_message.erase(_max_message_size - 7);
-		send_message += "[CUT]";
-	}
-
-	log("Sending message:\n" + send_message, debug);
-	send_message += "\r\n";
-
-	ssize_t bytes_sent = send(_fd, send_message.c_str(), send_message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
-	if (bytes_sent == -1)
-		throw std::runtime_error("Failed to send message");
-
-	return bytes_sent;
-}
-
-void Client::_check_registration()
-{
-	if (_nickname.empty() || _username.empty())
-		return ;
-
-	if (!_server.check_password(_password))
-		return send_error("Access denied: Bad password?");
-
-	_registered = true;
-}
-
 void Client::_handle_message(std::string message)
 {
 	if (message.empty())
@@ -211,6 +166,56 @@ void Client::_handle_message(std::string message)
 	log("Parsed command: " + oss.str(), debug);
 
 	Command::execute(args, *this);
+}
+
+ssize_t Client::_send(const std::string &message) const
+{
+	std::string send_message = message;
+
+	if (send_message.size() > _max_message_size - 2)
+	{
+		send_message.erase(_max_message_size - 7);
+		send_message += "[CUT]";
+	}
+
+	log("Sending message:\n" + send_message, debug);
+	send_message += "\r\n";
+
+	ssize_t bytes_sent = send(_fd, send_message.c_str(), send_message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
+	if (bytes_sent == -1)
+		throw std::runtime_error("Failed to send message");
+
+	return bytes_sent;
+}
+
+std::string Client::_create_reply(reply_code code, const std::string &arg, const std::string &message) const
+{
+	std::ostringstream oss;
+	oss << ':' << _server.get_name() << ' ' <<  code << ' ' << get_nickname(false);
+
+	if (!arg.empty())
+		oss << ' ' << arg;
+
+	if (!message.empty())
+	{
+		oss << ' ';
+		if (message.find(' ') != std::string::npos)
+			oss << ':';
+		oss << message;
+	}
+
+	return oss.str();
+}
+
+void Client::_check_registration()
+{
+	if (_nickname.empty() || _username.empty())
+		return ;
+
+	if (!_server.check_password(_password))
+		return send_error("Access denied: Bad password?");
+
+	_registered = true;
 }
 
 const std::string Client::_get_username(bool truncate) const
