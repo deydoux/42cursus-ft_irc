@@ -226,8 +226,9 @@ void Client::_check_registration()
 void Client::_greet() const
 {
 	std::string reply =
-		_create_reply(RPL_WELCOME, "", "Welcome to the " + _server.get_name() + " network " + get_nickname() + '!' + _get_username() + '@' + _ip)
-		+ _create_reply(RPL_YOURHOST, "", "Your host is " + _server.get_name() + ", running version ft_irc-" VERSION);
+		_create_reply(RPL_WELCOME, "", "Welcome to the Internet Relay Network " + get_nickname() + '!' + _get_username() + '@' + _ip)
+		+ _create_reply(RPL_YOURHOST, "", "Your host is " + _server.get_name() + ", running version " VERSION)
+		+ _create_reply(RPL_CREATED, "", "This server has been started " + _server.get_datetime());
 
 	_send(reply);
 }

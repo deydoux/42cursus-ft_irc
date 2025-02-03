@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <stdio.h>
 
+#include <ctime>
 #include <iostream>
 #include <sstream>
 
@@ -69,6 +70,11 @@ const std::string &Server::get_name() const
 	return _name;
 }
 
+const std::string &Server::get_datetime() const
+{
+	return _datetime;
+}
+
 Server Server::parse_args(int argc, char *argv[])
 {
 	std::string name = "kittirc";
@@ -127,6 +133,17 @@ Server Server::parse_args(int argc, char *argv[])
 
 bool Server::stop = false;
 
+void Server::_set_datetime()
+{
+	time_t now = std::time(NULL);
+	struct tm *tm = std::gmtime(&now);
+
+	char date[64];
+	std::strftime(date, sizeof(date), "%a %b %d %Y at %H:%M:%S (UTC)", tm);
+
+	_datetime = date;
+}
+
 void Server::_set_signal_handler()
 {
 	struct sigaction act = {};
@@ -164,6 +181,7 @@ void Server::_listen()
 
 void Server::_init()
 {
+	_set_datetime();
 	_set_signal_handler();
 	_init_socket();
 	_bind();

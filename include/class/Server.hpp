@@ -23,6 +23,7 @@ public:
 	Client				*get_client(const std::string &nickname) const;
 	const bool			&is_verbose() const;
 	const std::string	&get_name() const;
+	const std::string	&get_datetime() const;
 
 	static bool	stop;
 
@@ -39,10 +40,12 @@ private:
 
 	int			_socket;
 	_pollfds_t	_pollfds;
+	std::string	_datetime;
 
 	clients_t	_clients;
 	channels_t	_channels;
 
+	void	_set_datetime();
 	void	_set_signal_handler();
 	void	_init_socket();
 	void	_bind();
