@@ -21,9 +21,9 @@ private:
 
 	static _commands_t	_commands;
 
-	static void _nick(const args_t &args, Client &client);
-	static void _pass(const args_t &args, Client &client);
-	static void _user(const args_t &args, Client &client);
+	static void	_nick(const args_t &args, Client &client);
+	static void	_pass(const args_t &args, Client &client);
+	static void	_user(const args_t &args, Client &client);
 };
 
 #endif // COMMAND_HPP

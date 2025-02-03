@@ -51,10 +51,13 @@ private:
 	void	_check_registration();
 	void	_handle_message(std::string message);
 
+	const std::string	_get_username(bool truncate = true) const;
+
 	static const size_t	_max_message_size = 512;
 	static const size_t	_max_nickname_size = 9;
 
 	static bool	_is_valid_nickname(const std::string &nickname);
+	static bool	_is_valid_username(const std::string &username);
 };
 
 #endif // CLIENT_HPP

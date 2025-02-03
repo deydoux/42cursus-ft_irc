@@ -101,9 +101,11 @@ void Client::set_nickname(const std::string &nickname)
 
 void Client::set_username(const std::string &username)
 {
-	// TODO: validate username
 	if (_registered)
 		return reply(ERR_ALREADYREGISTRED, "", "Connection already registered");
+
+	if (!_is_valid_username(username))
+		return _send_error("Invalid user name");
 
 	_username = username;
 
@@ -149,7 +151,7 @@ void Client::_send_error(const std::string &message) const
 {
 	std::ostringstream oss;
 
-	oss << "ERROR :Closing connection: " << get_nickname(false) << "[~" << _username << '@' << _ip << ']';
+	oss << "ERROR :Closing connection: " << get_nickname(false) << "[~" << _get_username() << '@' << _ip << ']';
 	if (!message.empty())
 		oss << " (" << message << ')';
 	_send(oss.str());
@@ -206,16 +208,31 @@ void Client::_handle_message(std::string message)
 	Command::execute(args, *this);
 }
 
+const std::string Client::_get_username(bool truncate) const
+{
+	if (truncate)
+		return _username.substr(0, 18);
+
+	return _username;
+}
+
 bool Client::_is_valid_nickname(const std::string &nickname)
 {
 	if (std::isdigit(nickname[0]) || nickname[0] == '-')
 		return false;
 
 	for (std::string::const_iterator it = nickname.begin(); it != nickname.end(); ++it)
-	{
-		if (!std::isalnum(*it) && std::string("-[]\\`_^{|}").find(*it) == std::string::npos)
+		if (!std::isalnum(*it) && std::string("_-[]{}\\`^|").find(*it) == std::string::npos)
 			return false;
-	}
+
+	return true;
+}
+
+bool Client::_is_valid_username(const std::string &username)
+{
+	for (std::string::const_iterator it = username.begin(); it != username.end(); ++it)
+		if (!std::isalnum(*it) && std::string("_-").find(*it) == std::string::npos)
+			return false;
 
 	return true;
 }
