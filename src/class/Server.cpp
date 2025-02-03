@@ -212,11 +212,23 @@ void Server::_read()
 			continue;
 		}
 
+		bool disconnect_request;
 		try {
 			_clients[it->fd]->handle_messages(std::string(buffer, bytes_read));
-		} catch (Client::Disconnect) {
-			_disconnect_client((it--)->fd);
+			disconnect_request = _clients[it->fd]->has_disconnect_request();
+		} catch (std::exception &e) {
+			disconnect_request = true;
+			_clients[it->fd]->log(e.what(), error);
+
+			try {
+				_clients[it->fd]->send_error("Internal server error");
+			} catch (std::exception &e) {
+				_clients[it->fd]->log(e.what(), error);
+			}
 		}
+
+		if (disconnect_request)
+			_disconnect_client((it--)->fd);
 	}
 }
 

@@ -11,6 +11,7 @@ Client::Client(const int fd, char *ip, Server &server) :
 	_fd(fd),
 	_ip(ip),
 	_server(server),
+	_disconnect_request(false),
 	_registered(false)
 {
 	log("Accepted connection from " + std::string(_ip));
@@ -67,6 +68,19 @@ void Client::reply(reply_code code, const std::string &arg, const std::string &m
 	_send(oss.str());
 }
 
+void Client::send_error(const std::string &message)
+{
+	std::ostringstream oss;
+
+	oss << "ERROR :Closing connection: " << get_nickname(false) << "[~" << _get_username() << '@' << _ip << ']';
+	if (!message.empty())
+		oss << " (" << message << ')';
+
+	_send(oss.str());
+
+	_disconnect_request = true;
+}
+
 const bool &Client::is_registered() const
 {
 	return _registered;
@@ -80,6 +94,11 @@ const std::string &Client::get_nickname(bool allow_empty) const
 		return empty_nick;
 
 	return _nickname;
+}
+
+const bool &Client::has_disconnect_request() const
+{
+	return _disconnect_request;
 }
 
 void Client::set_nickname(const std::string &nickname)
@@ -105,7 +124,7 @@ void Client::set_username(const std::string &username)
 		return reply(ERR_ALREADYREGISTRED, "", "Connection already registered");
 
 	if (!_is_valid_username(username))
-		return _send_error("Invalid user name");
+		return send_error("Invalid user name");
 
 	_username = username;
 
@@ -147,25 +166,13 @@ ssize_t Client::_send(const std::string &message) const
 	return bytes_sent;
 }
 
-void Client::_send_error(const std::string &message) const
-{
-	std::ostringstream oss;
-
-	oss << "ERROR :Closing connection: " << get_nickname(false) << "[~" << _get_username() << '@' << _ip << ']';
-	if (!message.empty())
-		oss << " (" << message << ')';
-	_send(oss.str());
-
-	throw Disconnect();
-}
-
 void Client::_check_registration()
 {
 	if (_nickname.empty() || _username.empty())
 		return ;
 
 	if (!_server.check_password(_password))
-		return _send_error("Access denied: Bad password?");
+		return send_error("Access denied: Bad password?");
 
 	_registered = true;
 }
@@ -176,7 +183,7 @@ void Client::_handle_message(std::string message)
 		return;
 
 	if (message.size() > _max_message_size - 1)
-		_send_error("Request too long");
+		send_error("Request too long");
 
 	if (message[message.size() - 1] == '\r')
 		message.erase(message.size() - 1);
