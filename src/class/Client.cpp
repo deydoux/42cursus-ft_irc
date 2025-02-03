@@ -144,8 +144,6 @@ void Client::set_realname(const std::string &realname)
 	_realname = realname;
 }
 
-Client::Disconnect::Disconnect() {}
-
 ssize_t Client::_send(const std::string &message) const
 {
 	std::string send_message = message;
