@@ -9,11 +9,12 @@
 #include <iostream>
 #include <sstream>
 
-Server::Server(port_t port, std::string password, bool verbose):
+Server::Server(const std::string &name, port_t port, const std::string &password, bool verbose):
+	_name(name),
 	_port(port),
-	_address(_init_address(_port)),
 	_password(password),
-	_verbose(verbose)
+	_verbose(verbose),
+	_address(_init_address(_port))
 {
 	Command::init();
 	log("Constructed", debug);
@@ -65,9 +66,10 @@ const bool &Server::is_verbose() const
 
 Server Server::parse_args(int argc, char *argv[])
 {
+	std::string name = "kittirc";
 	Server::port_t port = _default_port;
+	bool verbose = _default_verbose;
 	std::string password;
-	bool verbose = _default_port;
 
 	bool port_set = false;
 	bool password_set = false;
@@ -77,7 +79,12 @@ Server Server::parse_args(int argc, char *argv[])
 
 		if (arg == "-h" || arg == "--help")
 			_print_usage(0);
-		else if (arg == "-P" || arg == "--pass" || arg == "--password") {
+		else if (arg == "-n" || arg == "--name") {
+			if (++i >= argc)
+				_print_usage();
+
+			name = argv[i];
+		} else if (arg == "-P" || arg == "--pass" || arg == "--password") {
 			if (++i >= argc)
 				_print_usage();
 
@@ -102,7 +109,7 @@ Server Server::parse_args(int argc, char *argv[])
 			_print_usage();
 	}
 
-	Server server = Server(port, password, verbose);
+	Server server = Server(name, port, password, verbose);
 
 	if (!port_set)
 		server.log("Using default port: " + to_string(port), warning);
@@ -236,6 +243,7 @@ void Server::_print_usage(int status)
 {
 	std::cerr << "Usage: ./ircserv [options]... [port] [password]" << std::endl
 			  << "  -h, --help                         Show this help message" << std::endl
+			  << "  -n, --name <name>                  Name of the server (default: kittirc)" << std::endl
 			  << "  -P, --pass, --password <password>  Password required to connect (default: None)" << std::endl
 			  << "  -p, --port <port>                  Port to listen on (default: 6697)" << std::endl
 			  << "  -v, --verbose                      Enable verbose output" << std::endl;
