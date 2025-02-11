@@ -11,7 +11,7 @@ class Server;
 class Client
 {
 public:
-	Client(int fd, char *ip, Server &server);
+	Client(const int fd, const std::string &ip, Server &server);
 	~Client();
 
 	void	handle_messages(std::string messages);
@@ -29,9 +29,9 @@ public:
 	void	set_password(const std::string &password);
 
 private:
-	const int	_fd;
-	const char	*_ip;
-	Server		&_server;
+	const int			_fd;
+	const std::string	&_ip;
+	Server				&_server;
 
 	bool		_disconnect_request;
 	bool		_registered;

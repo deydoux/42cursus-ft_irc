@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <sstream>
 
-Client::Client(const int fd, char *ip, Server &server) :
+Client::Client(const int fd, const std::string &ip, Server &server):
 	_fd(fd),
 	_ip(ip),
 	_server(server),
