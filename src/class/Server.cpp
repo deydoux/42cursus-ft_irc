@@ -288,6 +288,7 @@ void Server::_read()
 
 void Server::_disconnect_client(int fd)
 {
+	_connections--;
 	if (_clients[fd]->is_registered())
 		_registered_clients_count--;
 
