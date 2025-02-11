@@ -60,9 +60,9 @@ const bool &Server::is_verbose() const
 	return _verbose;
 }
 
-const std::string &Server::get_datetime() const
+const std::string &Server::get_start_time() const
 {
-	return _datetime;
+	return _start_time;
 }
 
 Client *Server::get_client(const std::string &nickname) const
@@ -143,15 +143,15 @@ Server Server::parse_args(int argc, char *argv[])
 
 bool Server::stop = false;
 
-void Server::_set_datetime()
+void Server::_set_start_time()
 {
 	time_t now = std::time(NULL);
 	struct tm *tm = std::gmtime(&now);
 
-	char date[64];
-	std::strftime(date, sizeof(date), "%a %b %d %Y at %H:%M:%S (UTC)", tm);
+	char datetime[64];
+	std::strftime(datetime, sizeof(datetime), "%a %b %d %Y at %H:%M:%S (UTC)", tm);
 
-	_datetime = date;
+	_start_time = datetime;
 }
 
 void Server::_set_signal_handler()
@@ -191,7 +191,7 @@ void Server::_listen()
 
 void Server::_init()
 {
-	_set_datetime();
+	_set_start_time();
 	_set_signal_handler();
 	_init_socket();
 	_bind();

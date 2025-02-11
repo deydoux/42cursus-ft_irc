@@ -22,7 +22,7 @@ public:
 	const std::string	&get_name() const;
 	bool				check_password(const std::string &password) const;
 	const bool			&is_verbose() const;
-	const std::string	&get_datetime() const;
+	const std::string	&get_start_time() const;
 	Client				*get_client(const std::string &nickname) const;
 	size_t				get_clients_count() const;
 	size_t				get_channels_count() const;
@@ -42,12 +42,12 @@ private:
 
 	int			_socket;
 	_pollfds_t	_pollfds;
-	std::string	_datetime;
+	std::string	_start_time;
 
 	clients_t	_clients;
 	channels_t	_channels;
 
-	void	_set_datetime();
+	void	_set_start_time();
 	void	_set_signal_handler();
 	void	_init_socket();
 	void	_bind();
