@@ -219,13 +219,14 @@ void Client::_check_registration()
 		return send_error("Access denied: Bad password?");
 
 	_registered = true;
+	_server.register_client();
 
 	_greet();
 }
 
 void Client::_greet() const
 {
-	std::string reply = // https://modern.ircdocs.horse/#rplwelcome-001
+	std::string reply =
 		_create_reply(RPL_WELCOME, "", "Welcome to the Internet Relay Network " + get_nickname() + '!' + _get_username() + '@' + _ip)
 		+ _create_reply(RPL_YOURHOST, "", "Your host is " + _server.get_name() + ", running version " VERSION)
 		+ _create_reply(RPL_CREATED, "", "This server has been started " + _server.get_start_time())
@@ -234,7 +235,10 @@ void Client::_greet() const
 		+ _create_reply(RPL_ISUPPORT, "CHANLIMIT=#&:50 CHANNELLEN=50 NICKLEN=" + to_string(_max_nickname_size) + " TOPICLEN=490 AWAYLEN=127 KICKLEN=400 MODES=5", "are supported on this server")
 		+ _create_reply(RPL_LUSERCLIENT, "", "There are " + to_string(_server.get_clients_count()) + " users and 0 services on 1 servers")
 		+ _create_reply(RPL_LUSERCHANNELS, to_string(_server.get_channels_count()), "channels formed")
-		+ _create_reply(RPL_LUSERME, "", "I have " + to_string(_server.get_clients_count()) + " users, 0 services and 0 servers");
+		+ _create_reply(RPL_LUSERME, "", "I have " + to_string(_server.get_clients_count()) + " users, 0 services and 0 servers")
+		+ _create_reply(RPL_LOCALUSERS, to_string(_server.get_clients_count()) + ' ' + to_string(_server.get_max_clients()), "Current local users: " + to_string(_server.get_clients_count()) + ", Max: " + to_string(_server.get_max_clients()))
+		+ _create_reply(RPL_LOCALUSERS, to_string(_server.get_clients_count()) + ' ' + to_string(_server.get_max_clients()), "Current global users: " + to_string(_server.get_clients_count()) + ", Max: " + to_string(_server.get_max_clients()))
+		+ _create_reply(RPL_STATSDLINE, "", "Highest connection count: " + to_string(_server.get_max_connections()) + " (" + to_string(_server.get_connections()) + " connections received)");
 
 	_send(reply);
 }
