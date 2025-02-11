@@ -6,14 +6,16 @@
 #include <signal.h>
 #include <stdio.h>
 
+#include <ctime>
 #include <iostream>
 #include <sstream>
 
-Server::Server(port_t port, std::string password, bool verbose):
+Server::Server(const std::string &name, port_t port, const std::string &password, bool verbose):
+	_name(name),
 	_port(port),
-	_address(_init_address(_port)),
 	_password(password),
-	_verbose(verbose)
+	_verbose(verbose),
+	_address(_init_address(_port))
 {
 	Command::init();
 	log("Constructed", debug);
@@ -43,33 +45,52 @@ void Server::start()
 	log("Stopped");
 }
 
-const std::string &Server::get_password() const
+const std::string &Server::get_name() const
 {
-	return _password;
+	return _name;
 }
 
-bool Server::is_verbose() const
+bool Server::check_password(const std::string &password) const
+{
+	return password == _password;
+}
+
+const bool &Server::is_verbose() const
 {
 	return _verbose;
 }
 
-void Server::disconnect_client(int fd)
+const std::string &Server::get_start_time() const
 {
-	delete _clients[fd];
-	_clients.erase(fd);
-	for (_pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it) {
-		if (it->fd == fd) {
-			_pollfds.erase(it);
-			break;
-		}
+	return _start_time;
+}
+
+Client *Server::get_client(const std::string &nickname) const
+{
+	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		if (it->second->get_nickname() == nickname)
+			return it->second;
 	}
+
+	return NULL;
+}
+
+size_t Server::get_clients_count() const
+{
+	return _clients.size();
+}
+
+size_t Server::get_channels_count() const
+{
+	return _channels.size();
 }
 
 Server Server::parse_args(int argc, char *argv[])
 {
+	std::string name = "kittirc";
 	Server::port_t port = _default_port;
+	bool verbose = _default_verbose;
 	std::string password;
-	bool verbose = _default_port;
 
 	bool port_set = false;
 	bool password_set = false;
@@ -79,7 +100,12 @@ Server Server::parse_args(int argc, char *argv[])
 
 		if (arg == "-h" || arg == "--help")
 			_print_usage(0);
-		else if (arg == "-P" || arg == "--pass" || arg == "--password") {
+		else if (arg == "-n" || arg == "--name") {
+			if (++i >= argc)
+				_print_usage();
+
+			name = argv[i];
+		} else if (arg == "-P" || arg == "--pass" || arg == "--password") {
 			if (++i >= argc)
 				_print_usage();
 
@@ -104,7 +130,7 @@ Server Server::parse_args(int argc, char *argv[])
 			_print_usage();
 	}
 
-	Server server = Server(port, password, verbose);
+	Server server = Server(name, port, password, verbose);
 
 	if (!port_set)
 		server.log("Using default port: " + to_string(port), warning);
@@ -116,6 +142,17 @@ Server Server::parse_args(int argc, char *argv[])
 }
 
 bool Server::stop = false;
+
+void Server::_set_start_time()
+{
+	time_t now = std::time(NULL);
+	struct tm *tm = std::gmtime(&now);
+
+	char datetime[64];
+	std::strftime(datetime, sizeof(datetime), "%a %b %d %Y at %H:%M:%S (UTC)", tm);
+
+	_start_time = datetime;
+}
 
 void Server::_set_signal_handler()
 {
@@ -154,6 +191,7 @@ void Server::_listen()
 
 void Server::_init()
 {
+	_set_start_time();
 	_set_signal_handler();
 	_init_socket();
 	_bind();
@@ -182,17 +220,10 @@ void Server::_accept()
 	int fd = accept(_socket, (sockaddr *)&address, &address_len);
 	if (fd == -1)
 		return log("Failed to accept connection", error);
-	log(inet_ntoa(address.sin_addr), debug);
 
 	_pollfds.push_back(_init_pollfd(fd));
-	_clients[fd] = new Client(fd, *this);
-
-	try {
-		_clients[fd]->init();
-	} catch (std::runtime_error &e) {
-		_clients[fd]->log(e.what(), error);
-		disconnect_client(fd);
-	}
+	char *ip = inet_ntoa(address.sin_addr);
+	_clients[fd] = new Client(fd, ip, *this);
 }
 
 void Server::_read()
@@ -205,11 +236,39 @@ void Server::_read()
 		ssize_t bytes_read = recv(it->fd, buffer, sizeof(buffer), MSG_DONTWAIT); // WAIT ✋ They don't love you like I love you
 
 		if (bytes_read <= 0) {
-			disconnect_client((it--)->fd);
+			_disconnect_client((it--)->fd);
 			continue;
 		}
 
-		_clients[it->fd]->handle_messages(std::string(buffer, bytes_read));
+		bool disconnect_request;
+		try {
+			_clients[it->fd]->handle_messages(std::string(buffer, bytes_read));
+			disconnect_request = _clients[it->fd]->has_disconnect_request();
+		} catch (std::exception &e) {
+			disconnect_request = true;
+			_clients[it->fd]->log(e.what(), error);
+
+			try {
+				_clients[it->fd]->send_error("Internal server error");
+			} catch (std::exception &e) {
+				_clients[it->fd]->log(e.what(), error);
+			}
+		}
+
+		if (disconnect_request)
+			_disconnect_client((it--)->fd);
+	}
+}
+
+void Server::_disconnect_client(int fd)
+{
+	delete _clients[fd];
+	_clients.erase(fd);
+	for (_pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it) {
+		if (it->fd == fd) {
+			_pollfds.erase(it);
+			break;
+		}
 	}
 }
 
@@ -229,6 +288,7 @@ void Server::_print_usage(int status)
 {
 	std::cerr << "Usage: ./ircserv [options]... [port] [password]" << std::endl
 			  << "  -h, --help                         Show this help message" << std::endl
+			  << "  -n, --name <name>                  Name of the server (default: kittirc)" << std::endl
 			  << "  -P, --pass, --password <password>  Password required to connect (default: None)" << std::endl
 			  << "  -p, --port <port>                  Port to listen on (default: 6697)" << std::endl
 			  << "  -v, --verbose                      Enable verbose output" << std::endl;

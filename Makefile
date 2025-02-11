@@ -1,4 +1,5 @@
 NAME = ircserv
+VERSION = $(shell git describe --tags --always --dirty=* --broken=#)
 
 SRC = \
 	class/Channel.cpp \
@@ -7,7 +8,6 @@ SRC = \
 	class/Server.cpp \
 	lib/log.cpp \
 	lib/to_lower.cpp \
-	lib/to_string.cpp \
 	main.cpp
 
 SRC_DIR = src
@@ -15,7 +15,7 @@ INC_DIR = include
 BUILD_DIR = build
 
 CXX = c++
-CXXFLAGS = -I$(INC_DIR) -MD -Wall -Wextra -Werror -std=c++98 -g
+CXXFLAGS = -D 'VERSION="ft_irc-$(VERSION)"' -I$(INC_DIR) -MD -Wall -Wextra -Werror -std=c++98 -g
 
 RM = rm -rf
 MKDIR = mkdir -p
@@ -34,11 +34,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 -include $(DEP)
 
-.PHONY: all clean fclean re
-
-ARGS = -v 6697 slay
-run: $(NAME)
-	./$< $(ARGS)
+.PHONY: all clean fclean re run
 
 all: $(NAME)
 
@@ -50,3 +46,6 @@ fclean:
 
 re: fclean
 	@$(MAKE)
+
+run: $(NAME)
+	./$< $(ARGS)
