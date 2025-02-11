@@ -15,7 +15,11 @@ Server::Server(const std::string &name, port_t port, const std::string &password
 	_port(port),
 	_password(password),
 	_verbose(verbose),
-	_address(_init_address(_port))
+	_address(_init_address(_port)),
+	_connections(0),
+	_max_connections(0),
+	_max_registered_clients(0),
+	_registered_clients_count(0)
 {
 	Command::init();
 	log("Constructed", debug);
@@ -43,6 +47,11 @@ void Server::start()
 	while (!stop)
 		_loop();
 	log("Stopped");
+}
+
+void Server::register_client()
+{
+	_max_registered_clients = std::max(_max_registered_clients, ++_registered_clients_count);
 }
 
 const std::string &Server::get_name() const
@@ -75,9 +84,24 @@ Client *Server::get_client(const std::string &nickname) const
 	return NULL;
 }
 
+size_t Server::get_connections() const
+{
+	return _connections;
+}
+
+size_t Server::get_max_connections() const
+{
+	return _max_connections;
+}
+
 size_t Server::get_clients_count() const
 {
-	return _clients.size();
+	return _registered_clients_count;
+}
+
+size_t Server::get_max_clients() const
+{
+	return _max_registered_clients;
 }
 
 size_t Server::get_channels_count() const
@@ -221,6 +245,8 @@ void Server::_accept()
 	if (fd == -1)
 		return log("Failed to accept connection", error);
 
+	_max_connections = std::max(_max_connections, ++_connections);
+
 	_pollfds.push_back(_init_pollfd(fd));
 	char *ip = inet_ntoa(address.sin_addr);
 	_clients[fd] = new Client(fd, ip, *this);
@@ -262,8 +288,12 @@ void Server::_read()
 
 void Server::_disconnect_client(int fd)
 {
+	if (_clients[fd]->is_registered())
+		_registered_clients_count--;
+
 	delete _clients[fd];
 	_clients.erase(fd);
+
 	for (_pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it) {
 		if (it->fd == fd) {
 			_pollfds.erase(it);

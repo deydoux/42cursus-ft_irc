@@ -18,13 +18,17 @@ public:
 
 	void	log(const std::string &message, const log_level level = info) const;
 	void	start();
+	void	register_client();
 
 	const std::string	&get_name() const;
 	bool				check_password(const std::string &password) const;
 	const bool			&is_verbose() const;
 	const std::string	&get_start_time() const;
 	Client				*get_client(const std::string &nickname) const;
+	size_t				get_connections() const;
+	size_t				get_max_connections() const;
 	size_t				get_clients_count() const;
+	size_t				get_max_clients() const;
 	size_t				get_channels_count() const;
 
 	static bool	stop;
@@ -43,6 +47,11 @@ private:
 	int			_socket;
 	_pollfds_t	_pollfds;
 	std::string	_start_time;
+
+	size_t	_connections;
+	size_t	_max_connections;
+	size_t	_max_registered_clients;
+	size_t	_registered_clients_count;
 
 	clients_t	_clients;
 	channels_t	_channels;
