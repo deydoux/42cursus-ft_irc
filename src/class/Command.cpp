@@ -4,6 +4,7 @@
 
 void Command::init()
 {
+	_commands["motd"] = (_command_t) {&_motd, 0, 1, true};
 	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
 	_commands["pass"] = (_command_t) {&_pass, 1, 1, false};
 	_commands["user"] = (_command_t) {&_user, 4, 4, false};
