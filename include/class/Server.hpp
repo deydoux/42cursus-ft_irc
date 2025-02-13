@@ -26,6 +26,9 @@ public:
 	Client				*get_client(const std::string &nickname) const;
 	size_t				get_clients_count() const;
 	size_t				get_channels_count() const;
+	const Channel		&find_channel(const std::string &channel_name);
+
+	void	add_channel(Channel &new_channel);
 
 	static bool	stop;
 

@@ -7,7 +7,7 @@ Channel::Channel(Client &creator, const bool verbose = false):
 {
 }
 
-Channel::Channel(Client &creator, const std::string &name, const bool verbose):
+Channel::Channel(Client &creator, std::string &name, const bool verbose):
 	_creator(creator),
 	_verbose(verbose)
 {
@@ -20,15 +20,20 @@ Channel::~Channel()
 	log("Destroyed");
 }
 
-void Channel::set_name(const std::string &name)
+void Channel::set_name(std::string &name, bool check_validity = true)
 {
-	if (!_is_valid_name(name))
-		return _creator.reply(ERR_NOSUCHCHANNEL, name, "No such channel");
+	if (check_validity && !is_valid_name(name))
+		return ;
 
 	_name = name;
 }
 
-bool Channel::_is_valid_name(const std::string &name)
+const std::string	&Channel::get_name( void )
+{
+	return _name;
+}
+
+bool Channel::is_valid_name(const std::string &name)
 {
 	// - Must start with # or &
 	if (!(name[0] == '&' || name[0] == '#'))

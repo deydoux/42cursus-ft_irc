@@ -271,3 +271,8 @@ bool Client::_is_valid_username(const std::string &username)
 
 	return true;
 }
+
+const Server &Client::get_server( void ) const
+{
+	return _server;
+}

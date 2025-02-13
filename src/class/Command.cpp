@@ -1,6 +1,7 @@
 #include "class/Client.hpp"
 #include "class/Command.hpp"
 #include "class/Channel.hpp"
+#include "class/Server.hpp"
 
 void Command::init()
 {
@@ -50,6 +51,48 @@ void Command::_user(const args_t &args, Client &client)
 	client.set_realname(args[4]);
 }
 
-void Command::_join(const args_t &args, Client &)
+void Command::_join(const args_t &args, Client &client)
 { 
+	size_t args_size = args.size();
+
+	// if the only argument to /join is 0
+	if (args_size == 2 && args[1] == "0")
+		// TODO close_all_chanels()
+		return ;
+
+	std::vector<Channel> channels_to_be_joined;
+	std::vector<std::string> passkeys;
+	Server server = client.get_server();
+	
+	std::vector<std::string> channels_name = ft_split(args[1], ',');
+	std::vector<std::string> input_passkeys = args_size == 3 ? 
+		ft_split(args[2], ',') : std::vector<std::string>({});
+
+	for (size_t i = 0; i < channels_name.size(); i++)
+	{
+		std::string channel_name = channels_name[i];
+		if (Channel::is_valid_name(channel_name)) {
+
+			try {
+				// fetch existing channel
+				channels_to_be_joined.push_back(server.find_channel(channel_name));
+			} catch (std::invalid_argument &) {
+				// the channel does not exists and needs to be created
+				Channel new_channel = Channel(client, channel_name);
+
+				channels_to_be_joined.push_back(new_channel);
+				server.add_channel(new_channel);
+			}
+
+			if (args_size == 3)
+				passkeys.push_back(input_passkeys.size() > i ? input_passkeys[i] : "");
+
+		} else {
+			client.reply(
+				ERR_NOSUCHCHANNEL, 
+				channels_name[i], 
+				"No such channel"
+			);
+		}
+	}
 }
