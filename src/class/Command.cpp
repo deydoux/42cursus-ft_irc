@@ -104,7 +104,9 @@ void Command::_join(const args_t &args, Client &client)
 		// ERR_CHANNELISFULL => must check the max number of users on the channel and if there's some spaces left
 		if (channel.is_full())
 			client.reply(ERR_CHANNELISFULL, channel.get_name(), "Cannot join channel (+l)");
-	}
 
+		// ERR_BADCHANNELKEY => must check if the channel requires a passkey and if so, if the one given is correct
+		else if (!channel.check_passkey(passkey))
+			client.reply(ERR_BADCHANNELKEY, channel.get_name(), "Cannot join channel (+k) - bad key");
 
 }

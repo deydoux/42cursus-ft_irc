@@ -67,6 +67,16 @@ bool	Channel::is_full( void )
 	return _members_limit <= _members.size();
 }
 
+void	Channel::set_passkey(std::string &passkey)
+{
+	_passkey = passkey;
+}
+
+bool	Channel::check_passkey(std::string &passkey)
+{
+	return _passkey == passkey;
+}
+
 void	Channel::log(const std::string &message, const log_level level) const
 {
 	if (_verbose || level != debug)
