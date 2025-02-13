@@ -68,6 +68,23 @@ void Client::send_error(const std::string &message)
 	_disconnect_request = true;
 }
 
+const std::string Client::create_motd_reply() const
+{
+	std::vector<std::string> motd_lines = _server.get_motd_lines();
+
+	if (motd_lines.empty())
+		return _create_reply(ERR_NOMOTD, "", "MOTD File is missing");
+
+	std::string reply = _create_reply(RPL_MOTDSTART, "", "- " + _server.get_name() + " message of the day");
+
+	for (std::vector<std::string>::iterator it = motd_lines.begin(); it != motd_lines.end(); ++it)
+		reply += _create_reply(RPL_MOTD, "", "- " + *it);
+
+	reply += _create_reply(RPL_ENDOFMOTD, "", "End of MOTD command");
+
+	return reply;
+}
+
 const bool &Client::is_registered() const
 {
 	return _registered;
@@ -238,7 +255,8 @@ void Client::_greet() const
 		+ _create_reply(RPL_LUSERME, "", "I have " + to_string(_server.get_clients_count()) + " users, 0 services and 0 servers")
 		+ _create_reply(RPL_LOCALUSERS, to_string(_server.get_clients_count()) + ' ' + to_string(_server.get_max_clients()), "Current local users: " + to_string(_server.get_clients_count()) + ", Max: " + to_string(_server.get_max_clients()))
 		+ _create_reply(RPL_LOCALUSERS, to_string(_server.get_clients_count()) + ' ' + to_string(_server.get_max_clients()), "Current global users: " + to_string(_server.get_clients_count()) + ", Max: " + to_string(_server.get_max_clients()))
-		+ _create_reply(RPL_STATSDLINE, "", "Highest connection count: " + to_string(_server.get_max_connections()) + " (" + to_string(_server.get_connections()) + " connections received)");
+		+ _create_reply(RPL_STATSDLINE, "", "Highest connection count: " + to_string(_server.get_max_connections()) + " (" + to_string(_server.get_connections()) + " connections received)")
+		+ create_motd_reply();
 
 	_send(reply);
 }
