@@ -52,6 +52,11 @@ void Server::start()
 	log("Stopped");
 }
 
+bool Server::check_password(const std::string &password) const
+{
+	return password == _password;
+}
+
 void Server::register_client()
 {
 	_max_registered_clients = std::max(_max_registered_clients, ++_registered_clients_count);
@@ -62,16 +67,6 @@ const std::string &Server::get_name() const
 	return _name;
 }
 
-bool Server::check_password(const std::string &password) const
-{
-	return password == _password;
-}
-
-const std::vector<std::string> &Server::get_motd_lines() const
-{
-	return _motd_lines;
-}
-
 const bool &Server::is_verbose() const
 {
 	return _verbose;
@@ -80,6 +75,11 @@ const bool &Server::is_verbose() const
 const std::string &Server::get_start_time() const
 {
 	return _start_time;
+}
+
+const std::vector<std::string> &Server::get_motd_lines() const
+{
+	return _motd_lines;
 }
 
 Client *Server::get_client(const std::string &nickname) const
