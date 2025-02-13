@@ -3,9 +3,9 @@
 
 void Command::init()
 {
-	_commands["nick"] = (_command_t) {&_nick, 1, false};
-	_commands["pass"] = (_command_t) {&_pass, 1, false};
-	_commands["user"] = (_command_t) {&_user, 4, false};
+	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
+	_commands["pass"] = (_command_t) {&_pass, 1, 1, false};
+	_commands["user"] = (_command_t) {&_user, 4, 4, false};
 }
 
 void Command::execute(const args_t &args, Client &client)
@@ -20,7 +20,8 @@ void Command::execute(const args_t &args, Client &client)
 
 	_command_t command = command_it->second;
 
-	if (args.size() - 1 != command.args_size)
+	size_t args_size(args.size() - 1);
+	if (args_size > command.max_args || args_size < command.min_args)
 		return client.reply(ERR_NEEDMOREPARAMS, args[0], "Syntax error");
 
 	if (command.need_registration && !client.is_registered())
