@@ -174,10 +174,8 @@ bool Server::stop = false;
 
 void Server::_init_motd()
 {
-	if (!_motd.empty()) {
-		_motd_lines.push_back(_motd);
-		return;
-	}
+	if (!_motd.empty())
+		return _motd_lines.push_back(_motd);
 
 	std::ifstream file(_motd_file.c_str());
 	if (file.fail())
