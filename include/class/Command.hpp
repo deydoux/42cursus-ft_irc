@@ -24,6 +24,7 @@ private:
 	static void	_nick(const args_t &args, Client &client);
 	static void	_pass(const args_t &args, Client &client);
 	static void	_user(const args_t &args, Client &client);
+	static void	_ping(const args_t &args, Client &client);
 };
 
 #endif // COMMAND_HPP

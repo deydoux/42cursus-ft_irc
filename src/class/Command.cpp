@@ -6,6 +6,7 @@ void Command::init()
 	_commands["nick"] = (_command_t) {&_nick, 1, false};
 	_commands["pass"] = (_command_t) {&_pass, 1, false};
 	_commands["user"] = (_command_t) {&_user, 4, false};
+	// _commands["ping"] = (_command_t) {&_user, 4, false};
 }
 
 void Command::execute(const args_t &args, Client &client)
@@ -45,4 +46,9 @@ void Command::_user(const args_t &args, Client &client)
 {
 	client.set_username(args[1]);
 	client.set_realname(args[4]);
+}
+
+void Command::_ping(const args_t &args, Client &client)
+{
+
 }
