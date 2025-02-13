@@ -109,4 +109,7 @@ void Command::_join(const args_t &args, Client &client)
 		else if (!channel.check_passkey(passkey))
 			client.reply(ERR_BADCHANNELKEY, channel.get_name(), "Cannot join channel (+k) - bad key");
 
+		// ERR_INVITEONLYCHAN => if the channel is INVITE-ONLY, check if the user has been invited
+		if (channel.is_invite_only() && !client.is_invited_to(channel))
+			client.reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
 }

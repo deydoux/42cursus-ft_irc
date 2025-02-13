@@ -1,12 +1,14 @@
 #include "class/Client.hpp"
 #include "class/Command.hpp"
 #include "class/Server.hpp"
+#include "class/Channel.hpp"
 
 #include <sys/types.h>
 #include <sys/socket.h>
 
 #include <iomanip>
 #include <sstream>
+#include <algorithm>
 
 Client::Client(const int fd, const std::string &ip, Server &server):
 	_fd(fd),
@@ -281,3 +283,17 @@ const int	Client::get_fd( void )
 {
 	return _fd;
 }
+
+const bool Client::is_invited_to(Channel &channel)
+{
+	return std::find(_channel_invitations.begin(), _channel_invitations.end(), channel.get_name()) != _channel_invitations.end();
+}
+
+void Client::invite_to_channel(Client &target, Channel &channel)
+{
+	target._channel_invitations.push_back(channel.get_name());
+
+	// TODO: this function also needs to send a privmsg to target, but this scope is not
+	// necessary as the /invite command is a bonus part
+}
+

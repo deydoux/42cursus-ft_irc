@@ -1,22 +1,30 @@
 #include "class/Channel.hpp"
 #include "class/Client.hpp"
+#include "Channel.hpp"
+
+void Channel::_default_initialization(Client &creator)
+{
+	_members[creator.get_fd()] = &creator;
+	_members_limit = -1;
+	_is_invite_only = false;
+	_passkey = "";
+}
 
 Channel::Channel(Client &creator, const bool verbose = false): 
-	_verbose(verbose),
-	_creator(creator),
-	_members_limit(-1)
+	_verbose(verbose), 
+	_creator(creator)
 {
 	log("Created");
-	_members[creator.get_fd()] = &creator;
+	_default_initialization(creator);
 }
 
 Channel::Channel(Client &creator, std::string &name, const bool verbose):
-	_creator(creator),
 	_verbose(verbose),
-	_members_limit(-1)
+	_creator(creator)
 {
 	log("Created");
-	_members[creator.get_fd()] = &creator;
+	_default_initialization(creator);
+
 	set_name(name);
 }
 
@@ -62,9 +70,14 @@ void	Channel::set_members_limit(int members_limit)
 	_members_limit = members_limit;
 }
 
-bool	Channel::is_full( void )
+void Channel::set_is_invite_only(bool invite_only)
 {
-	return _members_limit <= _members.size();
+	_is_invite_only = invite_only;
+}
+
+bool Channel::is_full(void)
+{
+	return _members_limit == -1 || _members_limit <= _members.size();
 }
 
 void	Channel::set_passkey(std::string &passkey)
@@ -74,7 +87,12 @@ void	Channel::set_passkey(std::string &passkey)
 
 bool	Channel::check_passkey(std::string &passkey)
 {
-	return _passkey == passkey;
+	return _passkey == "" || _passkey == passkey;
+}
+
+bool Channel::is_invite_only(void)
+{
+	return _is_invite_only;
 }
 
 void	Channel::log(const std::string &message, const log_level level) const
