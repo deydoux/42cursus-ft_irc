@@ -15,8 +15,8 @@
 class Channel;
 class Client;
 
-typedef std::map<int, Client *>				clients_t;
-typedef std::map<std::string, Channel *>	channels_t;
+typedef std::map<int, Client *>				clients_t; //	{client fd, client}
+typedef std::map<std::string, Channel *>	channels_t; //	{channel name, channel}
 typedef std::vector<std::string>			args_t;
 
 typedef enum {debug, info, warning, error}	log_level;

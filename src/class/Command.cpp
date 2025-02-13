@@ -95,4 +95,16 @@ void Command::_join(const args_t &args, Client &client)
 			);
 		}
 	}
+
+	for (size_t i = 0; i < channels_to_be_joined.size(); i++)
+	{
+		Channel channel = channels_to_be_joined[i];
+		std::string passkey = args_size == 3 ? passkeys[i] : "";
+
+		// ERR_CHANNELISFULL => must check the max number of users on the channel and if there's some spaces left
+		if (channel.is_full())
+			client.reply(ERR_CHANNELISFULL, channel.get_name(), "Cannot join channel (+l)");
+	}
+
+
 }

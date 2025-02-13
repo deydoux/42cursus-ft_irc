@@ -276,3 +276,8 @@ const Server &Client::get_server( void ) const
 {
 	return _server;
 }
+
+const int	Client::get_fd( void )
+{
+	return _fd;
+}

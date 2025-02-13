@@ -13,15 +13,21 @@ public:
 	void	log(const std::string &message, const log_level level = info) const;
 
 	const std::string	&get_name( void );
+	bool				is_full( void );
 
 	void	set_name(std::string &name, bool check_validity = true);
+	void	set_members_limit(int members_limit);
 	
 	static bool	is_valid_name(const std::string &name);
 
 private:
 	std::string		_name;
-	const bool		_verbose;
+	clients_t		_members;
 	Client			&_creator;
+
+	int				_members_limit;
+
+	const bool		_verbose;
 };
 
 #endif // CHANNEL_HPP

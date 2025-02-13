@@ -22,7 +22,8 @@ public:
 	const bool			&has_disconnect_request() const;
 	const bool			&is_registered() const;
 	const std::string	&get_nickname(bool allow_empty = true) const;
-	const Server		&get_server() const;
+	const Server		&get_server( void ) const;
+	const int			get_fd( void );
 
 	void	set_nickname(const std::string &nickname);
 	void	set_username(const std::string &username);
