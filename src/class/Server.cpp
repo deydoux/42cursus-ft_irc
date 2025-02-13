@@ -67,6 +67,11 @@ bool Server::check_password(const std::string &password) const
 	return password == _password;
 }
 
+const std::vector<std::string> &Server::get_motd_lines() const
+{
+	return _motd_lines;
+}
+
 const bool &Server::is_verbose() const
 {
 	return _verbose;

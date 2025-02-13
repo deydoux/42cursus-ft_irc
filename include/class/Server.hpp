@@ -20,16 +20,19 @@ public:
 	void	start();
 	void	register_client();
 
-	const std::string	&get_name() const;
-	bool				check_password(const std::string &password) const;
-	const bool			&is_verbose() const;
-	const std::string	&get_start_time() const;
-	Client				*get_client(const std::string &nickname) const;
-	size_t				get_connections() const;
-	size_t				get_max_connections() const;
-	size_t				get_clients_count() const;
-	size_t				get_max_clients() const;
-	size_t				get_channels_count() const;
+	const std::string				&get_name() const;
+	bool							check_password(const std::string &password) const;
+	const std::vector<std::string>	&get_motd_lines() const;
+	const bool						&is_verbose() const;
+	const std::string				&get_start_time() const;
+
+	Client							*get_client(const std::string &nickname) const;
+
+	size_t							get_connections() const;
+	size_t							get_max_connections() const;
+	size_t							get_clients_count() const;
+	size_t							get_max_clients() const;
+	size_t							get_channels_count() const;
 
 	static bool	stop;
 
