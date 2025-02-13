@@ -10,7 +10,7 @@ class Server;
 
 class Client
 {
-	public:
+public:
 	Client(const int fd, const std::string &ip, Server &server);
 	~Client();
 
