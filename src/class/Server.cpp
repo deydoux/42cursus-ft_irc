@@ -245,10 +245,13 @@ void Server::_accept()
 	if (fd == -1)
 		return log("Failed to accept connection", error);
 
+	char *ip = inet_ntoa(address.sin_addr);
+	if (!ip)
+		return log("Failed to get client IP", error);
+
 	_max_connections = std::max(_max_connections, ++_connections);
 
 	_pollfds.push_back(_init_pollfd(fd));
-	char *ip = inet_ntoa(address.sin_addr);
 	_clients[fd] = new Client(fd, ip, *this);
 }
 
