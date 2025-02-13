@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include <ctime>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 
@@ -166,7 +167,23 @@ Server Server::parse_args(int argc, char *argv[])
 
 bool Server::stop = false;
 
-void Server::_init_motd() {}
+void Server::_init_motd()
+{
+	if (!_motd.empty()) {
+		_motd_lines.push_back(_motd);
+		return;
+	}
+
+	std::ifstream file(_motd_file.c_str());
+	if (file.fail())
+		return log("Failed to open MOTD file", warning);
+
+	std::string line;
+	while (std::getline(file, line))
+		_motd_lines.push_back(line);
+
+	file.close();
+}
 
 void Server::_set_start_time()
 {
