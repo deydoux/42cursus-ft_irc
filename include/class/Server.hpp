@@ -68,8 +68,8 @@ private:
 
 	void	_disconnect_client(int fd);
 
-	static const port_t			_default_port = 6697;
-	static const bool			_default_verbose = true;
+	static const port_t	_default_port = 6697;
+	static const bool	_default_verbose = true;
 
 	static port_t			_parse_port(const std::string &port_str);
 	static void				_print_usage(int status = 1);
