@@ -50,9 +50,18 @@ void Client::log(const std::string &message, const log_level level) const
 		::log("Client " + to_string(_fd), message, level);
 }
 
+ssize_t Client::send(const std::string &message) const
+{
+	ssize_t bytes_sent = ::send(_fd, message.c_str(), message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
+	if (bytes_sent == -1)
+		throw std::runtime_error("Failed to send message");
+
+	return bytes_sent;
+}
+
 void Client::reply(reply_code code, const std::string &arg, const std::string &message) const
 {
-	_send(_create_reply(code, arg, message));
+	send(_create_reply(code, arg, message));
 }
 
 void Client::send_error(const std::string &message)
@@ -63,7 +72,7 @@ void Client::send_error(const std::string &message)
 	if (!message.empty())
 		oss << " (" << message << ')';
 
-	_send(_create_line(oss.str()));
+	send(_create_line(oss.str()));
 
 	_disconnect_request = true;
 }
@@ -98,6 +107,11 @@ const std::string &Client::get_nickname(bool allow_empty) const
 		return empty_nick;
 
 	return _nickname;
+}
+
+Server &Client::get_server() const
+{
+	return _server;
 }
 
 const bool &Client::has_disconnect_request() const
@@ -186,15 +200,6 @@ void Client::_handle_message(std::string message)
 	Command::execute(args, *this);
 }
 
-ssize_t Client::_send(const std::string &message) const
-{
-	ssize_t bytes_sent = send(_fd, message.c_str(), message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
-	if (bytes_sent == -1)
-		throw std::runtime_error("Failed to send message");
-
-	return bytes_sent;
-}
-
 std::string Client::_create_line(const std::string &content) const
 {
 	std::string line = content;
@@ -258,7 +263,7 @@ void Client::_greet() const
 		+ _create_reply(RPL_STATSDLINE, "", "Highest connection count: " + to_string(_server.get_max_connections()) + " (" + to_string(_server.get_connections()) + " connections received)")
 		+ create_motd_reply();
 
-	_send(reply);
+	send(reply);
 }
 
 const std::string Client::_get_username(bool truncate) const

@@ -1,5 +1,6 @@
 #include "class/Client.hpp"
 #include "class/Command.hpp"
+#include "class/Server.hpp"
 
 void Command::init()
 {
@@ -31,6 +32,14 @@ void Command::execute(const args_t &args, Client &client)
 }
 
 Command::_commands_t Command::_commands;
+
+void Command::_motd(const args_t &args, Client &client)
+{
+	if (args.size() == 2 && args[1] != client.get_server().get_name())
+		return client.reply(ERR_NOSUCHSERVER, args[1], "No such server");
+
+	client.send(client.create_motd_reply());
+}
 
 void Command::_nick(const args_t &args, Client &client)
 {

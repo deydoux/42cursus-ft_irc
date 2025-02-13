@@ -10,12 +10,13 @@ class Server;
 
 class Client
 {
-public:
+	public:
 	Client(const int fd, const std::string &ip, Server &server);
 	~Client();
 
 	void	handle_messages(std::string messages);
 	void	log(const std::string &message, const log_level level = info) const;
+	ssize_t	send(const std::string &message) const;
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	void	send_error(const std::string &message);
 
@@ -24,6 +25,8 @@ public:
 	const bool			&has_disconnect_request() const;
 	const bool			&is_registered() const;
 	const std::string	&get_nickname(bool allow_empty = true) const;
+
+	Server	&get_server() const;
 
 	void	set_nickname(const std::string &nickname);
 	void	set_username(const std::string &username);
@@ -45,7 +48,6 @@ private:
 	std::string	_username;
 
 	void		_handle_message(std::string message);
-	ssize_t		_send(const std::string &message) const;
 
 	std::string _create_line(const std::string &content) const;
 	std::string	_create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
