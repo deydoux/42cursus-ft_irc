@@ -10,10 +10,12 @@
 #include <iostream>
 #include <sstream>
 
-Server::Server(const std::string &name, port_t port, const std::string &password, bool verbose):
+Server::Server(const std::string &name, port_t port, const std::string &password, const std::string &motd, const std::string &motd_file, bool verbose):
 	_name(name),
 	_port(port),
 	_password(password),
+	_motd(motd),
+	_motd_file(motd_file),
 	_verbose(verbose),
 	_address(_init_address(_port)),
 	_connections(0),
@@ -115,6 +117,8 @@ Server Server::parse_args(int argc, char *argv[])
 	Server::port_t port = _default_port;
 	bool verbose = _default_verbose;
 	std::string password;
+	std::string motd;
+	std::string motd_file = "kittirc.motd";
 
 	bool port_set = false;
 	bool password_set = false;
@@ -124,24 +128,19 @@ Server Server::parse_args(int argc, char *argv[])
 
 		if (arg == "-h" || arg == "--help")
 			_print_usage(0);
-		else if (arg == "-n" || arg == "--name") {
-			if (++i >= argc)
-				_print_usage();
-
-			name = argv[i];
-		} else if (arg == "-P" || arg == "--pass" || arg == "--password") {
-			if (++i >= argc)
-				_print_usage();
-
-			password = arg;
+		else if (arg == "-n" || arg == "--name")
+			name = _get_next_arg(i, argc, argv);
+		else if (arg == "-P" || arg == "--pass" || arg == "--password") {
+			password = _get_next_arg(i, argc, argv);
 			password_set = true;
 		} else if (arg == "-p" || arg == "--port") {
-			if (++i >= argc)
-				_print_usage();
-
-			port = _parse_port(argv[i]);
+			port = _parse_port(_get_next_arg(i, argc, argv));
 			port_set = true;
-		} else if (arg == "-v" || arg == "--verbose")
+		} else if (arg == "-m" || arg == "--motd")
+			motd = _get_next_arg(i, argc, argv);
+		else if (arg == "-M" || arg == "--motd-file")
+			motd_file = _get_next_arg(i, argc, argv);
+		else if (arg == "-v" || arg == "--verbose")
 			verbose = true;
 		else if (!port_set) {
 			port = _parse_port(arg);
@@ -154,7 +153,7 @@ Server Server::parse_args(int argc, char *argv[])
 			_print_usage();
 	}
 
-	Server server = Server(name, port, password, verbose);
+	Server server = Server(name, port, password, motd, motd_file, verbose);
 
 	if (!port_set)
 		server.log("Using default port: " + to_string(port), warning);
@@ -166,6 +165,8 @@ Server Server::parse_args(int argc, char *argv[])
 }
 
 bool Server::stop = false;
+
+void Server::_init_motd() {}
 
 void Server::_set_start_time()
 {
@@ -215,6 +216,7 @@ void Server::_listen()
 
 void Server::_init()
 {
+	_init_motd();
 	_set_start_time();
 	_set_signal_handler();
 	_init_socket();
@@ -306,6 +308,14 @@ void Server::_disconnect_client(int fd)
 	}
 }
 
+std::string Server::_get_next_arg(int &i, int argc, char *argv[])
+{
+	if (++i >= argc)
+		_print_usage();
+
+	return argv[i];
+}
+
 Server::port_t Server::_parse_port(const std::string &port_str)
 {
 	std::istringstream iss(port_str);
@@ -325,6 +335,8 @@ void Server::_print_usage(int status)
 			  << "  -n, --name <name>                  Name of the server (default: kittirc)" << std::endl
 			  << "  -P, --pass, --password <password>  Password required to connect (default: None)" << std::endl
 			  << "  -p, --port <port>                  Port to listen on (default: 6697)" << std::endl
+			  << "  -m, --motd <message>               Message of the Day" << std::endl
+			  << "  -M, --motd-file <file>             MOTD file (default: kittirc.motd)" << std::endl
 			  << "  -v, --verbose                      Enable verbose output" << std::endl;
 
 	throw status;
