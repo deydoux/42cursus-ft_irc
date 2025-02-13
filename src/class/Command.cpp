@@ -1,8 +1,10 @@
 #include "class/Client.hpp"
 #include "class/Command.hpp"
+#include "class/Channel.hpp"
 
 void Command::init()
 {
+	_commands["join"] = (_command_t) {&_join, 1, 2, true};
 	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
 	_commands["pass"] = (_command_t) {&_pass, 1, 1, false};
 	_commands["user"] = (_command_t) {&_user, 4, 4, false};
@@ -46,4 +48,8 @@ void Command::_user(const args_t &args, Client &client)
 {
 	client.set_username(args[1]);
 	client.set_realname(args[4]);
+}
+
+void Command::_join(const args_t &args, Client &)
+{ 
 }

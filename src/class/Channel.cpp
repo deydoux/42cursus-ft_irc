@@ -1,15 +1,50 @@
 #include "class/Channel.hpp"
+#include "class/Client.hpp"
 
-Channel::Channel(const std::string &name, const bool verbose):
-	_name(name),
+Channel::Channel(Client &creator, const bool verbose = false): 
+	_verbose(verbose),
+	_creator(creator)
+{
+}
+
+Channel::Channel(Client &creator, const std::string &name, const bool verbose):
+	_creator(creator),
 	_verbose(verbose)
 {
 	log("Created");
+	set_name(name);
 }
 
 Channel::~Channel()
 {
 	log("Destroyed");
+}
+
+void Channel::set_name(const std::string &name)
+{
+	if (!_is_valid_name(name))
+		return _creator.reply(ERR_NOSUCHCHANNEL, name, "No such channel");
+
+	_name = name;
+}
+
+bool Channel::_is_valid_name(const std::string &name)
+{
+	// - Must start with # or &
+	if (!(name[0] == '&' || name[0] == '#'))
+		return false;
+
+	// - Max length check (50 chars)
+	if (name.size() > 50)
+		return false;
+	
+	// - No spaces, control chars, commas
+	for (size_t i = 0; i < name.size(); i++) {
+		if (iscntrl(name[i]) || name[i] == ' ')
+			return false;
+	}
+	
+	return true;
 }
 
 void Channel::log(const std::string &message, const log_level level) const
