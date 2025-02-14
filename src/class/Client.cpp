@@ -50,9 +50,18 @@ void Client::log(const std::string &message, const log_level level) const
 		::log("Client " + to_string(_fd), message, level);
 }
 
+ssize_t Client::send(const std::string &message) const
+{
+	ssize_t bytes_sent = ::send(_fd, message.c_str(), message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
+	if (bytes_sent == -1)
+		throw std::runtime_error("Failed to send message");
+
+	return bytes_sent;
+}
+
 void Client::reply(reply_code code, const std::string &arg, const std::string &message) const
 {
-	_send(_create_reply(code, arg, message));
+	send(_create_reply(code, arg, message));
 }
 
 void Client::send_error(const std::string &message)
@@ -63,9 +72,26 @@ void Client::send_error(const std::string &message)
 	if (!message.empty())
 		oss << " (" << message << ')';
 
-	_send(_create_line(oss.str()));
+	send(_create_line(oss.str()));
 
 	_disconnect_request = true;
+}
+
+const std::string Client::create_motd_reply() const
+{
+	std::vector<std::string> motd_lines = _server.get_motd_lines();
+
+	if (motd_lines.empty())
+		return _create_reply(ERR_NOMOTD, "", "MOTD File is missing");
+
+	std::string reply = _create_reply(RPL_MOTDSTART, "", "- " + _server.get_name() + " message of the day");
+
+	for (std::vector<std::string>::iterator it = motd_lines.begin(); it != motd_lines.end(); ++it)
+		reply += _create_reply(RPL_MOTD, "", "- " + *it);
+
+	reply += _create_reply(RPL_ENDOFMOTD, "", "End of MOTD command");
+
+	return reply;
 }
 
 const bool &Client::is_registered() const
@@ -81,6 +107,11 @@ const std::string &Client::get_nickname(bool allow_empty) const
 		return empty_nick;
 
 	return _nickname;
+}
+
+Server &Client::get_server() const
+{
+	return _server;
 }
 
 const bool &Client::has_disconnect_request() const
@@ -169,15 +200,6 @@ void Client::_handle_message(std::string message)
 	Command::execute(args, *this);
 }
 
-ssize_t Client::_send(const std::string &message) const
-{
-	ssize_t bytes_sent = send(_fd, message.c_str(), message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
-	if (bytes_sent == -1)
-		throw std::runtime_error("Failed to send message");
-
-	return bytes_sent;
-}
-
 std::string Client::_create_line(const std::string &content) const
 {
 	std::string line = content;
@@ -238,9 +260,10 @@ void Client::_greet() const
 		+ _create_reply(RPL_LUSERME, "", "I have " + to_string(_server.get_clients_count()) + " users, 0 services and 0 servers")
 		+ _create_reply(RPL_LOCALUSERS, to_string(_server.get_clients_count()) + ' ' + to_string(_server.get_max_clients()), "Current local users: " + to_string(_server.get_clients_count()) + ", Max: " + to_string(_server.get_max_clients()))
 		+ _create_reply(RPL_LOCALUSERS, to_string(_server.get_clients_count()) + ' ' + to_string(_server.get_max_clients()), "Current global users: " + to_string(_server.get_clients_count()) + ", Max: " + to_string(_server.get_max_clients()))
-		+ _create_reply(RPL_STATSDLINE, "", "Highest connection count: " + to_string(_server.get_max_connections()) + " (" + to_string(_server.get_connections()) + " connections received)");
+		+ _create_reply(RPL_STATSDLINE, "", "Highest connection count: " + to_string(_server.get_max_connections()) + " (" + to_string(_server.get_connections()) + " connections received)")
+		+ create_motd_reply();
 
-	_send(reply);
+	send(reply);
 }
 
 const std::string Client::_get_username(bool truncate) const
