@@ -95,6 +95,17 @@ bool Channel::is_invite_only(void)
 	return _is_invite_only;
 }
 
+bool Channel::is_client_banned(Client &client)
+{
+	std::string	client_mask = client.get_mask();
+
+	for (size_t i = 0; i < _banned_user_masks.size(); i++) {
+		if (match_mask(_banned_user_masks[i], client_mask))
+			return true;
+	}
+	return false;
+}
+
 void	Channel::log(const std::string &message, const log_level level) const
 {
 	if (_verbose || level != debug)

@@ -16,6 +16,7 @@ public:
 	bool				is_full( void );
 	bool				check_passkey(std::string &passkey);
 	bool				is_invite_only( void );
+	bool				is_client_banned(Client &client);
 
 	void	set_name(std::string &name, bool check_validity = true);
 	void	set_passkey(std::string &passkey);
@@ -32,6 +33,7 @@ private:
 	std::string		_passkey;
 	int				_members_limit;
 	bool			_is_invite_only;
+	std::vector<std::string> _banned_user_masks; // eg: nick!*@* , *!*@192.168.1.* ...
 
 	const bool		_verbose;
 

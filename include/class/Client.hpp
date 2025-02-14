@@ -26,6 +26,7 @@ public:
 	const Server		&get_server( void ) const;
 	const int			get_fd( void );
 	const bool			is_invited_to(Channel &channel);
+	const std::string	get_mask( void );
 
 	void	set_nickname(const std::string &nickname);
 	void	set_username(const std::string &username);

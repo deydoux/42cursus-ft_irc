@@ -112,4 +112,9 @@ void Command::_join(const args_t &args, Client &client)
 		// ERR_INVITEONLYCHAN => if the channel is INVITE-ONLY, check if the user has been invited
 		if (channel.is_invite_only() && !client.is_invited_to(channel))
 			client.reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
+
+		// ERR_BANNEDFROMCHAN => check if the user has not been banned from this channel
+		if (channel.is_client_banned(client))
+			client.reply(ERR_BANNEDFROMCHAN, channel.get_name(), "Cannot join channel (+b)");
+
 }

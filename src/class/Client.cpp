@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
+#include "Client.hpp"
 
 Client::Client(const int fd, const std::string &ip, Server &server):
 	_fd(fd),
@@ -287,6 +288,11 @@ const int	Client::get_fd( void )
 const bool Client::is_invited_to(Channel &channel)
 {
 	return std::find(_channel_invitations.begin(), _channel_invitations.end(), channel.get_name()) != _channel_invitations.end();
+}
+
+const std::string Client::get_mask(void)
+{
+	return _nickname + "!" + _username + "@" + _ip;
 }
 
 void Client::invite_to_channel(Client &target, Channel &channel)
