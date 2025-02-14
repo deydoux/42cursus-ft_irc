@@ -111,11 +111,6 @@ const std::string &Client::get_nickname(bool allow_empty) const
 	return _nickname;
 }
 
-Server &Client::get_server() const
-{
-	return _server;
-}
-
 const bool &Client::has_disconnect_request() const
 {
 	return _disconnect_request;
