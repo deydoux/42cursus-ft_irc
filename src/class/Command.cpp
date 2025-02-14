@@ -23,7 +23,7 @@ void Command::execute(const args_t &args, Client &client)
 
 	_command_t command = command_it->second;
 
-	size_t args_size(args.size() - 1);
+	size_t args_size = args.size() - 1;
 	if (args_size > command.max_args || args_size < command.min_args)
 		return client.reply(ERR_NEEDMOREPARAMS, args[0], "Syntax error");
 
