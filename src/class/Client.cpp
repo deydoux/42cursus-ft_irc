@@ -9,7 +9,6 @@
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
-#include "Client.hpp"
 
 Client::Client(const int fd, const std::string &ip, Server &server):
 	_fd(fd),
@@ -280,27 +279,28 @@ bool Client::_is_valid_username(const std::string &username)
 	return true;
 }
 
-const Server &Client::get_server( void ) const
+Server &Client::get_server( void ) const
 {
 	return _server;
 }
 
-const int	Client::get_fd( void )
+const int &Client::get_fd( void )
 {
 	return _fd;
 }
 
-const bool Client::is_invited_to(Channel &channel)
+bool	Client::is_invited_to(Channel &channel)
 {
-	return std::find(_channel_invitations.begin(), _channel_invitations.end(), channel.get_name()) != _channel_invitations.end();
+	bool is_invited = std::find(_channel_invitations.begin(), _channel_invitations.end(), channel.get_name()) != _channel_invitations.end();
+	return (is_invited);
 }
 
-const std::string Client::get_mask(void) const
+std::string	Client::get_mask(void) const
 {
-	return _nickname + "!" + _username + "@" + _ip;
+	return std::string(_nickname + "!" + _username + "@" + _ip);
 }
 
-const int Client::get_channels_count(void) const
+int Client::get_channels_count(void) const
 {
 	return _active_channels.size();
 }
@@ -330,7 +330,7 @@ void Client::join_channel(Channel &channel, std::string passkey)
 	else if (channel.is_client_banned(*this))
 		this->reply(ERR_BANNEDFROMCHAN, channel.get_name(), "Cannot join channel (+b)");
 
-	else if (this->get_channels_count() >= Channel::_max_channels_per_user)
+	else if (this->get_channels_count() >= (int) Channel::_max_channels_per_user)
 		this->reply(ERR_TOOMANYCHANNELS, channel.get_name(), "You have joined too many channels");
 
 	channel.add_client(*this);

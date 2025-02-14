@@ -24,11 +24,11 @@ public:
 	const bool			&has_disconnect_request() const;
 	const bool			&is_registered() const;
 	const std::string	&get_nickname(bool allow_empty = true) const;
-	const Server		&get_server( void ) const;
-	const int			get_fd( void );
-	const bool			is_invited_to(Channel &channel);
-	const std::string	get_mask( void ) const;
-	const int			get_channels_count( void ) const;
+	Server				&get_server( void ) const;
+	const int			&get_fd( void );
+	bool				is_invited_to(Channel &channel);
+	std::string			get_mask( void ) const;
+	int					get_channels_count( void ) const;
 
 	void	set_nickname(const std::string &nickname);
 	void	set_username(const std::string &username);

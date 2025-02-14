@@ -60,13 +60,13 @@ void Command::_join(const args_t &args, Client &client)
 		// TODO close_all_chanels() -> would be easier to implement when the /PART command will be
 		return ;
 
-	std::vector<Channel> channels_to_be_joined;
+	std::vector<Channel *> channels_to_be_joined;
 	std::vector<std::string> passkeys;
-	Server server = client.get_server();
+	Server &server = client.get_server();
 	
 	std::vector<std::string> channels_name = ft_split(args[1], ',');
 	std::vector<std::string> input_passkeys = args_size == 3 ? 
-		ft_split(args[2], ',') : std::vector<std::string>({});
+		ft_split(args[2], ',') : std::vector<std::string>();
 
 	for (size_t i = 0; i < channels_name.size(); i++)
 	{
@@ -78,10 +78,10 @@ void Command::_join(const args_t &args, Client &client)
 				channels_to_be_joined.push_back(server.find_channel(channel_name));
 			} catch (std::invalid_argument &) {
 				// the channel does not exists and needs to be created
-				Channel new_channel = Channel(client, channel_name);
+				Channel * new_channel = new Channel(client, channel_name);
 
 				channels_to_be_joined.push_back(new_channel);
-				server.add_channel(new_channel);
+				server.add_channel(*new_channel);
 			}
 
 			if (args_size == 3)
@@ -99,7 +99,7 @@ void Command::_join(const args_t &args, Client &client)
 	for (size_t i = 0; i < channels_to_be_joined.size(); i++)
 	{
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
-		client.join_channel(channels_to_be_joined[i], passkey);
+		client.join_channel(*channels_to_be_joined[i], passkey);
 		// TODO: Need to send a broadcast JOIN message to every channel members
 	}
 }

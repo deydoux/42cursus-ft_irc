@@ -1,6 +1,5 @@
 #include "class/Channel.hpp"
 #include "class/Client.hpp"
-#include "Channel.hpp"
 
 void Channel::_default_initialization(Client &creator)
 {
@@ -10,17 +9,17 @@ void Channel::_default_initialization(Client &creator)
 	_passkey = "";
 }
 
-Channel::Channel(Client &creator, const bool verbose = false): 
-	_verbose(verbose), 
-	_creator(creator)
+Channel::Channel(Client &creator, const bool verbose): 
+	_creator(creator),
+	_verbose(verbose) 
 {
 	log("Created");
 	_default_initialization(creator);
 }
 
 Channel::Channel(Client &creator, std::string &name, const bool verbose):
-	_verbose(verbose),
-	_creator(creator)
+	_creator(creator),
+	_verbose(verbose)
 {
 	log("Created");
 	_default_initialization(creator);
@@ -33,7 +32,7 @@ Channel::~Channel()
 	log("Destroyed");
 }
 
-void Channel::set_name(std::string &name, bool check_validity = true)
+void Channel::set_name(std::string &name, bool check_validity)
 {
 	if (check_validity && !is_valid_name(name))
 		return ;
@@ -82,7 +81,7 @@ void Channel::add_client(Client &client)
 
 bool Channel::is_full(void)
 {
-	return _members_limit == -1 || _members_limit <= _members.size();
+	return _members_limit == -1 || _members_limit <= (int) _members.size();
 }
 
 void	Channel::set_passkey(std::string &passkey)
