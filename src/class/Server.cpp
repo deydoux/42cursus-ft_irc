@@ -154,8 +154,7 @@ Server Server::parse_args(int argc, char *argv[])
 		} else if (!password_set) {
 			password = arg;
 			password_set = true;
-		}
-		else
+		} else
 			_print_usage();
 	}
 
