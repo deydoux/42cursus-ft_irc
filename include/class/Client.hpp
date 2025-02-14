@@ -19,6 +19,7 @@ public:
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	void	send_error(const std::string &message);
 	void	invite_to_channel(Client &target, Channel &channel);
+	void	join_channel(Channel &channel, std::string passkey);
 
 	const bool			&has_disconnect_request() const;
 	const bool			&is_registered() const;
@@ -26,12 +27,15 @@ public:
 	const Server		&get_server( void ) const;
 	const int			get_fd( void );
 	const bool			is_invited_to(Channel &channel);
-	const std::string	get_mask( void );
+	const std::string	get_mask( void ) const;
+	const int			get_channels_count( void ) const;
 
 	void	set_nickname(const std::string &nickname);
 	void	set_username(const std::string &username);
 	void	set_realname(const std::string &realname);
 	void	set_password(const std::string &password);
+
+	bool	operator==(const Client &other) const;
 
 private:
 	const int			_fd;
@@ -47,7 +51,8 @@ private:
 	std::string	_realname;
 	std::string	_username;
 
-	std::vector<std::string> _channel_invitations;
+	channels_t					_active_channels;
+	std::vector<std::string>	_channel_invitations;
 
 	void		_handle_message(std::string message);
 	ssize_t		_send(const std::string &message) const;

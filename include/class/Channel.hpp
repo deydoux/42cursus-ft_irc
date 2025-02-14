@@ -17,11 +17,17 @@ public:
 	bool				check_passkey(std::string &passkey);
 	bool				is_invite_only( void );
 	bool				is_client_banned(Client &client);
+	bool				is_client_member(Client &client);
 
 	void	set_name(std::string &name, bool check_validity = true);
 	void	set_passkey(std::string &passkey);
 	void	set_members_limit(int members_limit);
 	void	set_is_invite_only(bool invite_only);
+
+	void	add_client(Client &client);
+
+	static const size_t _max_channels_per_user = 50;
+	static const size_t _max_channel_name_size = 50;
 
 	static bool	is_valid_name(const std::string &name);
 

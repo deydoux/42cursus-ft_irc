@@ -52,12 +52,12 @@ void Command::_user(const args_t &args, Client &client)
 }
 
 void Command::_join(const args_t &args, Client &client)
-{ 
+{
 	size_t args_size = args.size();
 
-	// if the only argument to /join is 0
+	// if the only argument to /join 0
 	if (args_size == 2 && args[1] == "0")
-		// TODO close_all_chanels()
+		// TODO close_all_chanels() -> would be easier to implement when the /PART command will be
 		return ;
 
 	std::vector<Channel> channels_to_be_joined;
@@ -86,7 +86,7 @@ void Command::_join(const args_t &args, Client &client)
 
 			if (args_size == 3)
 				passkeys.push_back(input_passkeys.size() > i ? input_passkeys[i] : "");
-
+		
 		} else {
 			client.reply(
 				ERR_NOSUCHCHANNEL, 
@@ -98,23 +98,8 @@ void Command::_join(const args_t &args, Client &client)
 
 	for (size_t i = 0; i < channels_to_be_joined.size(); i++)
 	{
-		Channel channel = channels_to_be_joined[i];
-		std::string passkey = args_size == 3 ? passkeys[i] : "";
-
-		// ERR_CHANNELISFULL => must check the max number of users on the channel and if there's some spaces left
-		if (channel.is_full())
-			client.reply(ERR_CHANNELISFULL, channel.get_name(), "Cannot join channel (+l)");
-
-		// ERR_BADCHANNELKEY => must check if the channel requires a passkey and if so, if the one given is correct
-		else if (!channel.check_passkey(passkey))
-			client.reply(ERR_BADCHANNELKEY, channel.get_name(), "Cannot join channel (+k) - bad key");
-
-		// ERR_INVITEONLYCHAN => if the channel is INVITE-ONLY, check if the user has been invited
-		if (channel.is_invite_only() && !client.is_invited_to(channel))
-			client.reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
-
-		// ERR_BANNEDFROMCHAN => check if the user has not been banned from this channel
-		if (channel.is_client_banned(client))
-			client.reply(ERR_BANNEDFROMCHAN, channel.get_name(), "Cannot join channel (+b)");
-
+		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
+		client.join_channel(channels_to_be_joined[i], passkey);
+		// TODO: Need to send a broadcast JOIN message to every channel members
+	}
 }

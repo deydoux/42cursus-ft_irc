@@ -48,12 +48,12 @@ const std::string	&Channel::get_name( void )
 
 bool Channel::is_valid_name(const std::string &name)
 {
-	// - Must start with # or &
-	if (!(name[0] == '&' || name[0] == '#'))
+	// - Max length check (50 chars)
+	if (name.empty() || name.size() > _max_channel_name_size)
 		return false;
 
-	// - Max length check (50 chars)
-	if (name.size() > 50)
+	// - Must start with # or &
+	if (!(name[0] == '&' || name[0] == '#'))
 		return false;
 	
 	// - No spaces, control chars, commas
@@ -73,6 +73,11 @@ void	Channel::set_members_limit(int members_limit)
 void Channel::set_is_invite_only(bool invite_only)
 {
 	_is_invite_only = invite_only;
+}
+
+void Channel::add_client(Client &client)
+{
+	_members[client.get_fd()] = &client;
 }
 
 bool Channel::is_full(void)
@@ -101,6 +106,15 @@ bool Channel::is_client_banned(Client &client)
 
 	for (size_t i = 0; i < _banned_user_masks.size(); i++) {
 		if (match_mask(_banned_user_masks[i], client_mask))
+			return true;
+	}
+	return false;
+}
+
+bool Channel::is_client_member(Client &client)
+{
+	for (clients_t::iterator it = _members.begin(); it != _members.end(); ++it) {
+		if (*it->second == client)
 			return true;
 	}
 	return false;
