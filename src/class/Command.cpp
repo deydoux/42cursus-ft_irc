@@ -72,9 +72,9 @@ void Command::_join(const args_t &args, Client &client)
 	std::vector<Channel *> channels_to_be_joined;
 	std::vector<std::string> passkeys;
 	Server &server = client.get_server();
-	
+
 	std::vector<std::string> channels_name = ft_split(args[1], ',');
-	std::vector<std::string> input_passkeys = args_size == 3 ? 
+	std::vector<std::string> input_passkeys = args_size == 3 ?
 		ft_split(args[2], ',') : std::vector<std::string>();
 
 	for (size_t i = 0; i < channels_name.size(); i++)
@@ -86,7 +86,7 @@ void Command::_join(const args_t &args, Client &client)
 			Channel *new_channel = server.find_channel(channel_name);
 			if (!new_channel) {
 				// the channel does not exists and needs to be created
-				new_channel = new Channel(client, channel_name);
+				new_channel = new Channel(client, channel_name, client.get_server().is_verbose());
 				server.add_channel(*new_channel);
 			}
 
@@ -94,11 +94,11 @@ void Command::_join(const args_t &args, Client &client)
 
 			if (args_size == 3)
 				passkeys.push_back(input_passkeys.size() > i ? input_passkeys[i] : "");
-		
+
 		} else {
 			client.reply(
-				ERR_NOSUCHCHANNEL, 
-				channels_name[i], 
+				ERR_NOSUCHCHANNEL,
+				channels_name[i],
 				"No such channel"
 			);
 		}
