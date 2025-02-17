@@ -30,7 +30,7 @@ public:
 	const int			&get_fd( void );
 	bool				is_invited_to(Channel &channel);
 	std::string			get_mask( void ) const;
-	int					get_channels_count( void ) const;
+	size_t				get_channels_count( void ) const;
 
 	Server	&get_server() const;
 
@@ -68,6 +68,7 @@ private:
 
 	const std::string	_get_username(bool truncate = true) const;
 
+	static const size_t _max_channels = 50;
 	static const size_t	_max_message_size = 512;
 	static const size_t	_max_nickname_size = 9;
 

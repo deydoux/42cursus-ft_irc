@@ -256,7 +256,7 @@ void Client::_greet() const
 		+ _create_reply(RPL_CREATED, "", "This server has been started " + _server.get_start_time())
 		+ _create_reply(RPL_MYINFO, _server.get_name() + " " VERSION " o iklt")
 		+ _create_reply(RPL_ISUPPORT, "RFC2812 IRCD=ft_irc CHARSET=UTF-8 CASEMAPPING=ascii PREFIX=(o)@ CHANTYPES=#& CHANMODES=,k,l,it", "are supported on this server")
-		+ _create_reply(RPL_ISUPPORT, "CHANLIMIT=#&:" + to_string(Channel::_max_channels_per_user) + " CHANNELLEN=" + to_string(Channel::_max_channel_name_size) + " NICKLEN=" + to_string(_max_nickname_size) + " TOPICLEN=490 AWAYLEN=127 KICKLEN=400 MODES=5", "are supported on this server")
+		+ _create_reply(RPL_ISUPPORT, "CHANLIMIT=#&:" + to_string(Client::_max_channels) + " CHANNELLEN=" + to_string(Channel::max_channel_name_size) + " NICKLEN=" + to_string(_max_nickname_size) + " TOPICLEN=490 AWAYLEN=127 KICKLEN=400 MODES=5", "are supported on this server")
 		+ _create_reply(RPL_LUSERCLIENT, "", "There are " + to_string(_server.get_clients_count()) + " users and 0 services on 1 servers")
 		+ _create_reply(RPL_LUSERCHANNELS, to_string(_server.get_channels_count()), "channels formed")
 		+ _create_reply(RPL_LUSERME, "", "I have " + to_string(_server.get_clients_count()) + " users, 0 services and 0 servers")
@@ -322,7 +322,7 @@ std::string	Client::get_mask(void) const
 	return std::string(_nickname + "!" + _username + "@" + _ip);
 }
 
-int Client::get_channels_count(void) const
+size_t Client::get_channels_count(void) const
 {
 	return _active_channels.size();
 }
@@ -352,7 +352,7 @@ void Client::join_channel(Channel &channel, std::string passkey)
 	else if (channel.is_client_banned(*this))
 		this->reply(ERR_BANNEDFROMCHAN, channel.get_name(), "Cannot join channel (+b)");
 
-	else if (this->get_channels_count() >= (int) Channel::_max_channels_per_user)
+	else if (this->get_channels_count() >= Client::_max_channels)
 		this->reply(ERR_TOOMANYCHANNELS, channel.get_name(), "You have joined too many channels");
 
 	channel.add_client(*this);

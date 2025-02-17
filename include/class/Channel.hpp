@@ -6,7 +6,6 @@
 class Channel
 {
 public:
-	Channel(Client &creator, const bool verbose = false);
 	Channel(Client &creator, std::string &name, const bool verbose = false);
 	~Channel();
 
@@ -21,29 +20,29 @@ public:
 
 	void	set_name(std::string &name, bool check_validity = true);
 	void	set_passkey(std::string &passkey);
-	void	set_members_limit(int members_limit);
+	void	set_max_members(size_t max_members);
+	void	unset_members_limit( void );
 	void	set_is_invite_only(bool invite_only);
 
 	void	add_client(Client &client);
 
-	static const size_t _max_channels_per_user = 50;
-	static const size_t _max_channel_name_size = 50;
+	static const size_t max_channel_name_size = 50;
 
 	static bool	is_valid_name(const std::string &name);
 
 private:
-	std::string		_name;
-	clients_t		_members;
-	Client			&_creator;
+	const std::string	_name;
+	clients_t			_members;
+	Client				&_creator;
 
 	std::string		_passkey;
-	int				_members_limit;
+	
+	bool			_limit_members;
+	size_t			_max_members;
 	bool			_is_invite_only;
 	std::vector<std::string> _banned_user_masks; // eg: nick!*@* , *!*@192.168.1.* ...
 
 	const bool		_verbose;
-
-	void	_default_initialization(Client &creator);
 };
 
 #endif // CHANNEL_HPP

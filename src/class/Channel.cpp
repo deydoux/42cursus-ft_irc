@@ -1,43 +1,21 @@
 #include "class/Channel.hpp"
 #include "class/Client.hpp"
 
-void Channel::_default_initialization(Client &creator)
-{
-	_members[creator.get_fd()] = &creator;
-	_members_limit = -1;
-	_is_invite_only = false;
-	_passkey = "";
-}
-
-Channel::Channel(Client &creator, const bool verbose): 
-	_creator(creator),
-	_verbose(verbose) 
-{
-	log("Created");
-	_default_initialization(creator);
-}
-
 Channel::Channel(Client &creator, std::string &name, const bool verbose):
+	_name(name),
 	_creator(creator),
+	_passkey(),
+	_limit_members(false),
+	_is_invite_only(false),
 	_verbose(verbose)
 {
 	log("Created");
-	_default_initialization(creator);
-
-	set_name(name);
+	_members[creator.get_fd()] = &creator;
 }
 
 Channel::~Channel()
 {
 	log("Destroyed");
-}
-
-void Channel::set_name(std::string &name, bool check_validity)
-{
-	if (check_validity && !is_valid_name(name))
-		return ;
-
-	_name = name;
 }
 
 const std::string	&Channel::get_name( void )
@@ -48,7 +26,7 @@ const std::string	&Channel::get_name( void )
 bool Channel::is_valid_name(const std::string &name)
 {
 	// - Max length check (50 chars)
-	if (name.empty() || name.size() > _max_channel_name_size)
+	if (name.empty() || name.size() > max_channel_name_size)
 		return false;
 
 	// - Must start with # or &
@@ -64,9 +42,15 @@ bool Channel::is_valid_name(const std::string &name)
 	return true;
 }
 
-void	Channel::set_members_limit(int members_limit)
+void	Channel::set_max_members(size_t max_members)
 {
-	_members_limit = members_limit;
+	_limit_members = true;
+	_max_members = max_members;
+}
+
+void Channel::unset_members_limit(void)
+{
+	_limit_members = false;
 }
 
 void Channel::set_is_invite_only(bool invite_only)
@@ -81,7 +65,7 @@ void Channel::add_client(Client &client)
 
 bool Channel::is_full(void)
 {
-	return _members_limit == -1 || _members_limit <= (int) _members.size();
+	return _limit_members && _max_members <= _members.size();
 }
 
 void	Channel::set_passkey(std::string &passkey)
