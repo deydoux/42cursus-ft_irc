@@ -31,6 +31,7 @@ public:
 	bool				is_invited_to(Channel &channel);
 	std::string			get_mask( void ) const;
 	size_t				get_channels_count( void ) const;
+	Channel				*get_channel(const std::string &name);
 
 	Server	&get_server() const;
 

@@ -327,6 +327,16 @@ size_t Client::get_channels_count(void) const
 	return _active_channels.size();
 }
 
+Channel *Client::get_channel(const std::string &name)
+{
+	channels_t::iterator it = _active_channels.find(name);
+	if (it == _active_channels.end())
+		return NULL;
+
+	return it->second;
+}
+
+
 void Client::invite_to_channel(Client &target, Channel &channel)
 {
 	target._channel_invitations.push_back(channel.get_name());

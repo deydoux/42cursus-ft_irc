@@ -5,6 +5,7 @@
 
 void Command::init()
 {
+	_commands["invite"] = (_command_t) {&_invite, 2, 2, true};
 	_commands["join"] = (_command_t) {&_join, 1, 2, true};
 	_commands["motd"] = (_command_t) {&_motd, 0, 1, true};
 	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
@@ -35,6 +36,17 @@ void Command::execute(const args_t &args, Client &client)
 }
 
 Command::_commands_t Command::_commands;
+
+void Command::_invite(const args_t &args, Client &client)
+{
+	Channel *channel = client.get_channel(args[1]);
+	Client *target = client.get_server().get_client(args[2]);
+
+	if (!channel || !target)
+		return client.reply(ERR_NOSUCHNICK, args[1], "No such nick or channel name");
+
+	client.invite_to_channel(*target, *channel);
+}
 
 void Command::_motd(const args_t &args, Client &client)
 {
@@ -72,9 +84,9 @@ void Command::_join(const args_t &args, Client &client)
 	std::vector<Channel *> channels_to_be_joined;
 	std::vector<std::string> passkeys;
 	Server &server = client.get_server();
-	
+
 	std::vector<std::string> channels_name = ft_split(args[1], ',');
-	std::vector<std::string> input_passkeys = args_size == 3 ? 
+	std::vector<std::string> input_passkeys = args_size == 3 ?
 		ft_split(args[2], ',') : std::vector<std::string>();
 
 	for (size_t i = 0; i < channels_name.size(); i++)
@@ -94,11 +106,11 @@ void Command::_join(const args_t &args, Client &client)
 
 			if (args_size == 3)
 				passkeys.push_back(input_passkeys.size() > i ? input_passkeys[i] : "");
-		
+
 		} else {
 			client.reply(
-				ERR_NOSUCHCHANNEL, 
-				channels_name[i], 
+				ERR_NOSUCHCHANNEL,
+				channels_name[i],
 				"No such channel"
 			);
 		}
