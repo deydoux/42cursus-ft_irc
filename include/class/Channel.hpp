@@ -36,13 +36,13 @@ private:
 	Client				&_creator;
 
 	std::string		_passkey;
-	
+
 	bool			_limit_members;
 	size_t			_max_members;
 	bool			_is_invite_only;
 	std::vector<std::string> _banned_user_masks; // eg: nick!*@* , *!*@192.168.1.* ...
 
-	const bool		_verbose;
+	const bool	_verbose;
 };
 
 #endif // CHANNEL_HPP

@@ -98,7 +98,7 @@ void Command::_join(const args_t &args, Client &client)
 			Channel *new_channel = server.find_channel(channel_name);
 			if (!new_channel) {
 				// the channel does not exists and needs to be created
-				new_channel = new Channel(client, channel_name);
+				new_channel = new Channel(client, channel_name, client.get_server().is_verbose());
 				server.add_channel(*new_channel);
 			}
 
