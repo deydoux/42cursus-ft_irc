@@ -82,16 +82,15 @@ void Command::_join(const args_t &args, Client &client)
 		std::string channel_name = channels_name[i];
 		if (Channel::is_valid_name(channel_name)) {
 
-			try {
-				// fetch existing channel
-				channels_to_be_joined.push_back(server.find_channel(channel_name));
-			} catch (std::invalid_argument &) {
+			// fetch existing channel
+			Channel *new_channel = server.find_channel(channel_name);
+			if (!new_channel) {
 				// the channel does not exists and needs to be created
-				Channel * new_channel = new Channel(client, channel_name);
-
-				channels_to_be_joined.push_back(new_channel);
+				new_channel = new Channel(client, channel_name);
 				server.add_channel(*new_channel);
 			}
+
+			channels_to_be_joined.push_back(new_channel);
 
 			if (args_size == 3)
 				passkeys.push_back(input_passkeys.size() > i ? input_passkeys[i] : "");

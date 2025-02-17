@@ -9,13 +9,13 @@ Channel::Channel(Client &creator, std::string &name, const bool verbose):
 	_is_invite_only(false),
 	_verbose(verbose)
 {
-	log("Created");
+	log("Created", debug);
 	_members[creator.get_fd()] = &creator;
 }
 
 Channel::~Channel()
 {
-	log("Destroyed");
+	log("Destroyed", debug);
 }
 
 const std::string	&Channel::get_name( void )

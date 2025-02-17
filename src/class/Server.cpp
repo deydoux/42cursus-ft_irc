@@ -391,7 +391,7 @@ Channel	*Server::find_channel(const std::string &channel_name)
 {
 	channels_t::iterator channel = _channels.find(channel_name);
 	if (channel == _channels.end())
-		throw std::invalid_argument("the channel " + channel_name + " does not exist in the server");
+		return NULL;
 	return channel->second;
 }
 
