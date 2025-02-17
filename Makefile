@@ -8,6 +8,8 @@ SRC = \
 	class/Server.cpp \
 	lib/log.cpp \
 	lib/to_lower.cpp \
+	lib/split.cpp \
+	lib/match_mask.cpp \
 	main.cpp
 
 SRC_DIR = src

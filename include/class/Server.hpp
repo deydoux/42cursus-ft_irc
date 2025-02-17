@@ -25,6 +25,9 @@ public:
 	const std::string	&get_name() const;
 	const bool			&is_verbose() const;
 	const std::string	&get_start_time() const;
+	Channel				*find_channel(const std::string &channel_name);
+
+	void	add_channel(Channel &new_channel);
 
 	const std::vector<std::string>	&get_motd_lines() const;
 

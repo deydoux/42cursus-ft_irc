@@ -386,3 +386,16 @@ void Server::_signal_handler(int)
 {
 	stop = true;
 }
+
+Channel	*Server::find_channel(const std::string &channel_name)
+{
+	channels_t::iterator channel = _channels.find(channel_name);
+	if (channel == _channels.end())
+		return NULL;
+	return channel->second;
+}
+
+void	Server::add_channel(Channel &new_channel)
+{
+	_channels[new_channel.get_name()] = &new_channel;
+}

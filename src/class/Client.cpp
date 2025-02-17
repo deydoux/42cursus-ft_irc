@@ -1,12 +1,14 @@
 #include "class/Client.hpp"
 #include "class/Command.hpp"
 #include "class/Server.hpp"
+#include "class/Channel.hpp"
 
 #include <sys/types.h>
 #include <sys/socket.h>
 
 #include <iomanip>
 #include <sstream>
+#include <algorithm>
 
 Client::Client(const int fd, const std::string &ip, Server &server):
 	_fd(fd),
@@ -109,11 +111,6 @@ const std::string &Client::get_nickname(bool allow_empty) const
 	return _nickname;
 }
 
-Server &Client::get_server() const
-{
-	return _server;
-}
-
 const bool &Client::has_disconnect_request() const
 {
 	return _disconnect_request;
@@ -155,6 +152,11 @@ void Client::set_password(const std::string &password)
 		return reply(ERR_ALREADYREGISTRED, "", "Connection already registered");
 
 	_password = password;
+}
+
+bool Client::operator==(const Client &other) const
+{
+	return get_mask() == other.get_mask();
 }
 
 void Client::set_realname(const std::string &realname)
@@ -248,13 +250,13 @@ void Client::_check_registration()
 
 void Client::_greet() const
 {
-	std::string reply =
-		_create_reply(RPL_WELCOME, "", "Welcome to the Internet Relay Network " + get_nickname() + '!' + _get_username() + '@' + _ip)
+	std::string reply = // https://modern.ircdocs.horse/#rplwelcome-001
+		_create_reply(RPL_WELCOME, "", "Welcome to the Internet Relay Network " + get_mask())
 		+ _create_reply(RPL_YOURHOST, "", "Your host is " + _server.get_name() + ", running version " VERSION)
 		+ _create_reply(RPL_CREATED, "", "This server has been started " + _server.get_start_time())
 		+ _create_reply(RPL_MYINFO, _server.get_name() + " " VERSION " o iklt")
 		+ _create_reply(RPL_ISUPPORT, "RFC2812 IRCD=ft_irc CHARSET=UTF-8 CASEMAPPING=ascii PREFIX=(o)@ CHANTYPES=#& CHANMODES=,k,l,it", "are supported on this server")
-		+ _create_reply(RPL_ISUPPORT, "CHANLIMIT=#&:50 CHANNELLEN=50 NICKLEN=" + to_string(_max_nickname_size) + " TOPICLEN=490 AWAYLEN=127 KICKLEN=400 MODES=5", "are supported on this server")
+		+ _create_reply(RPL_ISUPPORT, "CHANLIMIT=#&:" + to_string(Client::_max_channels) + " CHANNELLEN=" + to_string(Channel::max_channel_name_size) + " NICKLEN=" + to_string(_max_nickname_size) + " TOPICLEN=490 AWAYLEN=127 KICKLEN=400 MODES=5", "are supported on this server")
 		+ _create_reply(RPL_LUSERCLIENT, "", "There are " + to_string(_server.get_clients_count()) + " users and 0 services on 1 servers")
 		+ _create_reply(RPL_LUSERCHANNELS, to_string(_server.get_channels_count()), "channels formed")
 		+ _create_reply(RPL_LUSERME, "", "I have " + to_string(_server.get_clients_count()) + " users, 0 services and 0 servers")
@@ -297,4 +299,62 @@ bool Client::_is_valid_username(const std::string &username)
 			return false;
 
 	return true;
+}
+
+Server &Client::get_server( void ) const
+{
+	return _server;
+}
+
+const int &Client::get_fd( void )
+{
+	return _fd;
+}
+
+bool	Client::is_invited_to(Channel &channel)
+{
+	bool is_invited = std::find(_channel_invitations.begin(), _channel_invitations.end(), channel.get_name()) != _channel_invitations.end();
+	return (is_invited);
+}
+
+std::string	Client::get_mask(void) const
+{
+	return std::string(_nickname + "!" + _username + "@" + _ip);
+}
+
+size_t Client::get_channels_count(void) const
+{
+	return _active_channels.size();
+}
+
+void Client::invite_to_channel(Client &target, Channel &channel)
+{
+	target._channel_invitations.push_back(channel.get_name());
+
+	// TODO: this function also needs to send a privmsg to target, but this scope is not
+	// necessary as the /invite command is a bonus part
+}
+
+void Client::join_channel(Channel &channel, std::string passkey)
+{
+	if (channel.is_client_member(*this))
+		return ;
+
+	if (channel.is_full())
+		this->reply(ERR_CHANNELISFULL, channel.get_name(), "Cannot join channel (+l)");
+
+	else if (!channel.check_passkey(passkey))
+		this->reply(ERR_BADCHANNELKEY, channel.get_name(), "Cannot join channel (+k) - bad key");
+
+	else if (channel.is_invite_only() && !this->is_invited_to(channel))
+		this->reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
+
+	else if (channel.is_client_banned(*this))
+		this->reply(ERR_BANNEDFROMCHAN, channel.get_name(), "Cannot join channel (+b)");
+
+	else if (this->get_channels_count() >= Client::_max_channels)
+		this->reply(ERR_TOOMANYCHANNELS, channel.get_name(), "You have joined too many channels");
+
+	channel.add_client(*this);
+	_active_channels[channel.get_name()] = &channel;
 }
