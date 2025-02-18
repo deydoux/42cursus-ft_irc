@@ -7,13 +7,16 @@
 #include <stdio.h>
 
 #include <ctime>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 
-Server::Server(const std::string &name, port_t port, const std::string &password, bool verbose):
+Server::Server(const std::string &name, port_t port, const std::string &password, const std::string &motd, const std::string &motd_file, bool verbose):
 	_name(name),
 	_port(port),
 	_password(password),
+	_motd(motd),
+	_motd_file(motd_file),
 	_verbose(verbose),
 	_address(_init_address(_port)),
 	_connections(0),
@@ -49,6 +52,11 @@ void Server::start()
 	log("Stopped");
 }
 
+bool Server::check_password(const std::string &password) const
+{
+	return password == _password;
+}
+
 void Server::register_client()
 {
 	_max_registered_clients = std::max(_max_registered_clients, ++_registered_clients_count);
@@ -59,11 +67,6 @@ const std::string &Server::get_name() const
 	return _name;
 }
 
-bool Server::check_password(const std::string &password) const
-{
-	return password == _password;
-}
-
 const bool &Server::is_verbose() const
 {
 	return _verbose;
@@ -72,6 +75,11 @@ const bool &Server::is_verbose() const
 const std::string &Server::get_start_time() const
 {
 	return _start_time;
+}
+
+const std::vector<std::string> &Server::get_motd_lines() const
+{
+	return _motd_lines;
 }
 
 Client *Server::get_client(const std::string &nickname) const
@@ -115,6 +123,8 @@ Server Server::parse_args(int argc, char *argv[])
 	Server::port_t port = _default_port;
 	bool verbose = _default_verbose;
 	std::string password;
+	std::string motd;
+	std::string motd_file = "kittirc.motd";
 
 	bool port_set = false;
 	bool password_set = false;
@@ -124,24 +134,19 @@ Server Server::parse_args(int argc, char *argv[])
 
 		if (arg == "-h" || arg == "--help")
 			_print_usage(0);
-		else if (arg == "-n" || arg == "--name") {
-			if (++i >= argc)
-				_print_usage();
-
-			name = argv[i];
-		} else if (arg == "-P" || arg == "--pass" || arg == "--password") {
-			if (++i >= argc)
-				_print_usage();
-
-			password = arg;
+		else if (arg == "-n" || arg == "--name")
+			name = _get_next_arg(i, argc, argv);
+		else if (arg == "-P" || arg == "--pass" || arg == "--password") {
+			password = _get_next_arg(i, argc, argv);
 			password_set = true;
 		} else if (arg == "-p" || arg == "--port") {
-			if (++i >= argc)
-				_print_usage();
-
-			port = _parse_port(argv[i]);
+			port = _parse_port(_get_next_arg(i, argc, argv));
 			port_set = true;
-		} else if (arg == "-v" || arg == "--verbose")
+		} else if (arg == "-m" || arg == "--motd")
+			motd = _get_next_arg(i, argc, argv);
+		else if (arg == "-M" || arg == "--motd-file")
+			motd_file = _get_next_arg(i, argc, argv);
+		else if (arg == "-v" || arg == "--verbose")
 			verbose = true;
 		else if (!port_set) {
 			port = _parse_port(arg);
@@ -149,12 +154,11 @@ Server Server::parse_args(int argc, char *argv[])
 		} else if (!password_set) {
 			password = arg;
 			password_set = true;
-		}
-		else
+		} else
 			_print_usage();
 	}
 
-	Server server = Server(name, port, password, verbose);
+	Server server = Server(name, port, password, motd, motd_file, verbose);
 
 	if (!port_set)
 		server.log("Using default port: " + to_string(port), warning);
@@ -166,6 +170,22 @@ Server Server::parse_args(int argc, char *argv[])
 }
 
 bool Server::stop = false;
+
+void Server::_init_motd()
+{
+	if (!_motd.empty())
+		return _motd_lines.push_back(_motd);
+
+	std::ifstream file(_motd_file.c_str());
+	if (file.fail())
+		return log("Failed to open MOTD file", warning);
+
+	std::string line;
+	while (std::getline(file, line))
+		_motd_lines.push_back(line);
+
+	file.close();
+}
 
 void Server::_set_start_time()
 {
@@ -215,6 +235,7 @@ void Server::_listen()
 
 void Server::_init()
 {
+	_init_motd();
 	_set_start_time();
 	_set_signal_handler();
 	_init_socket();
@@ -245,10 +266,13 @@ void Server::_accept()
 	if (fd == -1)
 		return log("Failed to accept connection", error);
 
+	char *ip = inet_ntoa(address.sin_addr);
+	if (!ip)
+		return log("Failed to get client IP", error);
+
 	_max_connections = std::max(_max_connections, ++_connections);
 
 	_pollfds.push_back(_init_pollfd(fd));
-	char *ip = inet_ntoa(address.sin_addr);
 	_clients[fd] = new Client(fd, ip, *this);
 }
 
@@ -303,6 +327,14 @@ void Server::_disconnect_client(int fd)
 	}
 }
 
+std::string Server::_get_next_arg(int &i, int argc, char *argv[])
+{
+	if (++i >= argc)
+		_print_usage();
+
+	return argv[i];
+}
+
 Server::port_t Server::_parse_port(const std::string &port_str)
 {
 	std::istringstream iss(port_str);
@@ -322,6 +354,8 @@ void Server::_print_usage(int status)
 			  << "  -n, --name <name>                  Name of the server (default: kittirc)" << std::endl
 			  << "  -P, --pass, --password <password>  Password required to connect (default: None)" << std::endl
 			  << "  -p, --port <port>                  Port to listen on (default: 6697)" << std::endl
+			  << "  -m, --motd <message>               Message of the Day" << std::endl
+			  << "  -M, --motd-file <file>             MOTD file (default: kittirc.motd)" << std::endl
 			  << "  -v, --verbose                      Enable verbose output" << std::endl;
 
 	throw status;
@@ -351,4 +385,17 @@ pollfd Server::_init_pollfd(int fd)
 void Server::_signal_handler(int)
 {
 	stop = true;
+}
+
+Channel	*Server::find_channel(const std::string &channel_name)
+{
+	channels_t::iterator channel = _channels.find(channel_name);
+	if (channel == _channels.end())
+		return NULL;
+	return channel->second;
+}
+
+void	Server::add_channel(Channel &new_channel)
+{
+	_channels[new_channel.get_name()] = &new_channel;
 }
