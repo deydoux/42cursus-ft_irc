@@ -18,7 +18,8 @@ public:
 	bool				is_client_banned(Client &client);
 	bool				is_client_member(Client &client);
 
-	void	set_name(std::string &name, bool check_validity = true);
+	void	send_broadcast(const std::string &message);
+
 	void	set_passkey(std::string &passkey);
 	void	set_max_members(size_t max_members);
 	void	unset_members_limit( void );

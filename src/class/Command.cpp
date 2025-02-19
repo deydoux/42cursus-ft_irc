@@ -109,12 +109,14 @@ void Command::_join(const args_t &args, Client &client)
 
 	for (size_t i = 0; i < channels_to_be_joined.size(); i++)
 	{
+		Channel *channel = channels_to_be_joined[i];
+
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
-		client.join_channel(*channels_to_be_joined[i], passkey);
+		client.join_channel(*channel, passkey);
 
 		args_t response_args;
-		response_args.push_back(channels_to_be_joined[i]->get_name());
-		client.send(client.create_cmd_reply(
+		response_args.push_back(channel->get_name());
+		channel->send_broadcast(client.create_cmd_reply(
 			client_mask, "JOIN", response_args
 		));
 	}
