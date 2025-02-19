@@ -10,7 +10,6 @@ void Command::init()
 	_commands["nick"] = (_command_t) {&_nick, 1, false};
 	_commands["pass"] = (_command_t) {&_pass, 1, false};
 	_commands["user"] = (_command_t) {&_user, 4, false};
-	_commands["ping"] = (_command_t) {&_ping, 0, 2, false};
 }
 
 void Command::execute(const args_t &args, Client &client)
@@ -112,10 +111,3 @@ void Command::_join(const args_t &args, Client &client)
 		// TODO: Need to send a broadcast JOIN message to every channel members
 	}
 }
-
-/* void Command::_ping(const args_t &args, Client &client)
-{
-	if (args.size() == 0)
-	 
-	if (rgs.si)
-} */
