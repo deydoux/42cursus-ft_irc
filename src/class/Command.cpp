@@ -5,6 +5,7 @@
 
 void Command::init()
 {
+	_commands["ping"] = (_command_t) {&_ping, 1, 1, true};
 	_commands["join"] = (_command_t) {&_join, 1, 2, true};
 	_commands["motd"] = (_command_t) {&_motd, 0, 1, true};
 	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
@@ -110,4 +111,13 @@ void Command::_join(const args_t &args, Client &client)
 		client.join_channel(*channels_to_be_joined[i], passkey);
 		// TODO: Need to send a broadcast JOIN message to every channel members
 	}
+}
+
+void Command::_ping(const args_t &args, Client &client)
+{
+	args_t response_args;
+	response_args.push_back(client.get_server().get_name());
+	response_args.push_back(args[1]);
+
+	client.send(client.create_cmd_reply("PONG", response_args));
 }
