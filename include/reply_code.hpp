@@ -2,7 +2,6 @@
 #define REPLY_CODE_HPP
 
 typedef enum {
-	NO_CODE = 0,
 	RPL_WELCOME = 1,
 	RPL_YOURHOST = 2,
 	RPL_CREATED = 3,

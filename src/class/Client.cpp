@@ -218,22 +218,17 @@ std::string Client::_create_line(const std::string &content) const
 std::string Client::_create_reply(reply_code code, const std::string &arg, const std::string &message) const
 {
 	std::ostringstream oss;
-	if (code == 0)
-		oss << ':' << _server.get_name() << ' ' << arg << ' ' << _server.get_name() << message;
-	else
+		oss << ':' << _server.get_name() << ' ' << std::setfill('0') << std::setw(3) << code << ' ' << get_nickname(false);
+
+	if (!arg.empty())
+		oss << ' ' << arg;
+
+	if (!message.empty())
 	{
-			oss << ':' << _server.get_name() << ' ' << std::setfill('0') << std::setw(3) << code << ' ' << get_nickname(false);
-
-		if (!arg.empty())
-			oss << ' ' << arg;
-
-		if (!message.empty())
-		{
-			oss << ' ';
-			if (message.find(' ') != std::string::npos)
-				oss << ':';
-			oss << message;
-		}
+		oss << ' ';
+		if (message.find(' ') != std::string::npos)
+			oss << ':';
+		oss << message;
 	}
 	return _create_line(oss.str());
 }
