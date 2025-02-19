@@ -23,7 +23,7 @@ public:
 	void	join_channel(Channel &channel, std::string passkey);
 
 	const std::string	create_motd_reply() const;
-	const std::string	create_cmd_reply(const std::string &cmd, args_t &args) const;
+	const std::string	create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const;
 
 	const bool			&has_disconnect_request() const;
 	const bool			&is_registered() const;

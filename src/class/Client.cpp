@@ -96,10 +96,10 @@ const std::string Client::create_motd_reply() const
 	return reply;
 }
 
-const std::string Client::create_cmd_reply(const std::string &cmd, args_t &args) const
+const std::string Client::create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const
 {
 	std::ostringstream oss;
-	oss << ':' << _server.get_name();
+	oss << ':' << prefix;
 
 	if (!cmd.empty())
 		oss << ' ' << cmd;

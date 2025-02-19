@@ -105,11 +105,18 @@ void Command::_join(const args_t &args, Client &client)
 		}
 	}
 
+	std::string client_mask = client.get_mask();
+
 	for (size_t i = 0; i < channels_to_be_joined.size(); i++)
 	{
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
 		client.join_channel(*channels_to_be_joined[i], passkey);
-		// TODO: Need to send a broadcast JOIN message to every channel members
+
+		args_t response_args;
+		response_args.push_back(channels_to_be_joined[i]->get_name());
+		client.send(client.create_cmd_reply(
+			client_mask, "JOIN", response_args
+		));
 	}
 }
 
@@ -119,5 +126,7 @@ void Command::_ping(const args_t &args, Client &client)
 	response_args.push_back(client.get_server().get_name());
 	response_args.push_back(args[1]);
 
-	client.send(client.create_cmd_reply("PONG", response_args));
+	client.send(client.create_cmd_reply(
+		client.get_server().get_name(), "PONG", response_args
+	));
 }
