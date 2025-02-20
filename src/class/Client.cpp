@@ -96,6 +96,29 @@ const std::string Client::create_motd_reply() const
 	return reply;
 }
 
+const std::string Client::create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const
+{
+	std::ostringstream oss;
+	oss << ':' << prefix;
+
+	if (!cmd.empty())
+		oss << ' ' << cmd;
+
+	if (!args.empty())
+	{
+		for (args_t::iterator it = args.begin(); it != args.end(); it++) {
+			std::string arg = *it;
+
+			oss << ' ';
+			if (arg.find(' ') != std::string::npos)
+				oss << ':';
+			oss << arg;
+		}
+	}
+
+	return _create_line(oss.str());
+}
+
 const bool &Client::is_registered() const
 {
 	return _registered;
