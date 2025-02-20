@@ -15,7 +15,8 @@ Client::Client(const int fd, const std::string &ip, Server &server):
 	_ip(ip),
 	_server(server),
 	_disconnect_request(false),
-	_registered(false)
+	_registered(false),
+	_is_operator(false)
 {
 	log("Accepted connection from " + std::string(_ip));
 }
@@ -99,6 +100,11 @@ const std::string Client::create_motd_reply() const
 const bool &Client::is_registered() const
 {
 	return _registered;
+}
+
+const bool &Client::is_operator() const
+{
+	return _is_operator;
 }
 
 const std::string &Client::get_nickname(bool allow_empty) const
@@ -334,7 +340,7 @@ void Client::invite_to_channel(Client &target, Channel &channel)
 	// necessary as the /invite command is a bonus part
 }
 
-void Client::join_channel(Channel &channel, std::string passkey)
+void	Client::join_channel(Channel &channel, std::string passkey)
 {
 	if (channel.is_client_member(*this))
 		return ;
@@ -356,4 +362,21 @@ void Client::join_channel(Channel &channel, std::string passkey)
 
 	channel.add_client(*this);
 	_active_channels[channel.get_name()] = &channel;
+}
+
+void	Client::kick_channel(Channel &channel, std::string kicked_client, std::string passkey)
+{
+	Server &server = this->get_server();
+	if (!channel.is_client_member(*this))
+		this->reply(ERR_NOTONCHANNEL, channel.get_name(), "You're not on that channel");
+	if (!this->is_operator())
+		this->reply(ERR_CHANOPRIVSNEEDED, channel.get_name(), "You're not channel operator");
+
+	Client *client_to_be_kicked = server.get_client(kicked_client);
+	if (!client_to_be_kicked)
+		this->reply(ERR_NOSUCHNICK, channel.get_name(), "No such nick/channel");
+	if (!channel.is_client_member(*client_to_be_kicked))
+		this->reply(ERR_USERNOTINCHANNEL, channel.get_name(), "They aren't on that channell");
+
+	channel.
 }

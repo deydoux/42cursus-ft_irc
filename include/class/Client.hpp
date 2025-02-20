@@ -21,11 +21,13 @@ public:
 	void	send_error(const std::string &message);
 	void	invite_to_channel(Client &target, Channel &channel);
 	void	join_channel(Channel &channel, std::string passkey);
+	void	kick_channel(Channel &chennel, std::string kicked_client, std::string passkey);
 
 	const std::string	create_motd_reply() const;
 
 	const bool			&has_disconnect_request() const;
 	const bool			&is_registered() const;
+	const bool			&is_operator() const;
 	const std::string	&get_nickname(bool allow_empty = true) const;
 	const int			&get_fd( void );
 	bool				is_invited_to(Channel &channel);
@@ -48,6 +50,7 @@ private:
 
 	bool		_disconnect_request;
 	bool		_registered;
+	bool		_is_operator;
 	std::string	_buffer;
 
 	std::string	_nickname;

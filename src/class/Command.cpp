@@ -10,6 +10,7 @@ void Command::init()
 	_commands["nick"] = (_command_t) {&_nick, 1, false};
 	_commands["pass"] = (_command_t) {&_pass, 1, false};
 	_commands["user"] = (_command_t) {&_user, 4, false};
+	_commands["kick"] = (_command_t) {&_kick, 2, 3, false};
 }
 
 void Command::execute(const args_t &args, Client &client)
@@ -109,5 +110,53 @@ void Command::_join(const args_t &args, Client &client)
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
 		client.join_channel(*channels_to_be_joined[i], passkey);
 		// TODO: Need to send a broadcast JOIN message to every channel members
+	}
+}
+
+void	Command::_kick(const args_t &args, Client &client)
+{
+	size_t args_size = args.size();
+
+	if (args_size < 3)
+	{
+		client.reply(
+		ERR_NEEDMOREPARAMS,
+		"",
+		"Not enough parameters for command");
+		return ;
+	}
+
+	std::vector<Channel *> channels_to_kick_from;
+	std::string	kicked_client = args[2];
+	Server &server = client.get_server();
+
+	std::vector<std::string> channels_name = ft_split(args[1], ',');
+	std::string passkey = (args_size == 4) ? args[3] : "";
+
+	for (size_t i = 0; i < channels_name.size(); i++)
+	{
+		std::string channel_name = channels_name[i];
+		if (Channel::is_valid_name(channel_name))
+		{
+			Channel *new_channel = server.find_channel(channel_name);
+			if (!new_channel)
+			{
+				client.reply(
+				ERR_NOSUCHCHANNEL,
+				channels_name[i],
+				"No such channel");
+			}
+			channels_to_kick_from.push_back(new_channel);
+		} else {
+			client.reply(
+				ERR_NOSUCHCHANNEL,
+				channels_name[i],
+				"No such channel"
+			);
+		}
+	}
+	for (size_t i = 0; i < channels_to_kick_from.size(); i++)
+	{
+		client.kick_channel(*channels_to_kick_from[i], kicked_client, passkey);
 	}
 }
