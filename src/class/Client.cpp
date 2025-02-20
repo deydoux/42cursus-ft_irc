@@ -10,7 +10,7 @@
 #include <sstream>
 #include <algorithm>
 
-Client::Client(const int fd, const std::string &ip, Server &server):
+Client::Client(const int fd, const std::string ip, Server &server):
 	_fd(fd),
 	_ip(ip),
 	_server(server),
@@ -343,6 +343,11 @@ bool	Client::is_invited_to(Channel &channel)
 std::string	Client::get_mask(void) const
 {
 	return std::string(_nickname + "!" + _username + "@" + _ip);
+}
+
+channels_t &Client::get_active_channels( void )
+{
+	return _active_channels;
 }
 
 size_t Client::get_channels_count(void) const

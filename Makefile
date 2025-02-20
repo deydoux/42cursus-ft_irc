@@ -30,7 +30,7 @@ DEP = $(OBJ:.o=.d)
 $(NAME): $(OBJ)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp Makefile
 	@$(MKDIR) $(@D)
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 

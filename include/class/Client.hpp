@@ -11,7 +11,7 @@ class Server;
 class Client
 {
 public:
-	Client(const int fd, const std::string &ip, Server &server);
+	Client(const int fd, const std::string ip, Server &server);
 	~Client();
 
 	void	handle_messages(std::string messages);
@@ -31,6 +31,7 @@ public:
 	const int			&get_fd( void );
 	bool				is_invited_to(Channel &channel);
 	std::string			get_mask( void ) const;
+	channels_t			&get_active_channels( void );
 	size_t				get_channels_count( void ) const;
 
 	Server	&get_server() const;
@@ -44,7 +45,7 @@ public:
 
 private:
 	const int			_fd;
-	const std::string	&_ip;
+	const std::string	_ip;
 	Server				&_server;
 
 	bool		_disconnect_request;

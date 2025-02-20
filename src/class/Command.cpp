@@ -8,6 +8,7 @@ void Command::init()
 	_commands["ping"] = (_command_t) {&_ping, 1, 1, true};
 	_commands["join"] = (_command_t) {&_join, 1, 2, true};
 	_commands["motd"] = (_command_t) {&_motd, 0, 1, true};
+	_commands["quit"] = (_command_t) {&_quit, 0, 1, true};
 	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
 	_commands["pass"] = (_command_t) {&_pass, 1, 1, false};
 	_commands["user"] = (_command_t) {&_user, 4, 4, false};
@@ -131,4 +132,22 @@ void Command::_ping(const args_t &args, Client &client)
 	client.send(client.create_cmd_reply(
 		client.get_server().get_name(), "PONG", response_args
 	));
+}
+
+void Command::_quit(const args_t &args, Client &client)
+{
+	std::string quit_message = "Client Quit";
+	if (args.size() > 1)
+		quit_message = args[1];
+
+	args_t response_args;
+	response_args.push_back(quit_message);
+	
+	channels_t client_channels = client.get_active_channels();
+	for (channels_t::iterator channel = client_channels.begin(); channel != client_channels.end(); channel++) {
+		channel->second->remove_client(client.get_fd());
+		channel->second->send_broadcast(client.create_cmd_reply(
+			client.get_mask(), "QUIT", response_args
+		));
+	}
 }
