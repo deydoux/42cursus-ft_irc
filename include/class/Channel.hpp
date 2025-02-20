@@ -26,6 +26,7 @@ public:
 	void	set_is_invite_only(bool invite_only);
 
 	void	add_client(Client &client);
+	void	remove_client(int client_fd);
 
 	static const size_t max_channel_name_size = 50;
 
@@ -34,7 +35,6 @@ public:
 private:
 	const std::string	_name;
 	clients_t			_members;
-	Client				&_creator;
 
 	std::string		_passkey;
 

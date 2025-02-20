@@ -10,7 +10,7 @@
 #include <sstream>
 #include <algorithm>
 
-Client::Client(const int fd, const std::string &ip, Server &server):
+Client::Client(const int fd, const std::string ip, Server &server):
 	_fd(fd),
 	_ip(ip),
 	_server(server),

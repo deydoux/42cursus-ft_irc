@@ -3,7 +3,6 @@
 
 Channel::Channel(Client &creator, std::string &name, const bool verbose):
 	_name(name),
-	_creator(creator),
 	_passkey(),
 	_limit_members(false),
 	_is_invite_only(false),
@@ -61,6 +60,11 @@ void Channel::set_is_invite_only(bool invite_only)
 void Channel::add_client(Client &client)
 {
 	_members[client.get_fd()] = &client;
+}
+
+void Channel::remove_client(int client_fd)
+{
+	_members.erase(client_fd);
 }
 
 bool Channel::is_full(void)
