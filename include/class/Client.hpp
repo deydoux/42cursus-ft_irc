@@ -11,7 +11,7 @@ class Server;
 class Client
 {
 public:
-	Client(const int fd, const std::string &ip, Server &server);
+	Client(const int fd, const std::string ip, Server &server);
 	~Client();
 
 	void	handle_messages(std::string messages);
@@ -24,6 +24,7 @@ public:
 	void	kick_channel(Channel &chennel, std::string kicked_client, std::string passkey);
 
 	const std::string	create_motd_reply() const;
+	const std::string	create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const;
 
 	const bool			&has_disconnect_request() const;
 	const bool			&is_registered() const;
@@ -32,6 +33,7 @@ public:
 	const int			&get_fd( void );
 	bool				is_invited_to(Channel &channel);
 	std::string			get_mask( void ) const;
+	channels_t			&get_active_channels( void );
 	size_t				get_channels_count( void ) const;
 
 	Server	&get_server() const;
@@ -45,7 +47,7 @@ public:
 
 private:
 	const int			_fd;
-	const std::string	&_ip;
+	const std::string	_ip;
 	Server				&_server;
 
 	bool		_disconnect_request;
