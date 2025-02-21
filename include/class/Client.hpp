@@ -62,7 +62,7 @@ private:
 
 	channels_t							_active_channels;
 	std::vector<std::string>			_channel_invitations;
-	std::map<std::string, bool>	_channel_operator;
+	std::map<std::string, bool>			_channel_operator;
 
 	void		_handle_message(std::string message);
 

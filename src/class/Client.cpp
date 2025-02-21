@@ -401,7 +401,6 @@ void	Client::join_channel(Channel &channel, std::string passkey, bool is_operato
 
 	channel.add_client(*this);
 	_active_channels[channel.get_name()] = &channel;
-	this->set_channel_operator(channel.get_name(), is_operator);
 
 }
 

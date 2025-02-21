@@ -74,7 +74,6 @@ void Command::_join(const args_t &args, Client &client)
 
 	std::vector<Channel *> 		channels_to_be_joined;
 	std::vector<std::string>	passkeys;
-	bool						is_operator = false;
 	Server						&server = client.get_server();
 
 	std::vector<std::string>	channels_name = ft_split(args[1], ',');
@@ -92,8 +91,6 @@ void Command::_join(const args_t &args, Client &client)
 				// the channel does not exists and needs to be created
 				new_channel = new Channel(client, channel_name, client.get_server().is_verbose());
 				server.add_channel(*new_channel);
-				//set the client as the new channel's operator as he is the one that created it
-				is_operator = true;
 			}
 
 			channels_to_be_joined.push_back(new_channel);
@@ -117,8 +114,9 @@ void Command::_join(const args_t &args, Client &client)
 		Channel *channel = channels_to_be_joined[i];
 
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
-		client.join_channel(*channel, passkey, is_operator);
+		client.join_channel(*channel, passkey);
 
+		// TODO: dont send anything if join channel and delete channel (maybe do that before ??)
 		args_t response_args;
 		response_args.push_back(channel->get_name());
 		channel->send_broadcast(client.create_cmd_reply(
