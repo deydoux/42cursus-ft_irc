@@ -379,7 +379,7 @@ void Client::invite_to_channel(Client &target, Channel &channel)
 	// necessary as the /invite command is a bonus part
 }
 
-void	Client::join_channel(Channel &channel, std::string passkey)
+void	Client::join_channel(Channel &channel, std::string passkey, bool is_operator)
 {
 	if (channel.is_client_member(*this))
 		return ;
@@ -401,6 +401,8 @@ void	Client::join_channel(Channel &channel, std::string passkey)
 
 	channel.add_client(*this);
 	_active_channels[channel.get_name()] = &channel;
+	this->set_channel_operator(channel.get_name(), is_operator);
+
 }
 
 void	Client::kick_channel(Channel &channel, std::string kicked_client, std::string passkey)
