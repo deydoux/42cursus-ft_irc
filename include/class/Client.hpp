@@ -20,7 +20,7 @@ public:
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	void	send_error(const std::string &message);
 	void	invite_to_channel(Client &target, Channel &channel);
-	void	join_channel(Channel &channel, std::string passkey);
+	void	join_channel(Channel &channel, std::string passkey, bool is_operator);
 	void	kick_channel(Channel &chennel, std::string kicked_client, std::string passkey);
 
 	const std::string	create_motd_reply() const;
@@ -28,7 +28,7 @@ public:
 
 	const bool			&has_disconnect_request() const;
 	const bool			&is_registered() const;
-	const bool			&is_operator() const;
+	bool				is_channel_operator(std::string channel_name) const;
 	const std::string	&get_nickname(bool allow_empty = true) const;
 	const int			&get_fd( void );
 	bool				is_invited_to(Channel &channel);
@@ -42,6 +42,7 @@ public:
 	void	set_username(const std::string &username);
 	void	set_realname(const std::string &realname);
 	void	set_password(const std::string &password);
+	void	set_channel_operator(std::string channel, bool value);
 
 	bool	operator==(const Client &other) const;
 
@@ -52,7 +53,6 @@ private:
 
 	bool		_disconnect_request;
 	bool		_registered;
-	bool		_is_operator;
 	std::string	_buffer;
 
 	std::string	_nickname;
@@ -60,8 +60,9 @@ private:
 	std::string	_realname;
 	std::string	_username;
 
-	channels_t					_active_channels;
-	std::vector<std::string>	_channel_invitations;
+	channels_t							_active_channels;
+	std::vector<std::string>			_channel_invitations;
+	std::map<std::string, bool>	_channel_operator;
 
 	void		_handle_message(std::string message);
 

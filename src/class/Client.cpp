@@ -15,8 +15,7 @@ Client::Client(const int fd, const std::string ip, Server &server):
 	_ip(ip),
 	_server(server),
 	_disconnect_request(false),
-	_registered(false),
-	_is_operator(false)
+	_registered(false)
 {
 	log("Accepted connection from " + std::string(_ip));
 }
@@ -125,9 +124,12 @@ const bool &Client::is_registered() const
 	return _registered;
 }
 
-const bool &Client::is_operator() const
+bool Client::is_channel_operator(std::string channel_name) const
 {
-	return _is_operator;
+	std::map<std::string, bool>::const_iterator it = this->_channel_operator.find(channel_name);
+	if (it != _channel_operator.end())
+		return it->second;
+	return false;
 }
 
 const std::string &Client::get_nickname(bool allow_empty) const
@@ -143,6 +145,15 @@ const std::string &Client::get_nickname(bool allow_empty) const
 const bool &Client::has_disconnect_request() const
 {
 	return _disconnect_request;
+}
+
+void	Client::set_channel_operator(std::string channel, bool value)
+{
+	std::map<std::string, bool>::iterator it = this->_channel_operator.find(channel);
+	if (it == _channel_operator.end())
+		_channel_operator.insert(std::make_pair(channel, value));
+	else
+		it->second = value;
 }
 
 void Client::set_nickname(const std::string &nickname)
@@ -397,7 +408,7 @@ void	Client::kick_channel(Channel &channel, std::string kicked_client, std::stri
 	Server &server = this->get_server();
 	if (!channel.is_client_member(*this))
 		this->reply(ERR_NOTONCHANNEL, channel.get_name(), "You're not on that channel");
-	if (!this->is_operator())
+	if (!this->is_channel_operator(channel.get_name()))
 		this->reply(ERR_CHANOPRIVSNEEDED, channel.get_name(), "You're not channel operator");
 
 	Client *client_to_be_kicked = server.get_client(kicked_client);
