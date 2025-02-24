@@ -10,7 +10,7 @@
 #include <sstream>
 #include <algorithm>
 
-Client::Client(const int fd, const std::string &ip, Server &server):
+Client::Client(const int fd, const std::string ip, Server &server):
 	_fd(fd),
 	_ip(ip),
 	_server(server),
@@ -94,6 +94,29 @@ const std::string Client::create_motd_reply() const
 	reply += _create_reply(RPL_ENDOFMOTD, "", "End of MOTD command");
 
 	return reply;
+}
+
+const std::string Client::create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const
+{
+	std::ostringstream oss;
+	oss << ':' << prefix;
+
+	if (!cmd.empty())
+		oss << ' ' << cmd;
+
+	if (!args.empty())
+	{
+		for (args_t::iterator it = args.begin(); it != args.end(); it++) {
+			std::string arg = *it;
+
+			oss << ' ';
+			if (arg.find(' ') != std::string::npos)
+				oss << ':';
+			oss << arg;
+		}
+	}
+
+	return _create_line(oss.str());
 }
 
 const bool &Client::is_registered() const
@@ -320,6 +343,11 @@ bool	Client::is_invited_to(Channel &channel)
 std::string	Client::get_mask(void) const
 {
 	return std::string(_nickname + "!" + _username + "@" + _ip);
+}
+
+channels_t &Client::get_active_channels( void )
+{
+	return _active_channels;
 }
 
 size_t Client::get_channels_count(void) const

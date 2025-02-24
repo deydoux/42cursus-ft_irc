@@ -10,6 +10,8 @@ void Command::init()
 	_commands["motd"] = (_command_t) {&_motd, 0, 1, true};
 	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
 	_commands["pass"] = (_command_t) {&_pass, 1, 1, false};
+	_commands["ping"] = (_command_t) {&_ping, 1, 1, true};
+	_commands["quit"] = (_command_t) {&_quit, 0, 1, true};
 	_commands["user"] = (_command_t) {&_user, 4, 4, false};
 }
 
@@ -116,10 +118,48 @@ void Command::_join(const args_t &args, Client &client)
 		}
 	}
 
+	std::string client_mask = client.get_mask();
+
 	for (size_t i = 0; i < channels_to_be_joined.size(); i++)
 	{
+		Channel *channel = channels_to_be_joined[i];
+
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
-		client.join_channel(*channels_to_be_joined[i], passkey);
-		// TODO: Need to send a broadcast JOIN message to every channel members
+		client.join_channel(*channel, passkey);
+
+		args_t response_args;
+		response_args.push_back(channel->get_name());
+		channel->send_broadcast(client.create_cmd_reply(
+			client_mask, "JOIN", response_args
+		));
+	}
+}
+
+void Command::_ping(const args_t &args, Client &client)
+{
+	args_t response_args;
+	response_args.push_back(client.get_server().get_name());
+	response_args.push_back(args[1]);
+
+	client.send(client.create_cmd_reply(
+		client.get_server().get_name(), "PONG", response_args
+	));
+}
+
+void Command::_quit(const args_t &args, Client &client)
+{
+	std::string quit_message = "Client Quit";
+	if (args.size() > 1)
+		quit_message = args[1];
+
+	args_t response_args;
+	response_args.push_back(quit_message);
+
+	channels_t client_channels = client.get_active_channels();
+	for (channels_t::iterator channel = client_channels.begin(); channel != client_channels.end(); channel++) {
+		channel->second->remove_client(client.get_fd());
+		channel->second->send_broadcast(client.create_cmd_reply(
+			client.get_mask(), "QUIT", response_args
+		));
 	}
 }
