@@ -59,12 +59,8 @@ void Channel::set_is_invite_only(bool invite_only)
 
 void Channel::invite_client(Client &client)
 {
-	for (clients_t::iterator it = _invited_clients.begin(); it != _invited_clients.end(); ++it) {
-		if (*it->second == client)
-			return;
-	}
-
-	_invited_clients[client.get_fd()] = &client;
+	if (!is_client_invited(client))
+		_invited_clients[client.get_fd()] = &client;
 }
 
 void Channel::add_client(Client &client)

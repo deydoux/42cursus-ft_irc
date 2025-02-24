@@ -325,12 +325,6 @@ const int &Client::get_fd( void )
 	return _fd;
 }
 
-bool	Client::is_invited_to(Channel &channel)
-{
-	bool is_invited = std::find(_channel_invitations.begin(), _channel_invitations.end(), channel.get_name()) != _channel_invitations.end();
-	return (is_invited);
-}
-
 std::string	Client::get_mask(void) const
 {
 	return std::string(_nickname + "!" + _username + "@" + _ip);
@@ -366,7 +360,7 @@ void Client::join_channel(Channel &channel, std::string passkey)
 	else if (!channel.check_passkey(passkey))
 		this->reply(ERR_BADCHANNELKEY, channel.get_name(), "Cannot join channel (+k) - bad key");
 
-	else if (channel.is_invite_only() && !this->is_invited_to(channel))
+	else if (channel.is_invite_only() && !channel.is_client_invited(*this))
 		this->reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
 
 	else if (channel.is_client_banned(*this))
