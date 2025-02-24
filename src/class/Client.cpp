@@ -354,14 +354,14 @@ void Client::join_channel(Channel &channel, std::string passkey)
 	if (channel.is_client_member(*this))
 		return ;
 
-	if (channel.is_full())
+	if (!channel.is_client_invited(*this) && channel.is_invite_only())
+		this->reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
+
+	else if (channel.is_full())
 		this->reply(ERR_CHANNELISFULL, channel.get_name(), "Cannot join channel (+l)");
 
 	else if (!channel.check_passkey(passkey))
 		this->reply(ERR_BADCHANNELKEY, channel.get_name(), "Cannot join channel (+k) - bad key");
-
-	else if (channel.is_invite_only() && !channel.is_client_invited(*this))
-		this->reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
 
 	else if (channel.is_client_banned(*this))
 		this->reply(ERR_BANNEDFROMCHAN, channel.get_name(), "Cannot join channel (+b)");

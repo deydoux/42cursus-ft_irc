@@ -59,8 +59,7 @@ void Channel::set_is_invite_only(bool invite_only)
 
 void Channel::invite_client(Client &client)
 {
-	if (!is_client_invited(client))
-		_invited_clients[client.get_fd()] = &client;
+	_invited_clients[client.get_fd()] = &client;
 }
 
 void Channel::add_client(Client &client)
@@ -106,21 +105,18 @@ bool Channel::is_client_banned(Client &client)
 
 bool Channel::is_client_member(Client &client)
 {
-	for (clients_t::iterator it = _members.begin(); it != _members.end(); ++it) {
-		if (*it->second == client)
-			return true;
-	}
-	return false;
+	return _members.find(client.get_fd()) != _members.end();
 }
 
 bool Channel::is_client_invited(Client &client)
 {
-	for (clients_t::iterator it = _invited_clients.begin(); it != _invited_clients.end(); ++it) {
-		if (*it->second == client)
-			return true;
-	}
+	clients_t::iterator it = _invited_clients.find(client.get_fd());
 
-	return false;
+	bool result = it != _invited_clients.end();
+	if (result)
+		_invited_clients.erase(it);
+
+	return result;
 }
 
 void Channel::send_broadcast(const std::string &message)
