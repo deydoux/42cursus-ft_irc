@@ -66,6 +66,11 @@ void Client::reply(reply_code code, const std::string &arg, const std::string &m
 	send(_create_reply(code, arg, message));
 }
 
+void Client::cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const
+{
+	send(create_cmd_reply(prefix, cmd, args));
+}
+
 void Client::send_error(const std::string &message)
 {
 	std::ostringstream oss;
@@ -94,29 +99,6 @@ const std::string Client::create_motd_reply() const
 	reply += _create_reply(RPL_ENDOFMOTD, "", "End of MOTD command");
 
 	return reply;
-}
-
-const std::string Client::create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const
-{
-	std::ostringstream oss;
-	oss << ':' << prefix;
-
-	if (!cmd.empty())
-		oss << ' ' << cmd;
-
-	if (!args.empty())
-	{
-		for (args_t::iterator it = args.begin(); it != args.end(); it++) {
-			std::string arg = *it;
-
-			oss << ' ';
-			if (arg.find(' ') != std::string::npos)
-				oss << ':';
-			oss << arg;
-		}
-	}
-
-	return _create_line(oss.str());
 }
 
 const bool &Client::is_registered() const
@@ -177,14 +159,36 @@ void Client::set_password(const std::string &password)
 	_password = password;
 }
 
+void Client::set_realname(const std::string &realname)
+{
+	_realname = realname;
+}
+
 bool Client::operator==(const Client &other) const
 {
 	return get_mask() == other.get_mask();
 }
 
-void Client::set_realname(const std::string &realname)
+const std::string Client::create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args)
 {
-	_realname = realname;
+	std::ostringstream oss;
+	oss << ':' << prefix;
+
+	if (!cmd.empty())
+		oss << ' ' << cmd;
+
+	if (!args.empty()) {
+		for (args_t::iterator it = args.begin(); it != args.end(); it++) {
+			std::string arg = *it;
+
+			oss << ' ';
+			if (arg.find(' ') != std::string::npos)
+				oss << ':';
+			oss << arg;
+		}
+	}
+
+	return _create_line(oss.str());
 }
 
 void Client::_handle_message(std::string message)
@@ -223,19 +227,6 @@ void Client::_handle_message(std::string message)
 	log("Parsed command: " + oss.str(), debug);
 
 	Command::execute(args, *this);
-}
-
-std::string Client::_create_line(const std::string &content) const
-{
-	std::string line = content;
-
-	if (line.size() > _max_message_size - 2) {
-		line.erase(_max_message_size - 7);
-		line += "[CUT]";
-	}
-	line += "\r\n";
-
-	return line;
 }
 
 std::string Client::_create_reply(reply_code code, const std::string &arg, const std::string &message) const
@@ -395,4 +386,17 @@ void Client::join_channel(Channel &channel, std::string passkey)
 
 	channel.add_client(*this);
 	_active_channels[channel.get_name()] = &channel;
+}
+
+std::string Client::_create_line(const std::string &content)
+{
+	std::string line = content;
+
+	if (line.size() > _max_message_size - 2) {
+		line.erase(_max_message_size - 7);
+		line += "[CUT]";
+	}
+	line += "\r\n";
+
+	return line;
 }

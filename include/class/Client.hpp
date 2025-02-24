@@ -17,13 +17,15 @@ public:
 	void	handle_messages(std::string messages);
 	void	log(const std::string &message, const log_level level = info) const;
 	ssize_t	send(const std::string &message) const;
-	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	void	send_error(const std::string &message);
+
 	void	invite_to_channel(Client &target, Channel &channel);
 	void	join_channel(Channel &channel, std::string passkey);
 
+	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
+	void	cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const;
+
 	const std::string	create_motd_reply() const;
-	const std::string	create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const;
 
 	const bool			&has_disconnect_request() const;
 	const bool			&is_registered() const;
@@ -44,6 +46,8 @@ public:
 
 	bool	operator==(const Client &other) const;
 
+	static const std::string	create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args);
+
 private:
 	const int			_fd;
 	const std::string	_ip;
@@ -63,7 +67,6 @@ private:
 
 	void		_handle_message(std::string message);
 
-	std::string _create_line(const std::string &content) const;
 	std::string	_create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 
 	void	_check_registration();
@@ -77,6 +80,8 @@ private:
 
 	static bool	_is_valid_nickname(const std::string &nickname);
 	static bool	_is_valid_username(const std::string &username);
+
+	static std::string	_create_line(const std::string &content);
 };
 
 #endif // CLIENT_HPP
