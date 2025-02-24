@@ -53,6 +53,8 @@ void Command::_invite(const args_t &args, Client &client)
 
 		if (channel->is_client_member(*target))
 			return client.reply(ERR_USERONCHANNEL, target->get_nickname(), "is already on channel");
+
+		channel->invite_client(*target);
 	}
 
 	args_t response_args;

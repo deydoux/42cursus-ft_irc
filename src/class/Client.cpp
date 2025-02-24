@@ -355,15 +355,6 @@ Channel *Client::get_channel(const std::string &name)
 	return it->second;
 }
 
-
-void Client::invite_to_channel(Client &target, Channel &channel)
-{
-	target._channel_invitations.push_back(channel.get_name());
-
-	// TODO: this function also needs to send a privmsg to target, but this scope is not
-	// necessary as the /invite command is a bonus part
-}
-
 void Client::join_channel(Channel &channel, std::string passkey)
 {
 	if (channel.is_client_member(*this))

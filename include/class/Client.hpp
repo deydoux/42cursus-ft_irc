@@ -19,7 +19,6 @@ public:
 	ssize_t	send(const std::string &message) const;
 	void	send_error(const std::string &message);
 
-	void	invite_to_channel(Client &target, Channel &channel);
 	void	join_channel(Channel &channel, std::string passkey);
 
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
