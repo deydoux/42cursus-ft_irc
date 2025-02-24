@@ -129,9 +129,7 @@ void Command::_ping(const args_t &args, Client &client)
 	response_args.push_back(client.get_server().get_name());
 	response_args.push_back(args[1]);
 
-	client.send(Client::create_cmd_reply(
-		client.get_server().get_name(), "PONG", response_args
-	));
+	client.cmd_reply(client.get_server().get_name(), "PONG", response_args);
 }
 
 void Command::_quit(const args_t &args, Client &client)
