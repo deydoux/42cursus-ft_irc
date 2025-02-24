@@ -9,7 +9,6 @@
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
-#include "Client.hpp"
 
 Client::Client(const int fd, const std::string ip, Server &server):
 	_fd(fd),
