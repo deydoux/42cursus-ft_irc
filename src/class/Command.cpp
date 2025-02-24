@@ -47,7 +47,16 @@ void Command::_invite(const args_t &args, Client &client)
 	if (!channel || !target)
 		return client.reply(ERR_NOSUCHNICK, args[1], "No such nick or channel name");
 
-	client.invite_to_channel(*target, *channel);
+	// client.invite_to_channel(*target, *channel);
+
+	args_t response_args;
+	response_args.push_back(args[1]);
+	response_args.push_back(args[2]);
+
+	target->send(target->create_cmd_reply(
+		client.get_mask(), "INVITE", response_args
+	));
+	client.reply(RPL_INVITING, args[1] + ' ' + args[2]);
 }
 
 void Command::_motd(const args_t &args, Client &client)
