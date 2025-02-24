@@ -17,10 +17,13 @@ public:
 	void	handle_messages(std::string messages);
 	void	log(const std::string &message, const log_level level = info) const;
 	ssize_t	send(const std::string &message) const;
-	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	void	send_error(const std::string &message);
+
 	void	invite_to_channel(Client &target, Channel &channel);
 	void	join_channel(Channel &channel, std::string passkey);
+
+	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
+	void	cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const;
 
 	const std::string	create_motd_reply() const;
 

@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
+#include "Client.hpp"
 
 Client::Client(const int fd, const std::string ip, Server &server):
 	_fd(fd),
@@ -64,6 +65,11 @@ ssize_t Client::send(const std::string &message) const
 void Client::reply(reply_code code, const std::string &arg, const std::string &message) const
 {
 	send(_create_reply(code, arg, message));
+}
+
+void Client::cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const
+{
+	send(create_cmd_reply(prefix, cmd, args));
 }
 
 void Client::send_error(const std::string &message)
