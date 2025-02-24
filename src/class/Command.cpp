@@ -117,7 +117,7 @@ void Command::_join(const args_t &args, Client &client)
 
 		args_t response_args;
 		response_args.push_back(channel->get_name());
-		channel->send_broadcast(client.create_cmd_reply(
+		channel->send_broadcast(Client::create_cmd_reply(
 			client_mask, "JOIN", response_args
 		));
 	}
@@ -129,9 +129,7 @@ void Command::_ping(const args_t &args, Client &client)
 	response_args.push_back(client.get_server().get_name());
 	response_args.push_back(args[1]);
 
-	client.send(client.create_cmd_reply(
-		client.get_server().get_name(), "PONG", response_args
-	));
+	client.cmd_reply(client.get_server().get_name(), "PONG", response_args);
 }
 
 void Command::_quit(const args_t &args, Client &client)
@@ -142,11 +140,11 @@ void Command::_quit(const args_t &args, Client &client)
 
 	args_t response_args;
 	response_args.push_back(quit_message);
-	
+
 	channels_t client_channels = client.get_active_channels();
 	for (channels_t::iterator channel = client_channels.begin(); channel != client_channels.end(); channel++) {
 		channel->second->remove_client(client.get_fd());
-		channel->second->send_broadcast(client.create_cmd_reply(
+		channel->second->send_broadcast(Client::create_cmd_reply(
 			client.get_mask(), "QUIT", response_args
 		));
 	}
