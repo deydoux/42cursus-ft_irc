@@ -167,12 +167,12 @@ void	Command::_kick(const args_t &args, Client &client)
 		return ;
 	}
 
-	std::vector<Channel *> channels_to_kick_from;
-	std::string	kicked_client = args[2];
-	Server &server = client.get_server();
+	std::vector<Channel *>		channels_to_kick_from;
+	std::string					kicked_client = args[2];
+	Server						&server = client.get_server();
 
-	std::vector<std::string> channels_name = ft_split(args[1], ',');
-	std::string passkey = (args_size == 4) ? args[3] : "";
+	std::vector<std::string>	channels_name = ft_split(args[1], ',');
+	std::string 				reason = (args_size == 4) ? args[3] : "";
 
 	for (size_t i = 0; i < channels_name.size(); i++)
 	{
@@ -196,8 +196,18 @@ void	Command::_kick(const args_t &args, Client &client)
 			);
 		}
 	}
+
+	std::string client_mask = client.get_mask();
 	for (size_t i = 0; i < channels_to_kick_from.size(); i++)
 	{
-		client.kick_channel(*channels_to_kick_from[i], kicked_client, passkey);
+		args_t args;
+		args.push_back(channels_to_kick_from[i]->get_name());
+		args.push_back(client.get_nickname());
+		args.push_back(reason);
+
+		client.kick_channel(*channels_to_kick_from[i], kicked_client);
+		channels_to_kick_from[i]->send_broadcast(client.create_cmd_reply(
+			client_mask, "KICK", args
+		));
 	}
 }

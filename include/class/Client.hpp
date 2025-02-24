@@ -20,8 +20,8 @@ public:
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	void	send_error(const std::string &message);
 	void	invite_to_channel(Client &target, Channel &channel);
-	void	join_channel(Channel &channel, std::string passkey, bool is_operator);
-	void	kick_channel(Channel &chennel, std::string kicked_client, std::string passkey);
+	void	join_channel(Channel &channel, std::string passkey);
+	void	kick_channel(Channel &chennel, std::string kicked_client);
 
 	const std::string	create_motd_reply() const;
 	const std::string	create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const;
