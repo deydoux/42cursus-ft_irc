@@ -44,8 +44,16 @@ void Command::_invite(const args_t &args, Client &client)
 	Client *target = client.get_server().get_client(args[1]);
 	Channel *channel = client.get_channel(args[2]);
 
-	if (!target || !channel)
+	if (!target)
 		return client.reply(ERR_NOSUCHNICK, args[1], "No such nick or channel name");
+
+	if (channel) {
+		if (!channel->is_client_member(client))
+			return client.reply(ERR_NOTONCHANNEL, channel->get_name(), "You are not on that channel");
+
+		if (channel->is_client_member(*target))
+			return client.reply(ERR_USERONCHANNEL, target->get_nickname(), "is already on channel");
+	}
 
 	args_t response_args;
 	response_args.push_back(args[1]);
