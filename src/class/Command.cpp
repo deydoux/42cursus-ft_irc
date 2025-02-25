@@ -217,7 +217,6 @@ void	Command::_kick(const args_t &args, Client &client)
 			channels_to_kick_from.push_back(new_channel);
 	}
 
-	std::string client_mask = client.get_mask();
 	for (size_t i = 0; i < channels_to_kick_from.size(); i++)
 	{
 		args_t args;
