@@ -21,7 +21,7 @@ public:
 
 	void	invite_to_channel(Client &target, Channel &channel);
 	void	join_channel(Channel &channel, std::string passkey);
-	void	kick_channel(Channel &chennel, std::string kicked_client);
+	void	kick_channel(Channel &chennel, std::string kicked_client, args_t args);
 
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	void	cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const;

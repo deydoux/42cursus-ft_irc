@@ -152,6 +152,7 @@ void Command::_quit(const args_t &args, Client &client)
 	}
 }
 
+#include <iostream>
 void	Command::_kick(const args_t &args, Client &client)
 {
 	size_t args_size = args.size();
@@ -170,7 +171,7 @@ void	Command::_kick(const args_t &args, Client &client)
 	Server						&server = client.get_server();
 
 	std::vector<std::string>	channels_name = ft_split(args[1], ',');
-	std::string 				reason = (args_size == 4) ? args[3] : "";
+	std::string 				reason = (args_size == 4) ? args[3] : client.get_nickname();
 
 	for (size_t i = 0; i < channels_name.size(); i++)
 	{
@@ -200,12 +201,9 @@ void	Command::_kick(const args_t &args, Client &client)
 	{
 		args_t args;
 		args.push_back(channels_to_kick_from[i]->get_name());
-		args.push_back(client.get_nickname());
+		args.push_back(kicked_client);
 		args.push_back(reason);
 
-		client.kick_channel(*channels_to_kick_from[i], kicked_client);
-		channels_to_kick_from[i]->send_broadcast(client.create_cmd_reply(
-			client_mask, "KICK", args
-		));
+		client.kick_channel(*channels_to_kick_from[i], kicked_client, args);
 	}
 }

@@ -370,7 +370,7 @@ void Client::invite_to_channel(Client &target, Channel &channel)
 	// necessary as the /invite command is a bonus part
 }
 
-void	Client::join_channel(Channel &channel, std::string passkey, bool is_operator)
+void	Client::join_channel(Channel &channel, std::string passkey)
 {
 	if (channel.is_client_member(*this))
 		return ;
@@ -395,21 +395,27 @@ void	Client::join_channel(Channel &channel, std::string passkey, bool is_operato
 
 }
 
-void	Client::kick_channel(Channel &channel, std::string kicked_client, std::string passkey)
+void	Client::kick_channel(Channel &channel, std::string kicked_client, args_t args)
 {
 	Server &server = this->get_server();
+	Client *client_to_be_kicked = server.get_client(kicked_client);
+
 	if (!channel.is_client_member(*this))
 		this->reply(ERR_NOTONCHANNEL, channel.get_name(), "You're not on that channel");
-	if (!this->is_channel_operator(channel.get_name()))
+	else if (!this->is_channel_operator(channel.get_name()))
 		this->reply(ERR_CHANOPRIVSNEEDED, channel.get_name(), "You're not channel operator");
-
-	Client *client_to_be_kicked = server.get_client(kicked_client);
-	if (!client_to_be_kicked)
+	else if (!client_to_be_kicked)
 		this->reply(ERR_NOSUCHNICK, channel.get_name(), "No such nick/channel");
-	if (!channel.is_client_member(*client_to_be_kicked))
-		this->reply(ERR_USERNOTINCHANNEL, channel.get_name(), "They aren't on that channell");
-
-	channel.
+	else if (!channel.is_client_member(*client_to_be_kicked))
+		this->reply(ERR_USERNOTINCHANNEL, channel.get_name(), "They aren't on that channel");
+	else
+	{
+		channel.send_broadcast(this->create_cmd_reply(
+			this->get_mask(), "KICK", args
+		));
+		channel.remove_client(client_to_be_kicked->get_fd());
+		client_to_be_kicked->get_active_channels().erase(channel.get_name());
+	}
 }
 
 std::string Client::_create_line(const std::string &content)
