@@ -425,8 +425,7 @@ void Client::notify_quit()
 {
 	clients_t clients_to_notify;
 
-	channels_t client_channels = _active_channels;
-	for (channels_t::iterator it = client_channels.begin(); it != client_channels.end(); ++it) {
+	for (channels_t::iterator it = _active_channels.begin(); it != _active_channels.end(); ++it) {
 		Channel *channel = it->second;
 
 		clients_t members = channel->get_members();
