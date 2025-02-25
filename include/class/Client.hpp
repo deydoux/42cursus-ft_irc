@@ -33,6 +33,10 @@ public:
 	std::string			get_mask( void ) const;
 	channels_t			&get_active_channels( void );
 	size_t				get_channels_count( void ) const;
+	
+	bool				is_channel_op(std::string channel_name) const;
+	void				give_op_permissions_to(Channel &channel) const;
+	void				remove_op_permissions_from(Channel &channel) const;
 
 	Server	&get_server() const;
 

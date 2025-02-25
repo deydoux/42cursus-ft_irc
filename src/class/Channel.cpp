@@ -1,9 +1,13 @@
 #include "class/Channel.hpp"
 #include "class/Client.hpp"
+#include "class/Server.hpp"
 
 Channel::Channel(Client &creator, std::string &name, const bool verbose):
 	_name(name),
+	_creation_timestamp(unix_timestamp()),
 	_passkey(),
+	_topic(),
+	_is_topic_protected(false),
 	_limit_members(false),
 	_is_invite_only(false),
 	_verbose(verbose)
@@ -82,6 +86,11 @@ bool	Channel::check_passkey(std::string &passkey)
 	return _passkey == "" || _passkey == passkey;
 }
 
+const std::string	Channel::get_passkey( void )
+{
+	return _passkey;
+}
+
 bool Channel::is_invite_only(void)
 {
 	return _is_invite_only;
@@ -112,6 +121,33 @@ void Channel::send_broadcast(const std::string &message)
 	for (clients_t::iterator member = _members.begin(); member != _members.end(); member++) {
 		member->second->send(message);
 	}
+}
+
+std::string Channel::get_modes( void ) const
+{
+	std::stringstream ss;
+
+	ss << '+';
+	for (std::vector<char>::const_iterator it = _modes.begin(); it != _modes.end(); it++) {
+		ss << *it;
+	}
+
+	return ss.str();
+}
+
+const std::string	Channel::get_creation_timestamp( void ) const
+{
+	return _creation_timestamp;
+}
+
+void Channel::set_is_topic_protected(bool is_topic_protected)
+{
+	_is_topic_protected = is_topic_protected;
+}
+
+bool Channel::is_topic_protected( void )
+{
+	return _is_topic_protected;
 }
 
 void Channel::log(const std::string &message, const log_level level) const

@@ -3,12 +3,15 @@
 #include "class/Channel.hpp"
 #include "class/Server.hpp"
 
+#include <sstream>
+
 void Command::init()
 {
 	_commands["ping"] = (_command_t) {&_ping, 1, 1, true};
 	_commands["join"] = (_command_t) {&_join, 1, 2, true};
 	_commands["motd"] = (_command_t) {&_motd, 0, 1, true};
 	_commands["quit"] = (_command_t) {&_quit, 0, 1, true};
+	_commands["mode"] = (_command_t) {&_mode, 2, 3, true};
 	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
 	_commands["pass"] = (_command_t) {&_pass, 1, 1, false};
 	_commands["user"] = (_command_t) {&_user, 4, 4, false};
@@ -150,4 +153,141 @@ void Command::_quit(const args_t &args, Client &client)
 			client.get_mask(), "QUIT", response_args
 		));
 	}
+}
+
+void Command::_mode(const args_t &args, Client &client)
+{
+	std::string target = args[1];
+	Server *server = &client.get_server();
+
+	Channel *channel = server->find_channel(target);
+	if (!channel)
+		// The real message would be "No such nick or ..", but in kittirc, only channel modes can be edied, not the user modes
+		return client.reply(ERR_NOSUCHNICK, target, "No such channel name");
+
+	if (args.size() == 2)
+	{
+		std::string channel_modes = channel->get_modes();
+		// If the user is inside the channel and a passkey is required, then it must appears in the reply message
+		if (channel_modes.find('k') != std::string::npos && channel->is_client_member(client)) {
+			channel_modes += ' ' + channel->get_passkey();
+		}
+
+		client.reply(RPL_CHANNELMODEIS, target, channel_modes);
+		client.reply(RPL_CREATIONTIME, target, channel->get_creation_timestamp());		
+		return ;
+	}
+
+	std::stringstream applied_modes;
+
+	bool add_mode = true;
+	for (char mode: args[2])
+	{
+		if (mode == '-') {
+			add_mode = false;
+			continue ;
+		} else if (mode == '+')
+			continue ;
+
+		if (std::string("itokl").find(mode) == std::string::npos) {
+			client.reply(ERR_UNKNOWNMODE, "" + mode, "is unknown mode char for " + target);
+			continue ;
+		}
+		else if ((mode == 'k' || mode == 'l') && add_mode && args.size() < 4) {
+			client.reply(ERR_NEEDMOREPARAMS, args[0], "Syntax error");
+			continue ;
+		}
+		else if (!client.is_channel_op(target)) {
+			client.reply(ERR_CHANOPRIVSNEEDED, target, "You are not channel operator");
+			continue ;
+		}
+
+		std::string argument = args[3];
+
+		if (mode == 'i') {
+			if (channel->is_invite_only() == add_mode) continue ;
+			channel->set_is_invite_only(add_mode);
+		}
+
+		else if (mode == 't') {
+			if (channel->is_topic_protected() == add_mode) continue ;
+			channel->set_is_topic_protected(add_mode);
+		}
+
+		else if (mode == 'k' && add_mode)
+			channel->set_passkey(argument);
+		
+		else if (mode == 'k' && !add_mode) {
+			std::string empty_pass = "";
+			channel->set_passkey(empty_pass);
+		}
+
+		else if (mode == 'l' && add_mode)
+			channel->set_max_members(std::atoi(argument.c_str()));
+		
+		else if (mode  == 'l' && !add_mode)
+			channel->unset_members_limit();
+
+		else if (mode == 'o') {
+			Client *new_op = server->get_client(argument);
+			if (new_op == NULL) {
+				client.reply(ERR_NOSUCHNICK, argument, "No such nick or channel name");
+				continue ;
+			}
+
+			if (!channel->is_client_member(*new_op)) {
+				client.reply(ERR_USERNOTINCHANNEL, argument + ' ' + target, "They aren't on that channel");
+				continue ;
+			}
+
+			if (add_mode)
+				new_op->give_op_permissions_to(*channel);
+			else
+				new_op->remove_op_permissions_from(*channel);
+		}
+
+		add_mode = true;
+	}
+
+
+	/*
+	syntax: MODE {#<channel>,<nickname>} <+/-><modes> [parameters]
+
+	channel modes: 
+	- i: Set/remove invite-only status
+	- t: Set/remove topic protection
+	- o: Give/take channel operator status
+	- k <key>: Set/remove channel password
+	- l <limit>: Set/remove user limit
+
+	a few interesting features:
+	- no symbol (+/-) means +
+	- when a mode is set, it channel broadcasts the mode just set
+		<< MODE #the-cure -t
+		>> :quteriss!~quteriss@z4r8p5.local MODE #the-cure -t
+	- this can also work for a group of modes, in the format that it was sent to the server
+		<< MODE #the-cure +it
+		>> :quteriss!~quteriss@z4r8p5.local MODE #the-cure +it
+	- but when the mode is already set, it returns nothing
+	- if the mode used is an unrecognized character, it returns a specific error message (472)
+		<< MODE #the-cure +y
+		>> :irc.example.net 472 quteriss y :is unknown mode char for #the-cure
+
+	some weird behaviors:
+	- when a mode receives a parameters, whe it needed one only in + state, then it does this ...
+		<< MODE #the-cure -l 10
+		>> :irc.example.net 472 quteriss 1 :is unknown mode char for #the-cure
+		>> :irc.example.net 472 quteriss 0 :is unknown mode char for #the-cure
+		>> :quteriss!~quteriss@z4r8p5.local MODE #the-cure -l
+	- 
+		<< MODE #the-cure +i -i i -i i- i i i i i i i
+		>> :quteriss!~quteriss@z4r8p5.local MODE #the-cure -i
+
+	<< MODE #test +it -it
+	>> :quteriss!~quteriss@z3r3p3.local MODE #test +it-it
+
+	<< MODE #test it -it
+	>> :quteriss!~quteriss@z3r3p3.local MODE #test +it-it
+	*/
+	
 }

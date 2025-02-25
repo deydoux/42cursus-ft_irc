@@ -29,6 +29,7 @@ private:
 	static void	_join(const args_t &args, Client &client);
 	static void	_ping(const args_t &args, Client &client);
 	static void	_quit(const args_t &args, Client &client);
+	static void	_mode(const args_t &args, Client &client);
 };
 
 #endif // COMMAND_HPP
