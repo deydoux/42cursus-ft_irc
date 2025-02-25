@@ -182,7 +182,6 @@ void Command::_quit(const args_t &args, Client &client)
 	}
 }
 
-#include <iostream>
 void	Command::_kick(const args_t &args, Client &client)
 {
 	size_t args_size = args.size();
