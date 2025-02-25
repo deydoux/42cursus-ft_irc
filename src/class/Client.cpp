@@ -15,7 +15,8 @@ Client::Client(const int fd, const std::string ip, Server &server):
 	_ip(ip),
 	_server(server),
 	_disconnect_request(false),
-	_registered(false)
+	_registered(false),
+	_quit_reason("Client closed connection")
 {
 	log("Accepted connection from " + std::string(_ip));
 }
@@ -170,6 +171,11 @@ void Client::set_username(const std::string &username)
 	_check_registration();
 }
 
+void Client::set_realname(const std::string &realname)
+{
+	_realname = realname;
+}
+
 void Client::set_password(const std::string &password)
 {
 	if (!_username.empty() && !_nickname.empty())
@@ -178,9 +184,9 @@ void Client::set_password(const std::string &password)
 	_password = password;
 }
 
-void Client::set_realname(const std::string &realname)
+void Client::set_quit_reason(const std::string &reason)
 {
-	_realname = realname;
+	_quit_reason = reason;
 }
 
 bool Client::operator==(const Client &other) const
@@ -198,12 +204,12 @@ const std::string Client::create_cmd_reply(const std::string &prefix, const std:
 
 	if (!args.empty()) {
 		for (args_t::iterator it = args.begin(); it != args.end(); it++) {
-			std::string arg = *it;
-
 			oss << ' ';
-			if (arg.find(' ') != std::string::npos)
+
+			if (it + 1 == args.end())
 				oss << ':';
-			oss << arg;
+
+			oss << *it;
 		}
 	}
 
@@ -343,7 +349,7 @@ const int &Client::get_fd( void )
 	return _fd;
 }
 
-std::string	Client::get_mask(void) const
+std::string Client::get_mask(void) const
 {
 	return std::string(_nickname + "!" + _username + "@" + _ip);
 }
@@ -413,6 +419,31 @@ void	Client::kick_channel(Channel &channel, std::string kicked_client, args_t ar
 		channel.remove_client(*client_to_be_kicked);
 		client_to_be_kicked->get_active_channels().erase(channel.get_name());
 	}
+}
+
+void Client::notify_quit()
+{
+	clients_t clients_to_notify;
+
+	for (channels_t::iterator it = _active_channels.begin(); it != _active_channels.end(); ++it) {
+		Channel *channel = it->second;
+
+		clients_t members = channel->get_members();
+		for (clients_t::iterator member = members.begin(); member != members.end(); ++member) {
+			Client *member_client = member->second;
+			clients_to_notify[member_client->get_fd()] = member_client;
+		}
+	}
+
+	clients_to_notify.erase(_fd);
+
+	args_t response_args;
+	response_args.push_back(_quit_reason);
+
+	std::string cmd_reply = Client::create_cmd_reply(get_mask(), "QUIT", response_args);
+
+	for (clients_t::iterator it = clients_to_notify.begin(); it != clients_to_notify.end(); ++it)
+		it->second->send(cmd_reply);
 }
 
 std::string Client::_create_line(const std::string &content)

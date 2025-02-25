@@ -312,14 +312,18 @@ void Server::_read()
 
 void Server::_disconnect_client(int fd)
 {
+	Client *client = _clients[fd];
+
 	_connections--;
-	if (_clients[fd]->is_registered())
+	if (client->is_registered())
 		_registered_clients_count--;
 
-	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it)
-		it->second->remove_client(*_clients[fd]);
+	client->notify_quit();
 
-	delete _clients[fd];
+	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it)
+		it->second->remove_client(*client);
+
+	delete client;
 	_clients.erase(fd);
 
 	for (_pollfds_t::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it) {

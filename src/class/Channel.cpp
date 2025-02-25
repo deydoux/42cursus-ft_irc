@@ -71,9 +71,16 @@ void Channel::add_client(Client &client)
 void Channel::remove_client(Client &client)
 {
 	int client_fd = client.get_fd();
+
 	_members.erase(client_fd);
 	_invited_clients.erase(client_fd);
+
 	client.remove_channel_operator(_name);
+}
+
+const clients_t &Channel::get_members()
+{
+	return _members;
 }
 
 bool Channel::is_full(void)

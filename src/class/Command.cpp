@@ -166,20 +166,11 @@ void Command::_ping(const args_t &args, Client &client)
 
 void Command::_quit(const args_t &args, Client &client)
 {
-	std::string quit_message = "Client Quit";
-	if (args.size() > 1)
-		quit_message = args[1];
+	std::string reason = args.size() == 2 ? args[1] : client.get_nickname();
+	client.set_quit_reason(reason);
 
-	args_t response_args;
-	response_args.push_back(quit_message);
-
-	channels_t client_channels = client.get_active_channels();
-	for (channels_t::iterator channel = client_channels.begin(); channel != client_channels.end(); channel++) {
-		channel->second->remove_client(client);
-		channel->second->send_broadcast(Client::create_cmd_reply(
-			client.get_mask(), "QUIT", response_args
-		));
-	}
+	std::string error_description = args.size() == 2 ? args[1] : "";
+	client.send_error('"' + error_description + '"');
 }
 
 void	Command::_kick(const args_t &args, Client &client)
