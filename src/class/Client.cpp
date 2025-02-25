@@ -341,12 +341,6 @@ const int &Client::get_fd( void )
 	return _fd;
 }
 
-bool	Client::is_invited_to(Channel &channel)
-{
-	bool is_invited = std::find(_channel_invitations.begin(), _channel_invitations.end(), channel.get_name()) != _channel_invitations.end();
-	return (is_invited);
-}
-
 std::string	Client::get_mask(void) const
 {
 	return std::string(_nickname + "!" + _username + "@" + _ip);
@@ -362,12 +356,13 @@ size_t Client::get_channels_count(void) const
 	return _active_channels.size();
 }
 
-void Client::invite_to_channel(Client &target, Channel &channel)
+Channel *Client::get_channel(const std::string &name)
 {
-	target._channel_invitations.push_back(channel.get_name());
+	channels_t::iterator it = _active_channels.find(name);
+	if (it == _active_channels.end())
+		return NULL;
 
-	// TODO: this function also needs to send a privmsg to target, but this scope is not
-	// necessary as the /invite command is a bonus part
+	return it->second;
 }
 
 void	Client::join_channel(Channel &channel, std::string passkey)
@@ -375,14 +370,14 @@ void	Client::join_channel(Channel &channel, std::string passkey)
 	if (channel.is_client_member(*this))
 		return ;
 
-	if (channel.is_full())
+	if (!channel.is_client_invited(*this) && channel.is_invite_only())
+		this->reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
+
+	else if (channel.is_full())
 		this->reply(ERR_CHANNELISFULL, channel.get_name(), "Cannot join channel (+l)");
 
 	else if (!channel.check_passkey(passkey))
 		this->reply(ERR_BADCHANNELKEY, channel.get_name(), "Cannot join channel (+k) - bad key");
-
-	else if (channel.is_invite_only() && !this->is_invited_to(channel))
-		this->reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
 
 	else if (channel.is_client_banned(*this))
 		this->reply(ERR_BANNEDFROMCHAN, channel.get_name(), "Cannot join channel (+b)");
