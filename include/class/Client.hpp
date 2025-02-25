@@ -19,7 +19,6 @@ public:
 	ssize_t	send(const std::string &message) const;
 	void	send_error(const std::string &message);
 
-	void	invite_to_channel(Client &target, Channel &channel);
 	void	join_channel(Channel &channel, std::string passkey);
 
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
@@ -31,10 +30,10 @@ public:
 	const bool			&is_registered() const;
 	const std::string	&get_nickname(bool allow_empty = true) const;
 	const int			&get_fd( void );
-	bool				is_invited_to(Channel &channel);
 	std::string			get_mask( void ) const;
 	channels_t			&get_active_channels( void );
 	size_t				get_channels_count( void ) const;
+	Channel				*get_channel(const std::string &name);
 
 	Server	&get_server() const;
 
@@ -61,8 +60,7 @@ private:
 	std::string	_realname;
 	std::string	_username;
 
-	channels_t					_active_channels;
-	std::vector<std::string>	_channel_invitations;
+	channels_t	_active_channels;
 
 	void		_handle_message(std::string message);
 

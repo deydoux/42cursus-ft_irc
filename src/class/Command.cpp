@@ -5,12 +5,13 @@
 
 void Command::init()
 {
-	_commands["ping"] = (_command_t) {&_ping, 1, 1, true};
+	_commands["invite"] = (_command_t) {&_invite, 2, 2, true};
 	_commands["join"] = (_command_t) {&_join, 1, 2, true};
 	_commands["motd"] = (_command_t) {&_motd, 0, 1, true};
-	_commands["quit"] = (_command_t) {&_quit, 0, 1, true};
 	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
 	_commands["pass"] = (_command_t) {&_pass, 1, 1, false};
+	_commands["ping"] = (_command_t) {&_ping, 1, 1, true};
+	_commands["quit"] = (_command_t) {&_quit, 0, 1, true};
 	_commands["user"] = (_command_t) {&_user, 4, 4, false};
 }
 
@@ -38,6 +39,34 @@ void Command::execute(const args_t &args, Client &client)
 
 Command::_commands_t Command::_commands;
 
+void Command::_invite(const args_t &args, Client &client)
+{
+	Server &server = client.get_server();
+
+	Client *target = server.get_client(args[1]);
+	Channel *channel = server.find_channel(args[2]);
+
+	if (!target)
+		return client.reply(ERR_NOSUCHNICK, args[1], "No such nick or channel name");
+
+	if (channel) {
+		if (!channel->is_client_member(client))
+			return client.reply(ERR_NOTONCHANNEL, channel->get_name(), "You are not on that channel");
+
+		if (channel->is_client_member(*target))
+			return client.reply(ERR_USERONCHANNEL, target->get_nickname(), "is already on channel");
+
+		channel->invite_client(*target);
+	}
+
+	args_t response_args;
+	response_args.push_back(args[1]);
+	response_args.push_back(args[2]);
+
+	target->cmd_reply(client.get_mask(), "INVITE", response_args);
+	client.reply(RPL_INVITING, args[1] + ' ' + args[2]);
+}
+
 void Command::_motd(const args_t &args, Client &client)
 {
 	if (args.size() == 2 && args[1] != client.get_server().get_name())
@@ -59,6 +88,7 @@ void Command::_pass(const args_t &args, Client &client)
 void Command::_user(const args_t &args, Client &client)
 {
 	client.set_username(args[1]);
+	// TODO: check realname
 	client.set_realname(args[4]);
 }
 

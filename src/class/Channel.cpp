@@ -31,13 +31,13 @@ bool Channel::is_valid_name(const std::string &name)
 	// - Must start with # or &
 	if (!(name[0] == '&' || name[0] == '#'))
 		return false;
-	
+
 	// - No spaces, control chars, commas
 	for (size_t i = 0; i < name.size(); i++) {
 		if (iscntrl(name[i]) || name[i] == ' ')
 			return false;
 	}
-	
+
 	return true;
 }
 
@@ -57,6 +57,11 @@ void Channel::set_is_invite_only(bool invite_only)
 	_is_invite_only = invite_only;
 }
 
+void Channel::invite_client(Client &client)
+{
+	_invited_clients[client.get_fd()] = &client;
+}
+
 void Channel::add_client(Client &client)
 {
 	_members[client.get_fd()] = &client;
@@ -65,6 +70,7 @@ void Channel::add_client(Client &client)
 void Channel::remove_client(int client_fd)
 {
 	_members.erase(client_fd);
+	_invited_clients.erase(client_fd);
 }
 
 bool Channel::is_full(void)
@@ -100,11 +106,18 @@ bool Channel::is_client_banned(Client &client)
 
 bool Channel::is_client_member(Client &client)
 {
-	for (clients_t::iterator it = _members.begin(); it != _members.end(); ++it) {
-		if (*it->second == client)
-			return true;
-	}
-	return false;
+	return _members.find(client.get_fd()) != _members.end();
+}
+
+bool Channel::is_client_invited(Client &client)
+{
+	clients_t::iterator it = _invited_clients.find(client.get_fd());
+
+	if (it == _invited_clients.end())
+		return false;
+
+	_invited_clients.erase(it);
+	return true;
 }
 
 void Channel::send_broadcast(const std::string &message)
