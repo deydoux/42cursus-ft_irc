@@ -7,7 +7,7 @@ void Command::init()
 {
 	_commands["invite"] = (_command_t) {&_invite, 2, 2, true};
 	_commands["join"] = (_command_t) {&_join, 1, 2, true};
-	_commands["kick"] = (_command_t) {&_kick, 2, 3, false};
+	_commands["kick"] = (_command_t) {&_kick, 2, 3, true};
 	_commands["motd"] = (_command_t) {&_motd, 0, 1, true};
 	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
 	_commands["pass"] = (_command_t) {&_pass, 1, 1, false};
@@ -184,23 +184,12 @@ void Command::_quit(const args_t &args, Client &client)
 
 void	Command::_kick(const args_t &args, Client &client)
 {
-	size_t args_size = args.size();
-
-	if (args_size < 3)
-	{
-		client.reply(
-		ERR_NEEDMOREPARAMS,
-		"",
-		"Not enough parameters for command");
-		return ;
-	}
-
 	std::vector<Channel *>		channels_to_kick_from;
 	std::string					kicked_client = args[2];
 	Server						&server = client.get_server();
 
 	std::vector<std::string>	channels_name = ft_split(args[1], ',');
-	std::string 				reason = (args_size == 4) ? args[3] : client.get_nickname();
+	std::string 				reason = (args.size() == 4) ? args[3] : client.get_nickname();
 
 	for (size_t i = 0; i < channels_name.size(); i++)
 	{
