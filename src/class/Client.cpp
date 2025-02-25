@@ -179,12 +179,12 @@ const std::string Client::create_cmd_reply(const std::string &prefix, const std:
 
 	if (!args.empty()) {
 		for (args_t::iterator it = args.begin(); it != args.end(); it++) {
-			std::string arg = *it;
-
 			oss << ' ';
-			if (arg.find(' ') != std::string::npos)
+
+			if (it + 1 == args.end())
 				oss << ':';
-			oss << arg;
+
+			oss << *it;
 		}
 	}
 
