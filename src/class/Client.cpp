@@ -15,7 +15,8 @@ Client::Client(const int fd, const std::string ip, Server &server):
 	_ip(ip),
 	_server(server),
 	_disconnect_request(false),
-	_registered(false)
+	_registered(false),
+	_quit_reason("Client closed connection")
 {
 	log("Accepted connection from " + std::string(_ip));
 }
@@ -170,6 +171,11 @@ void Client::set_username(const std::string &username)
 	_check_registration();
 }
 
+void Client::set_realname(const std::string &realname)
+{
+	_realname = realname;
+}
+
 void Client::set_password(const std::string &password)
 {
 	if (!_username.empty() && !_nickname.empty())
@@ -178,9 +184,9 @@ void Client::set_password(const std::string &password)
 	_password = password;
 }
 
-void Client::set_realname(const std::string &realname)
+void Client::set_quit_reason(const std::string &reason)
 {
-	_realname = realname;
+	_quit_reason = reason;
 }
 
 bool Client::operator==(const Client &other) const
@@ -343,7 +349,7 @@ const int &Client::get_fd( void )
 	return _fd;
 }
 
-std::string	Client::get_mask(void) const
+std::string Client::get_mask(void) const
 {
 	return std::string(_nickname + "!" + _username + "@" + _ip);
 }
@@ -415,7 +421,7 @@ void	Client::kick_channel(Channel &channel, std::string kicked_client, args_t ar
 	}
 }
 
-void Client::notify_quit(const std::string &reason)
+void Client::notify_quit()
 {
 	clients_t clients_to_notify;
 
@@ -433,7 +439,7 @@ void Client::notify_quit(const std::string &reason)
 	clients_to_notify.erase(_fd);
 
 	args_t response_args;
-	response_args.push_back(reason);
+	response_args.push_back(_quit_reason);
 
 	std::string cmd_reply = Client::create_cmd_reply(get_mask(), "QUIT", response_args);
 
