@@ -205,24 +205,16 @@ void	Command::_kick(const args_t &args, Client &client)
 	for (size_t i = 0; i < channels_name.size(); i++)
 	{
 		std::string channel_name = channels_name[i];
-		if (Channel::is_valid_name(channel_name))
+		Channel *new_channel = server.find_channel(channel_name);
+		if (!new_channel)
 		{
-			Channel *new_channel = server.find_channel(channel_name);
-			if (!new_channel)
-			{
-				client.reply(
-				ERR_NOSUCHCHANNEL,
-				channels_name[i],
-				"No such channel");
-			}
-			channels_to_kick_from.push_back(new_channel);
-		} else {
 			client.reply(
-				ERR_NOSUCHCHANNEL,
-				channels_name[i],
-				"No such channel"
-			);
+			ERR_NOSUCHCHANNEL,
+			channels_name[i],
+			"No such channel");
 		}
+		else
+			channels_to_kick_from.push_back(new_channel);
 	}
 
 	std::string client_mask = client.get_mask();
