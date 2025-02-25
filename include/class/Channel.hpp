@@ -28,7 +28,7 @@ public:
 
 	void	invite_client(Client &client);
 	void	add_client(Client &client);
-	void	remove_client(int client_fd);
+	void	remove_client(Client &client);
 
 	static const size_t max_channel_name_size = 50;
 

@@ -175,7 +175,7 @@ void Command::_quit(const args_t &args, Client &client)
 
 	channels_t client_channels = client.get_active_channels();
 	for (channels_t::iterator channel = client_channels.begin(); channel != client_channels.end(); channel++) {
-		channel->second->remove_client(client.get_fd());
+		channel->second->remove_client(client);
 		channel->second->send_broadcast(Client::create_cmd_reply(
 			client.get_mask(), "QUIT", response_args
 		));

@@ -108,7 +108,7 @@ const bool &Client::is_registered() const
 
 bool Client::is_channel_operator(std::string channel_name) const
 {
-	return _channel_operator.find(channel_name) != _channel_operator.end();
+	return std::find(_channel_operator.begin(), _channel_operator.end(), channel_name) != _channel_operator.end();
 }
 
 const std::string &Client::get_nickname(bool allow_empty) const
@@ -126,9 +126,18 @@ const bool &Client::has_disconnect_request() const
 	return _disconnect_request;
 }
 
-void	Client::set_channel_operator(std::string channel, bool value)
+void	Client::set_channel_operator(std::string channel)
 {
-	_channel_operator[channel] = value;
+	if (!is_channel_operator(channel))
+		_channel_operator.push_back(channel);
+}
+
+void Client::remove_channel_operator(std::string channel)
+{
+	std::vector<std::string>::iterator it = std::find(_channel_operator.begin(), _channel_operator.end(), channel);
+
+	if (it != _channel_operator.end())
+		_channel_operator.erase(it);
 }
 
 void Client::set_nickname(const std::string &nickname)
@@ -401,7 +410,7 @@ void	Client::kick_channel(Channel &channel, std::string kicked_client, args_t ar
 		channel.send_broadcast(this->create_cmd_reply(
 			this->get_mask(), "KICK", args
 		));
-		channel.remove_client(client_to_be_kicked->get_fd());
+		channel.remove_client(*client_to_be_kicked);
 		client_to_be_kicked->get_active_channels().erase(channel.get_name());
 	}
 }

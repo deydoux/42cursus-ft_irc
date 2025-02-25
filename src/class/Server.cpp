@@ -317,7 +317,7 @@ void Server::_disconnect_client(int fd)
 		_registered_clients_count--;
 
 	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it)
-		it->second->remove_client(fd);
+		it->second->remove_client(*_clients[fd]);
 
 	delete _clients[fd];
 	_clients.erase(fd);
