@@ -28,7 +28,7 @@ public:
 
 	void	invite_client(Client &client);
 	void	add_client(Client &client);
-	void	remove_client(int client_fd);
+	void	remove_client(Client &client);
 
 	const clients_t	&get_members();
 

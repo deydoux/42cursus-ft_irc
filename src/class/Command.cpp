@@ -7,6 +7,7 @@ void Command::init()
 {
 	_commands["invite"] = (_command_t) {&_invite, 2, 2, true};
 	_commands["join"] = (_command_t) {&_join, 1, 2, true};
+	_commands["kick"] = (_command_t) {&_kick, 2, 3, true};
 	_commands["motd"] = (_command_t) {&_motd, 0, 1, true};
 	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
 	_commands["pass"] = (_command_t) {&_pass, 1, 1, false};
@@ -101,12 +102,12 @@ void Command::_join(const args_t &args, Client &client)
 		// TODO close_all_chanels() -> would be easier to implement when the /PART command will be
 		return ;
 
-	std::vector<Channel *> channels_to_be_joined;
-	std::vector<std::string> passkeys;
-	Server &server = client.get_server();
+	std::vector<Channel *> 		channels_to_be_joined;
+	std::vector<std::string>	passkeys;
+	Server						&server = client.get_server();
 
-	std::vector<std::string> channels_name = ft_split(args[1], ',');
-	std::vector<std::string> input_passkeys = args_size == 3 ?
+	std::vector<std::string>	channels_name = ft_split(args[1], ',');
+	std::vector<std::string>	input_passkeys = args_size == 3 ?
 		ft_split(args[2], ',') : std::vector<std::string>();
 
 	for (size_t i = 0; i < channels_name.size(); i++)
@@ -145,6 +146,7 @@ void Command::_join(const args_t &args, Client &client)
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
 		client.join_channel(*channel, passkey);
 
+		// TODO: dont send anything if join channel and delete channel (maybe do that before ??)
 		args_t response_args;
 		response_args.push_back(channel->get_name());
 		channel->send_broadcast(Client::create_cmd_reply(
@@ -169,4 +171,40 @@ void Command::_quit(const args_t &args, Client &client)
 		quit_message = args[1];
 
 	client.notify_quit(quit_message);
+}
+
+void	Command::_kick(const args_t &args, Client &client)
+{
+	std::vector<Channel *>		channels_to_kick_from;
+	std::string					kicked_client = args[2];
+	Server						&server = client.get_server();
+
+	std::vector<std::string>	channels_name = ft_split(args[1], ',');
+	std::string 				reason = (args.size() == 4) ? args[3] : client.get_nickname();
+
+	for (size_t i = 0; i < channels_name.size(); i++)
+	{
+		std::string channel_name = channels_name[i];
+		Channel *new_channel = server.find_channel(channel_name);
+		if (!new_channel)
+		{
+			client.reply(
+				ERR_NOSUCHCHANNEL,
+				channels_name[i],
+				"No such channel"
+			);
+		}
+		else
+			channels_to_kick_from.push_back(new_channel);
+	}
+
+	for (size_t i = 0; i < channels_to_kick_from.size(); i++)
+	{
+		args_t args;
+		args.push_back(channels_to_kick_from[i]->get_name());
+		args.push_back(kicked_client);
+		args.push_back(reason);
+
+		client.kick_channel(*channels_to_kick_from[i], kicked_client, args);
+	}
 }
