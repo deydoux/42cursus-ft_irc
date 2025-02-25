@@ -128,11 +128,7 @@ const bool &Client::has_disconnect_request() const
 
 void	Client::set_channel_operator(std::string channel, bool value)
 {
-	std::map<std::string, bool>::iterator it = this->_channel_operator.find(channel);
-	if (it == _channel_operator.end())
-		_channel_operator.insert(std::make_pair(channel, value));
-	else
-		it->second = value;
+	_channel_operator[channel] = value;
 }
 
 void Client::set_nickname(const std::string &nickname)
