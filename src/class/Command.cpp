@@ -166,9 +166,11 @@ void Command::_ping(const args_t &args, Client &client)
 
 void Command::_quit(const args_t &args, Client &client)
 {
-	std::string reason = args.size() == 2 ? args[1] : client.get_nickname();
+	std::string quit_message = args.size() == 2 ? args[1] : client.get_nickname();
+	client.notify_quit(quit_message);
 
-	client.notify_quit(reason);
+	std::string error_description = args.size() == 2 ? args[1] : "";
+	client.send_error('"' + error_description + '"');
 }
 
 void	Command::_kick(const args_t &args, Client &client)
