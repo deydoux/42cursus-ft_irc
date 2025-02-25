@@ -73,6 +73,11 @@ void Channel::remove_client(int client_fd)
 	_invited_clients.erase(client_fd);
 }
 
+const clients_t &Channel::get_members()
+{
+	return _members;
+}
+
 bool Channel::is_full(void)
 {
 	return _limit_members && _max_members <= _members.size();

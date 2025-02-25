@@ -20,6 +20,7 @@ public:
 	void	send_error(const std::string &message);
 
 	void	join_channel(Channel &channel, std::string passkey);
+	void	notify_quit(const std::string &reason);
 
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	void	cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const;

@@ -30,6 +30,8 @@ public:
 	void	add_client(Client &client);
 	void	remove_client(int client_fd);
 
+	const clients_t	&get_members();
+
 	static const size_t max_channel_name_size = 50;
 
 	static bool	is_valid_name(const std::string &name);

@@ -373,6 +373,32 @@ void Client::join_channel(Channel &channel, std::string passkey)
 	_active_channels[channel.get_name()] = &channel;
 }
 
+void Client::notify_quit(const std::string &reason)
+{
+	clients_t clients_to_notify;
+
+	channels_t client_channels = _active_channels;
+	for (channels_t::iterator it = client_channels.begin(); it != client_channels.end(); ++it) {
+		Channel *channel = it->second;
+
+		clients_t members = channel->get_members();
+		for (clients_t::iterator member = members.begin(); member != members.end(); ++member) {
+			Client *member_client = member->second;
+			clients_to_notify[member_client->get_fd()] = member_client;
+		}
+	}
+
+	clients_to_notify.erase(_fd);
+
+	args_t response_args;
+	response_args.push_back(reason);
+
+	std::string cmd_reply = Client::create_cmd_reply(get_mask(), "QUIT", response_args);
+
+	for (clients_t::iterator it = clients_to_notify.begin(); it != clients_to_notify.end(); ++it)
+		it->second->send(cmd_reply);
+}
+
 std::string Client::_create_line(const std::string &content)
 {
 	std::string line = content;
