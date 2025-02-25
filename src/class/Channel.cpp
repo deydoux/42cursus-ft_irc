@@ -9,6 +9,7 @@ Channel::Channel(Client &creator, std::string &name, const bool verbose):
 	_verbose(verbose)
 {
 	log("Created", debug);
+	creator.set_channel_operator(name);
 	_members[creator.get_fd()] = &creator;
 }
 
@@ -67,10 +68,12 @@ void Channel::add_client(Client &client)
 	_members[client.get_fd()] = &client;
 }
 
-void Channel::remove_client(int client_fd)
+void Channel::remove_client(Client &client)
 {
+	int client_fd = client.get_fd();
 	_members.erase(client_fd);
 	_invited_clients.erase(client_fd);
+	client.remove_channel_operator(_name);
 }
 
 bool Channel::is_full(void)

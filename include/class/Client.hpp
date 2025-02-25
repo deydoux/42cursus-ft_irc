@@ -20,6 +20,7 @@ public:
 	void	send_error(const std::string &message);
 
 	void	join_channel(Channel &channel, std::string passkey);
+	void	kick_channel(Channel &chennel, std::string kicked_client, args_t args);
 
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	void	cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const;
@@ -28,6 +29,7 @@ public:
 
 	const bool			&has_disconnect_request() const;
 	const bool			&is_registered() const;
+	bool				is_channel_operator(std::string channel_name) const;
 	const std::string	&get_nickname(bool allow_empty = true) const;
 	const int			&get_fd( void );
 	std::string			get_mask( void ) const;
@@ -41,6 +43,8 @@ public:
 	void	set_username(const std::string &username);
 	void	set_realname(const std::string &realname);
 	void	set_password(const std::string &password);
+	void	set_channel_operator(std::string channel);
+	void	remove_channel_operator(std::string channel);
 
 	bool	operator==(const Client &other) const;
 
@@ -60,7 +64,8 @@ private:
 	std::string	_realname;
 	std::string	_username;
 
-	channels_t	_active_channels;
+	channels_t						_active_channels;
+	std::vector<std::string>		_channel_operator;
 
 	void		_handle_message(std::string message);
 

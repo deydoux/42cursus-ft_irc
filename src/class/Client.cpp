@@ -106,6 +106,11 @@ const bool &Client::is_registered() const
 	return _registered;
 }
 
+bool Client::is_channel_operator(std::string channel_name) const
+{
+	return std::find(_channel_operator.begin(), _channel_operator.end(), channel_name) != _channel_operator.end();
+}
+
 const std::string &Client::get_nickname(bool allow_empty) const
 {
 	static const std::string empty_nick = "*";
@@ -119,6 +124,20 @@ const std::string &Client::get_nickname(bool allow_empty) const
 const bool &Client::has_disconnect_request() const
 {
 	return _disconnect_request;
+}
+
+void	Client::set_channel_operator(std::string channel)
+{
+	if (!is_channel_operator(channel))
+		_channel_operator.push_back(channel);
+}
+
+void Client::remove_channel_operator(std::string channel)
+{
+	std::vector<std::string>::iterator it = std::find(_channel_operator.begin(), _channel_operator.end(), channel);
+
+	if (it != _channel_operator.end())
+		_channel_operator.erase(it);
 }
 
 void Client::set_nickname(const std::string &nickname)
@@ -232,19 +251,18 @@ void Client::_handle_message(std::string message)
 std::string Client::_create_reply(reply_code code, const std::string &arg, const std::string &message) const
 {
 	std::ostringstream oss;
+
 	oss << ':' << _server.get_name() << ' ' << std::setfill('0') << std::setw(3) << code << ' ' << get_nickname(false);
 
 	if (!arg.empty())
 		oss << ' ' << arg;
 
-	if (!message.empty())
-	{
+	if (!message.empty()) {
 		oss << ' ';
 		if (message.find(' ') != std::string::npos)
 			oss << ':';
 		oss << message;
 	}
-
 	return _create_line(oss.str());
 }
 
@@ -349,7 +367,7 @@ Channel *Client::get_channel(const std::string &name)
 	return it->second;
 }
 
-void Client::join_channel(Channel &channel, std::string passkey)
+void	Client::join_channel(Channel &channel, std::string passkey)
 {
 	if (channel.is_client_member(*this))
 		return ;
@@ -371,6 +389,30 @@ void Client::join_channel(Channel &channel, std::string passkey)
 
 	channel.add_client(*this);
 	_active_channels[channel.get_name()] = &channel;
+
+}
+
+void	Client::kick_channel(Channel &channel, std::string kicked_client, args_t args)
+{
+	Server &server = this->get_server();
+	Client *client_to_be_kicked = server.get_client(kicked_client);
+
+	if (!channel.is_client_member(*this))
+		this->reply(ERR_NOTONCHANNEL, channel.get_name(), "You're not on that channel");
+	else if (!this->is_channel_operator(channel.get_name()))
+		this->reply(ERR_CHANOPRIVSNEEDED, channel.get_name(), "You're not channel operator");
+	else if (!client_to_be_kicked)
+		this->reply(ERR_NOSUCHNICK, channel.get_name(), "No such nick/channel");
+	else if (!channel.is_client_member(*client_to_be_kicked))
+		this->reply(ERR_USERNOTINCHANNEL, channel.get_name(), "They aren't on that channel");
+	else
+	{
+		channel.send_broadcast(this->create_cmd_reply(
+			this->get_mask(), "KICK", args
+		));
+		channel.remove_client(*client_to_be_kicked);
+		client_to_be_kicked->get_active_channels().erase(channel.get_name());
+	}
 }
 
 std::string Client::_create_line(const std::string &content)
