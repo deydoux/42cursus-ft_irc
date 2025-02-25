@@ -113,11 +113,11 @@ bool Channel::is_client_invited(Client &client)
 {
 	clients_t::iterator it = _invited_clients.find(client.get_fd());
 
-	bool result = it != _invited_clients.end();
-	if (result)
-		_invited_clients.erase(it);
+	if (it == _invited_clients.end())
+		return false;
 
-	return result;
+	_invited_clients.erase(it);
+	return true;
 }
 
 void Channel::send_broadcast(const std::string &message)
