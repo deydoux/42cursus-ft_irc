@@ -70,6 +70,7 @@ void Channel::add_client(Client &client)
 void Channel::remove_client(int client_fd)
 {
 	_members.erase(client_fd);
+	_invited_clients.erase(client_fd);
 }
 
 bool Channel::is_full(void)
