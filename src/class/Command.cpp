@@ -198,9 +198,10 @@ void	Command::_kick(const args_t &args, Client &client)
 		if (!new_channel)
 		{
 			client.reply(
-			ERR_NOSUCHCHANNEL,
-			channels_name[i],
-			"No such channel");
+				ERR_NOSUCHCHANNEL,
+				channels_name[i],
+				"No such channel"
+			);
 		}
 		else
 			channels_to_kick_from.push_back(new_channel);
