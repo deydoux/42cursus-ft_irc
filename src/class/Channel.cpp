@@ -130,11 +130,11 @@ bool Channel::is_client_invited(Client &client)
 	return true;
 }
 
-void Channel::send_broadcast(const std::string &message)
+void Channel::send_broadcast(const std::string &message, int exclude_fd)
 {
-	for (clients_t::iterator member = _members.begin(); member != _members.end(); member++) {
-		member->second->send(message);
-	}
+	for (clients_t::iterator member = _members.begin(); member != _members.end(); member++)
+		if (member->first != exclude_fd)
+			member->second->send(message);
 }
 
 void Channel::log(const std::string &message, const log_level level) const

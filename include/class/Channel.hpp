@@ -19,7 +19,7 @@ public:
 	bool				is_client_member(Client &client);
 	bool				is_client_invited(Client &client);
 
-	void	send_broadcast(const std::string &message);
+	void	send_broadcast(const std::string &message, int exclude_fd = -1);
 
 	void	set_passkey(std::string &passkey);
 	void	set_max_members(size_t max_members);

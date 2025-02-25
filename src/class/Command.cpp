@@ -12,6 +12,7 @@ void Command::init()
 	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
 	_commands["pass"] = (_command_t) {&_pass, 1, 1, false};
 	_commands["ping"] = (_command_t) {&_ping, 1, 1, true};
+	_commands["privmsg"] = (_command_t) {&_privmsg, 0, 2, true};
 	_commands["quit"] = (_command_t) {&_quit, 0, 1, true};
 	_commands["user"] = (_command_t) {&_user, 4, 4, false};
 }
@@ -173,7 +174,37 @@ void Command::_quit(const args_t &args, Client &client)
 	client.send_error('"' + error_description + '"');
 }
 
-void	Command::_kick(const args_t &args, Client &client)
+void Command::_privmsg(const args_t &args, Client &client)
+{
+	if (args.size() == 1)
+		return client.reply(ERR_NORECIPIENT, "", "No recipient given (" + args[0] + ")");
+
+	if (args.size() == 2)
+		return client.reply(ERR_NOTEXTTOSEND, "", "No text to send");
+
+	std::string recipient = args[1];
+
+	args_t response_args;
+	response_args.push_back(recipient);
+	response_args.push_back(args[2]);
+
+	if (recipient[0] == '#' || recipient[0] == '&') {
+		Channel *channel = client.get_server().find_channel(recipient);
+		if (!channel)
+			return client.reply(ERR_NOSUCHNICK, recipient, "No such nick or channel name");
+
+		std::string message = Client::create_cmd_reply(client.get_mask(), "PRIVMSG", response_args);
+		channel->send_broadcast(message, client.get_fd());
+	} else {
+		Client *target = client.get_server().get_client(recipient);
+		if (!target)
+			return client.reply(ERR_NOSUCHNICK, recipient, "No such nick or channel name");
+
+		target->cmd_reply(client.get_mask(), "PRIVMSG", response_args);
+	}
+}
+
+void Command::_kick(const args_t &args, Client &client)
 {
 	std::vector<Channel *>		channels_to_kick_from;
 	std::string					kicked_client = args[2];
