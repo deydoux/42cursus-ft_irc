@@ -108,10 +108,7 @@ const bool &Client::is_registered() const
 
 bool Client::is_channel_operator(std::string channel_name) const
 {
-	std::map<std::string, bool>::const_iterator it = this->_channel_operator.find(channel_name);
-	if (it != _channel_operator.end())
-		return it->second;
-	return false;
+	return _channel_operator.find(channel_name) != _channel_operator.end();
 }
 
 const std::string &Client::get_nickname(bool allow_empty) const
