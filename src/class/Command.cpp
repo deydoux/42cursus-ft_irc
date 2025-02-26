@@ -285,7 +285,7 @@ void Command::_mode(const args_t &args, Client &client)
 	sign = '+';
 	for (size_t i = 0; i < args[2].size(); i++)
 	{
-		char mode = args[2][i];
+		mode = args[2][i];
 		if (mode == '-' || mode == '+') {
 			sign = mode;
 			continue ;
