@@ -26,6 +26,7 @@ void	log(const std::string &context, const std::string &message, const log_level
 std::string		to_lower(const std::string &str);
 bool			match_mask(const std::string& mask, const std::string& user_string);
 std::vector<std::string> ft_split(const std::string &str, char separator);
+std::string		unix_timestamp( void );
 
 template <typename T>
 std::string to_string(T n);
