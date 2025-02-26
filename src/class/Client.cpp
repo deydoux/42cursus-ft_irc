@@ -373,10 +373,10 @@ Channel *Client::get_channel(const std::string &name)
 	return it->second;
 }
 
-void	Client::join_channel(Channel &channel, std::string passkey)
+bool	Client::join_channel(Channel &channel, std::string passkey)
 {
 	if (channel.is_client_member(*this))
-		return ;
+		return (true);
 
 	if (!channel.is_client_invited(*this) && channel.is_invite_only())
 		this->reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
@@ -392,10 +392,14 @@ void	Client::join_channel(Channel &channel, std::string passkey)
 
 	else if (this->get_channels_count() >= Client::_max_channels)
 		this->reply(ERR_TOOMANYCHANNELS, channel.get_name(), "You have joined too many channels");
-
-	channel.add_client(*this);
-	_active_channels[channel.get_name()] = &channel;
-
+	else
+	{
+		channel.add_client(*this);
+		_active_channels[channel.get_name()] = &channel;
+		
+		return (true);
+	}
+	return (false);
 }
 
 void	Client::kick_channel(Channel &channel, std::string kicked_client, args_t args)

@@ -16,7 +16,6 @@ Channel::Channel(Client &creator, std::string &name, const bool verbose):
 {
 	log("Created", debug);
 	creator.set_channel_operator(name);
-	_members[creator.get_fd()] = &creator;
 }
 
 Channel::~Channel()
@@ -136,11 +135,11 @@ bool Channel::is_client_invited(Client &client)
 	return true;
 }
 
-void Channel::send_broadcast(const std::string &message)
+void Channel::send_broadcast(const std::string &message, int exclude_fd)
 {
-	for (clients_t::iterator member = _members.begin(); member != _members.end(); member++) {
-		member->second->send(message);
-	}
+	for (clients_t::iterator member = _members.begin(); member != _members.end(); member++)
+		if (member->first != exclude_fd)
+			member->second->send(message);
 }
 
 std::string Channel::get_modes(bool get_modes_values)

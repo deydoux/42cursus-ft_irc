@@ -31,10 +31,13 @@ Server::Server(const std::string &name, port_t port, const std::string &password
 Server::~Server()
 {
 	close(_socket);
+
 	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it)
 		delete it->second;
+
 	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it)
 		delete it->second;
+
 	log("Destroyed", debug);
 }
 
@@ -47,8 +50,12 @@ void Server::log(const std::string &message, const log_level level) const
 void Server::start()
 {
 	_init();
+
 	while (!stop)
 		_loop();
+
+	_down();
+
 	log("Stopped");
 }
 
@@ -310,6 +317,12 @@ void Server::_read()
 	}
 }
 
+void Server::_down()
+{
+	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it)
+		it->second->send_error("Server going down");
+}
+
 void Server::_disconnect_client(int fd)
 {
 	Client *client = _clients[fd];
@@ -318,7 +331,8 @@ void Server::_disconnect_client(int fd)
 	if (client->is_registered())
 		_registered_clients_count--;
 
-	client->notify_quit();
+	if (!stop)
+		client->notify_quit();
 
 	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it)
 		it->second->remove_client(*client);
@@ -405,4 +419,9 @@ Channel	*Server::find_channel(const std::string &channel_name)
 void	Server::add_channel(Channel &new_channel)
 {
 	_channels[new_channel.get_name()] = &new_channel;
+}
+
+void	Server::delete_channel(std::string channel_name)
+{
+	_channels.erase(channel_name);
 }

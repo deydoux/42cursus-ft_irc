@@ -28,6 +28,7 @@ public:
 	Channel				*find_channel(const std::string &channel_name);
 
 	void	add_channel(Channel &new_channel);
+	void	delete_channel(std::string name);
 
 	const std::vector<std::string>	&get_motd_lines() const;
 
@@ -78,6 +79,7 @@ private:
 	void	_loop();
 	void	_accept();
 	void	_read();
+	void	_down();
 
 	void	_disconnect_client(int fd);
 
