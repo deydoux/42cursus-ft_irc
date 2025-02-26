@@ -182,25 +182,39 @@ void Command::_privmsg(const args_t &args, Client &client)
 	if (args.size() == 2)
 		return client.reply(ERR_NOTEXTTOSEND, "", "No text to send");
 
-	std::string recipient = args[1];
+	std::vector<std::string> recipients = ft_split(args[1], ',');
+	std::string message = args[2];
 
-	args_t response_args;
-	response_args.push_back(recipient);
-	response_args.push_back(args[2]);
+	for (std::vector<std::string>::iterator it = recipients.begin(); it != recipients.end(); it++) {
+		std::string recipient = *it;
 
-	if (recipient[0] == '#' || recipient[0] == '&') {
-		Channel *channel = client.get_server().find_channel(recipient);
-		if (!channel)
-			return client.reply(ERR_NOSUCHNICK, recipient, "No such nick or channel name");
+		args_t response_args;
+		response_args.push_back(recipient);
+		response_args.push_back(message);
 
-		std::string message = Client::create_cmd_reply(client.get_mask(), "PRIVMSG", response_args);
-		channel->send_broadcast(message, client.get_fd());
-	} else {
-		Client *target = client.get_server().get_client(recipient);
-		if (!target)
-			return client.reply(ERR_NOSUCHNICK, recipient, "No such nick or channel name");
+		if (recipient[0] == '#' || recipient[0] == '&') {
+			Channel *channel = client.get_server().find_channel(recipient);
 
-		target->cmd_reply(client.get_mask(), "PRIVMSG", response_args);
+			if (!channel)
+				client.reply(ERR_NOSUCHNICK, recipient, "No such nick or channel name");
+
+			else if (!channel->is_client_member(client))
+				client.reply(ERR_NOTONCHANNEL, recipient, "You are not on that channel");
+
+			else {
+				std::string message = Client::create_cmd_reply(client.get_mask(), "PRIVMSG", response_args);
+				channel->send_broadcast(message, client.get_fd());
+			}
+		}
+
+		else {
+			Client *target = client.get_server().get_client(recipient);
+
+			if (!target)
+				return client.reply(ERR_NOSUCHNICK, recipient, "No such nick or channel name");
+
+			target->cmd_reply(client.get_mask(), "PRIVMSG", response_args);
+		}
 	}
 }
 
