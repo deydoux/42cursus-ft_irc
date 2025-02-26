@@ -15,7 +15,6 @@ public:
 	const std::string	get_creation_timestamp( void ) const;
 	bool				is_full( void );
 	bool				check_passkey(std::string &passkey);
-	const std::string	get_passkey( void );
 	bool				is_invite_only( void );
 	bool				is_client_banned(Client &client);
 	bool				is_client_member(Client &client);
@@ -23,7 +22,6 @@ public:
 
 	void	send_broadcast(const std::string &message);
 
-	std::string get_modes( void ) const;
 
 	void	set_passkey(std::string &passkey);
 	void	set_max_members(size_t max_members);
@@ -36,7 +34,16 @@ public:
 
 	static const size_t max_channel_name_size = 50;
 
-	static bool	is_valid_name(const std::string &name);
+	static bool			is_valid_name(const std::string &name);
+
+	typedef struct modes_s {
+		std::vector<std::string> flags; // eg: ["+k", "+l", "-i"]
+		std::map<char, std::string> values; // eg: {'k': "pass", 'l': "10", ...}
+	} modes_t;
+
+	static std::string	stringify_modes(modes_t *modes, bool add_modes_values = true);
+	std::string			get_modes(bool get_modes_values = true);
+	void				add_modes(modes_t *modes);
 
 private:
 	const std::string	_name;
@@ -53,7 +60,7 @@ private:
 	bool			_is_invite_only;
 	std::vector<std::string> _banned_user_masks; // eg: nick!*@* , *!*@192.168.1.* ...
 
-	std::vector<char> _modes;
+	modes_t			_modes;
 
 	const bool	_verbose;
 };

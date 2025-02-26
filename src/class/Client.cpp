@@ -107,12 +107,7 @@ const std::string Client::create_cmd_reply(const std::string &prefix, const std:
 	if (!args.empty())
 	{
 		for (args_t::iterator it = args.begin(); it != args.end(); it++) {
-			std::string arg = *it;
-
-			oss << ' ';
-			if (arg.find(' ') != std::string::npos)
-				oss << ':';
-			oss << arg;
+			oss << ' ' << *it;
 		}
 	}
 
@@ -385,4 +380,17 @@ void Client::join_channel(Channel &channel, std::string passkey)
 
 	channel.add_client(*this);
 	_active_channels[channel.get_name()] = &channel;
+}
+
+bool Client::is_channel_op(std::string ) const
+{
+	return true;
+}
+
+void Client::give_op_permissions_to(Channel &) const
+{
+}
+
+void Client::remove_op_permissions_from(Channel &) const
+{
 }

@@ -4,6 +4,7 @@
 #include "class/Server.hpp"
 
 #include <sstream>
+#include <cstdlib>
 
 void Command::init()
 {
@@ -11,7 +12,7 @@ void Command::init()
 	_commands["join"] = (_command_t) {&_join, 1, 2, true};
 	_commands["motd"] = (_command_t) {&_motd, 0, 1, true};
 	_commands["quit"] = (_command_t) {&_quit, 0, 1, true};
-	_commands["mode"] = (_command_t) {&_mode, 2, 3, true};
+	_commands["mode"] = (_command_t) {&_mode, 1, __INT_MAX__, true};
 	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
 	_commands["pass"] = (_command_t) {&_pass, 1, 1, false};
 	_commands["user"] = (_command_t) {&_user, 4, 4, false};
@@ -144,7 +145,7 @@ void Command::_quit(const args_t &args, Client &client)
 		quit_message = args[1];
 
 	args_t response_args;
-	response_args.push_back(quit_message);
+	response_args.push_back(":" + quit_message);
 	
 	channels_t client_channels = client.get_active_channels();
 	for (channels_t::iterator channel = client_channels.begin(); channel != client_channels.end(); channel++) {
@@ -161,39 +162,38 @@ void Command::_mode(const args_t &args, Client &client)
 	Server *server = &client.get_server();
 
 	Channel *channel = server->find_channel(target);
+	// The real message would be "No such nick or ..", but in kittirc, only channel modes can be edied, not the user modes
 	if (!channel)
-		// The real message would be "No such nick or ..", but in kittirc, only channel modes can be edied, not the user modes
 		return client.reply(ERR_NOSUCHNICK, target, "No such channel name");
 
 	if (args.size() == 2)
 	{
-		std::string channel_modes = channel->get_modes();
-		// If the user is inside the channel and a passkey is required, then it must appears in the reply message
-		if (channel_modes.find('k') != std::string::npos && channel->is_client_member(client)) {
-			channel_modes += ' ' + channel->get_passkey();
-		}
-
-		client.reply(RPL_CHANNELMODEIS, target, channel_modes);
+		client.reply(RPL_CHANNELMODEIS, target, channel->get_modes(channel->is_client_member(client)));
 		client.reply(RPL_CREATIONTIME, target, channel->get_creation_timestamp());		
 		return ;
 	}
 
-	std::stringstream applied_modes;
+	std::vector<std::string> applied_flags;
+	std::map<char, std::string> modes_values;
+
+	size_t argument_index = 3;
 
 	bool add_mode = true;
-	for (char mode: args[2])
+	for (size_t i = 0; i < args[2].size(); i++)
 	{
-		if (mode == '-') {
-			add_mode = false;
-			continue ;
-		} else if (mode == '+')
-			continue ;
+		char mode = args[2][i];
 
-		if (std::string("itokl").find(mode) == std::string::npos) {
-			client.reply(ERR_UNKNOWNMODE, "" + mode, "is unknown mode char for " + target);
+		if (mode == '-' || mode == '+') {
+			if (mode == '-') add_mode = false;
 			continue ;
 		}
-		else if ((mode == 'k' || mode == 'l') && add_mode && args.size() < 4) {
+
+		if (std::string("itokl").find(mode) == std::string::npos) {
+			std::string mode_str(1, mode);
+			client.reply(ERR_UNKNOWNMODE, mode_str, "is unknown mode char for " + target);
+			continue ;
+		}
+		else if ((mode == 'k' || mode == 'l') && add_mode && args.size() < argument_index + 1) {
 			client.reply(ERR_NEEDMOREPARAMS, args[0], "Syntax error");
 			continue ;
 		}
@@ -202,7 +202,7 @@ void Command::_mode(const args_t &args, Client &client)
 			continue ;
 		}
 
-		std::string argument = args[3];
+		std::string argument = args[argument_index];
 
 		if (mode == 'i') {
 			if (channel->is_invite_only() == add_mode) continue ;
@@ -214,16 +214,21 @@ void Command::_mode(const args_t &args, Client &client)
 			channel->set_is_topic_protected(add_mode);
 		}
 
-		else if (mode == 'k' && add_mode)
+		else if (mode == 'k' && add_mode) {
 			channel->set_passkey(argument);
+			modes_values[mode] = argument;
+		}
 		
 		else if (mode == 'k' && !add_mode) {
 			std::string empty_pass = "";
 			channel->set_passkey(empty_pass);
+			modes_values[mode] = "*";
 		}
 
-		else if (mode == 'l' && add_mode)
+		else if (mode == 'l' && add_mode) {
 			channel->set_max_members(std::atoi(argument.c_str()));
+			modes_values[mode] = argument;
+		}
 		
 		else if (mode  == 'l' && !add_mode)
 			channel->unset_members_limit();
@@ -246,48 +251,25 @@ void Command::_mode(const args_t &args, Client &client)
 				new_op->remove_op_permissions_from(*channel);
 		}
 
-		add_mode = true;
+		std::string flag = add_mode ? "+" : "-";
+		applied_flags.push_back(flag + mode);
+
+		if (mode == 'k' || mode == 'l')
+			argument_index++;
 	}
 
+	if (!applied_flags.empty())
+	{	
+		args_t response_args;
+		response_args.push_back(target);
+			
+		Channel::modes_t modes = { flags: applied_flags, values: modes_values };
 
-	/*
-	syntax: MODE {#<channel>,<nickname>} <+/-><modes> [parameters]
+		response_args.push_back(Channel::stringify_modes(&modes));
+		channel->add_modes(&modes);
 
-	channel modes: 
-	- i: Set/remove invite-only status
-	- t: Set/remove topic protection
-	- o: Give/take channel operator status
-	- k <key>: Set/remove channel password
-	- l <limit>: Set/remove user limit
-
-	a few interesting features:
-	- no symbol (+/-) means +
-	- when a mode is set, it channel broadcasts the mode just set
-		<< MODE #the-cure -t
-		>> :quteriss!~quteriss@z4r8p5.local MODE #the-cure -t
-	- this can also work for a group of modes, in the format that it was sent to the server
-		<< MODE #the-cure +it
-		>> :quteriss!~quteriss@z4r8p5.local MODE #the-cure +it
-	- but when the mode is already set, it returns nothing
-	- if the mode used is an unrecognized character, it returns a specific error message (472)
-		<< MODE #the-cure +y
-		>> :irc.example.net 472 quteriss y :is unknown mode char for #the-cure
-
-	some weird behaviors:
-	- when a mode receives a parameters, whe it needed one only in + state, then it does this ...
-		<< MODE #the-cure -l 10
-		>> :irc.example.net 472 quteriss 1 :is unknown mode char for #the-cure
-		>> :irc.example.net 472 quteriss 0 :is unknown mode char for #the-cure
-		>> :quteriss!~quteriss@z4r8p5.local MODE #the-cure -l
-	- 
-		<< MODE #the-cure +i -i i -i i- i i i i i i i
-		>> :quteriss!~quteriss@z4r8p5.local MODE #the-cure -i
-
-	<< MODE #test +it -it
-	>> :quteriss!~quteriss@z3r3p3.local MODE #test +it-it
-
-	<< MODE #test it -it
-	>> :quteriss!~quteriss@z3r3p3.local MODE #test +it-it
-	*/
-	
+		channel->send_broadcast(client.create_cmd_reply(
+			client.get_mask(), "MODE", response_args
+		));
+	}
 }

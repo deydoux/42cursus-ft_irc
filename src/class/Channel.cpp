@@ -2,6 +2,8 @@
 #include "class/Client.hpp"
 #include "class/Server.hpp"
 
+#include <algorithm>
+
 Channel::Channel(Client &creator, std::string &name, const bool verbose):
 	_name(name),
 	_creation_timestamp(unix_timestamp()),
@@ -86,11 +88,6 @@ bool	Channel::check_passkey(std::string &passkey)
 	return _passkey == "" || _passkey == passkey;
 }
 
-const std::string	Channel::get_passkey( void )
-{
-	return _passkey;
-}
-
 bool Channel::is_invite_only(void)
 {
 	return _is_invite_only;
@@ -123,16 +120,9 @@ void Channel::send_broadcast(const std::string &message)
 	}
 }
 
-std::string Channel::get_modes( void ) const
+std::string Channel::get_modes(bool get_modes_values)
 {
-	std::stringstream ss;
-
-	ss << '+';
-	for (std::vector<char>::const_iterator it = _modes.begin(); it != _modes.end(); it++) {
-		ss << *it;
-	}
-
-	return ss.str();
+	return stringify_modes(&_modes, get_modes_values);
 }
 
 const std::string	Channel::get_creation_timestamp( void ) const
@@ -154,4 +144,54 @@ void Channel::log(const std::string &message, const log_level level) const
 {
 	if (_verbose || level != debug)
 		::log("Channel " + _name, message, level);
+}
+
+std::string Channel::stringify_modes(Channel::modes_t *modes, bool add_modes_values)
+{
+	if (modes->flags.empty())
+		return "+";
+    
+	std::string str_flags;
+	std::string str_values;
+	char current_sign = 0;
+
+	for (size_t i = 0; i < modes->flags.size(); ++i) {
+		std::string mode = modes->flags[i];
+
+		if (mode[0] != current_sign) {
+			current_sign = mode[0];
+			str_flags += current_sign;
+		}
+
+		str_flags += mode[1];
+		if (modes->values.find(mode[1]) != modes->values.end())
+			str_values += modes->values.find(mode[1])->second;
+	}
+
+	return str_flags + (add_modes_values ? " " + str_values : "");
+}
+
+void Channel::add_modes(modes_t *modes)
+{
+	for (size_t i = 0; i < modes->flags.size(); i++)
+	{
+		char mode = modes->flags[i][1];
+		if (mode == 'o') continue;
+
+		bool is_adding = modes->flags[i][0] == '+';
+		if (is_adding) {
+			_modes.flags.push_back(modes->flags[i]);
+		} else {
+			_modes.flags.erase(std::find(
+				_modes.flags.begin(), 
+				_modes.flags.end(), 
+				"-" + mode
+			));
+		}
+	}
+
+	for (std::map<char, std::string>::iterator it = modes->values.begin(); it != modes->values.end(); ++it) {
+		if (it->first == 'o') continue ;
+		_modes.values[it->first] = it->second;
+	}
 }
