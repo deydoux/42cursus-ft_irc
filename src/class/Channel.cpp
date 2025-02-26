@@ -10,7 +10,6 @@ Channel::Channel(Client &creator, std::string &name, const bool verbose):
 {
 	log("Created", debug);
 	creator.set_channel_operator(name);
-	_members[creator.get_fd()] = &creator;
 }
 
 Channel::~Channel()
