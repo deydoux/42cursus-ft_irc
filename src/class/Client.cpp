@@ -15,7 +15,8 @@ Client::Client(const int fd, const std::string ip, Server &server):
 	_ip(ip),
 	_server(server),
 	_disconnect_request(false),
-	_registered(false)
+	_registered(false),
+	_quit_reason("Client closed connection")
 {
 	log("Accepted connection from " + std::string(_ip));
 }
@@ -108,10 +109,7 @@ const bool &Client::is_registered() const
 
 bool Client::is_channel_operator(std::string channel_name) const
 {
-	std::map<std::string, bool>::const_iterator it = this->_channel_operator.find(channel_name);
-	if (it != _channel_operator.end())
-		return it->second;
-	return false;
+	return std::find(_channel_operator.begin(), _channel_operator.end(), channel_name) != _channel_operator.end();
 }
 
 const std::string &Client::get_nickname(bool allow_empty) const
@@ -129,13 +127,18 @@ const bool &Client::has_disconnect_request() const
 	return _disconnect_request;
 }
 
-void	Client::set_channel_operator(std::string channel, bool value)
+void	Client::set_channel_operator(std::string channel)
 {
-	std::map<std::string, bool>::iterator it = this->_channel_operator.find(channel);
-	if (it == _channel_operator.end())
-		_channel_operator.insert(std::make_pair(channel, value));
-	else
-		it->second = value;
+	if (!is_channel_operator(channel))
+		_channel_operator.push_back(channel);
+}
+
+void Client::remove_channel_operator(std::string channel)
+{
+	std::vector<std::string>::iterator it = std::find(_channel_operator.begin(), _channel_operator.end(), channel);
+
+	if (it != _channel_operator.end())
+		_channel_operator.erase(it);
 }
 
 void Client::set_nickname(const std::string &nickname)
@@ -168,6 +171,11 @@ void Client::set_username(const std::string &username)
 	_check_registration();
 }
 
+void Client::set_realname(const std::string &realname)
+{
+	_realname = realname;
+}
+
 void Client::set_password(const std::string &password)
 {
 	if (!_username.empty() && !_nickname.empty())
@@ -176,9 +184,9 @@ void Client::set_password(const std::string &password)
 	_password = password;
 }
 
-void Client::set_realname(const std::string &realname)
+void Client::set_quit_reason(const std::string &reason)
 {
-	_realname = realname;
+	_quit_reason = reason;
 }
 
 bool Client::operator==(const Client &other) const
@@ -196,12 +204,12 @@ const std::string Client::create_cmd_reply(const std::string &prefix, const std:
 
 	if (!args.empty()) {
 		for (args_t::iterator it = args.begin(); it != args.end(); it++) {
-			std::string arg = *it;
-
 			oss << ' ';
-			if (arg.find(' ') != std::string::npos)
+
+			if (it + 1 == args.end())
 				oss << ':';
-			oss << arg;
+
+			oss << *it;
 		}
 	}
 
@@ -249,13 +257,13 @@ void Client::_handle_message(std::string message)
 std::string Client::_create_reply(reply_code code, const std::string &arg, const std::string &message) const
 {
 	std::ostringstream oss;
-		oss << ':' << _server.get_name() << ' ' << std::setfill('0') << std::setw(3) << code << ' ' << get_nickname(false);
+
+	oss << ':' << _server.get_name() << ' ' << std::setfill('0') << std::setw(3) << code << ' ' << get_nickname(false);
 
 	if (!arg.empty())
 		oss << ' ' << arg;
 
-	if (!message.empty())
-	{
+	if (!message.empty()) {
 		oss << ' ';
 		if (message.find(' ') != std::string::npos)
 			oss << ':';
@@ -341,13 +349,7 @@ const int &Client::get_fd( void )
 	return _fd;
 }
 
-bool	Client::is_invited_to(Channel &channel)
-{
-	bool is_invited = std::find(_channel_invitations.begin(), _channel_invitations.end(), channel.get_name()) != _channel_invitations.end();
-	return (is_invited);
-}
-
-std::string	Client::get_mask(void) const
+std::string Client::get_mask(void) const
 {
 	return std::string(_nickname + "!" + _username + "@" + _ip);
 }
@@ -362,12 +364,13 @@ size_t Client::get_channels_count(void) const
 	return _active_channels.size();
 }
 
-void Client::invite_to_channel(Client &target, Channel &channel)
+Channel *Client::get_channel(const std::string &name)
 {
-	target._channel_invitations.push_back(channel.get_name());
+	channels_t::iterator it = _active_channels.find(name);
+	if (it == _active_channels.end())
+		return NULL;
 
-	// TODO: this function also needs to send a privmsg to target, but this scope is not
-	// necessary as the /invite command is a bonus part
+	return it->second;
 }
 
 bool	Client::join_channel(Channel &channel, std::string passkey)
@@ -375,14 +378,14 @@ bool	Client::join_channel(Channel &channel, std::string passkey)
 	if (channel.is_client_member(*this))
 		return (true);
 
-	if (channel.is_full())
+	if (!channel.is_client_invited(*this) && channel.is_invite_only())
+		this->reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
+
+	else if (channel.is_full())
 		this->reply(ERR_CHANNELISFULL, channel.get_name(), "Cannot join channel (+l)");
 
 	else if (!channel.check_passkey(passkey))
 		this->reply(ERR_BADCHANNELKEY, channel.get_name(), "Cannot join channel (+k) - bad key");
-
-	else if (channel.is_invite_only() && !this->is_invited_to(channel))
-		this->reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
 
 	else if (channel.is_client_banned(*this))
 		this->reply(ERR_BANNEDFROMCHAN, channel.get_name(), "Cannot join channel (+b)");
@@ -417,9 +420,34 @@ void	Client::kick_channel(Channel &channel, std::string kicked_client, args_t ar
 		channel.send_broadcast(this->create_cmd_reply(
 			this->get_mask(), "KICK", args
 		));
-		channel.remove_client(client_to_be_kicked->get_fd());
+		channel.remove_client(*client_to_be_kicked);
 		client_to_be_kicked->get_active_channels().erase(channel.get_name());
 	}
+}
+
+void Client::notify_quit()
+{
+	clients_t clients_to_notify;
+
+	for (channels_t::iterator it = _active_channels.begin(); it != _active_channels.end(); ++it) {
+		Channel *channel = it->second;
+
+		clients_t members = channel->get_members();
+		for (clients_t::iterator member = members.begin(); member != members.end(); ++member) {
+			Client *member_client = member->second;
+			clients_to_notify[member_client->get_fd()] = member_client;
+		}
+	}
+
+	clients_to_notify.erase(_fd);
+
+	args_t response_args;
+	response_args.push_back(_quit_reason);
+
+	std::string cmd_reply = Client::create_cmd_reply(get_mask(), "QUIT", response_args);
+
+	for (clients_t::iterator it = clients_to_notify.begin(); it != clients_to_notify.end(); ++it)
+		it->second->send(cmd_reply);
 }
 
 std::string Client::_create_line(const std::string &content)
