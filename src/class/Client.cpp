@@ -15,7 +15,8 @@ Client::Client(const int fd, const std::string ip, Server &server):
 	_ip(ip),
 	_server(server),
 	_disconnect_request(false),
-	_registered(false)
+	_registered(false),
+	_quit_reason("Client closed connection")
 {
 	log("Accepted connection from " + std::string(_ip));
 }
@@ -66,6 +67,11 @@ void Client::reply(reply_code code, const std::string &arg, const std::string &m
 	send(_create_reply(code, arg, message));
 }
 
+void Client::cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const
+{
+	send(create_cmd_reply(prefix, cmd, args));
+}
+
 void Client::send_error(const std::string &message)
 {
 	std::ostringstream oss;
@@ -96,27 +102,14 @@ const std::string Client::create_motd_reply() const
 	return reply;
 }
 
-const std::string Client::create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const
-{
-	std::ostringstream oss;
-	oss << ':' << prefix;
-
-	if (!cmd.empty())
-		oss << ' ' << cmd;
-
-	if (!args.empty())
-	{
-		for (args_t::iterator it = args.begin(); it != args.end(); it++) {
-			oss << ' ' << *it;
-		}
-	}
-
-	return _create_line(oss.str());
-}
-
 const bool &Client::is_registered() const
 {
 	return _registered;
+}
+
+bool Client::is_channel_operator(std::string channel_name) const
+{
+	return std::find(_channel_operator.begin(), _channel_operator.end(), channel_name) != _channel_operator.end();
 }
 
 const std::string &Client::get_nickname(bool allow_empty) const
@@ -132,6 +125,20 @@ const std::string &Client::get_nickname(bool allow_empty) const
 const bool &Client::has_disconnect_request() const
 {
 	return _disconnect_request;
+}
+
+void	Client::set_channel_operator(std::string channel)
+{
+	if (!is_channel_operator(channel))
+		_channel_operator.push_back(channel);
+}
+
+void Client::remove_channel_operator(std::string channel)
+{
+	std::vector<std::string>::iterator it = std::find(_channel_operator.begin(), _channel_operator.end(), channel);
+
+	if (it != _channel_operator.end())
+		_channel_operator.erase(it);
 }
 
 void Client::set_nickname(const std::string &nickname)
@@ -164,6 +171,11 @@ void Client::set_username(const std::string &username)
 	_check_registration();
 }
 
+void Client::set_realname(const std::string &realname)
+{
+	_realname = realname;
+}
+
 void Client::set_password(const std::string &password)
 {
 	if (!_username.empty() && !_nickname.empty())
@@ -172,14 +184,31 @@ void Client::set_password(const std::string &password)
 	_password = password;
 }
 
+void Client::set_quit_reason(const std::string &reason)
+{
+	_quit_reason = reason;
+}
+
 bool Client::operator==(const Client &other) const
 {
 	return get_mask() == other.get_mask();
 }
 
-void Client::set_realname(const std::string &realname)
+const std::string Client::create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args)
 {
-	_realname = realname;
+	std::ostringstream oss;
+	oss << ':' << prefix;
+
+	if (!cmd.empty())
+		oss << ' ' << cmd;
+
+	if (!args.empty()) {
+		for (args_t::iterator it = args.begin(); it != args.end(); it++) {
+			oss << ' ' << *it;
+		}
+	}
+
+	return _create_line(oss.str());
 }
 
 void Client::_handle_message(std::string message)
@@ -220,35 +249,21 @@ void Client::_handle_message(std::string message)
 	Command::execute(args, *this);
 }
 
-std::string Client::_create_line(const std::string &content) const
-{
-	std::string line = content;
-
-	if (line.size() > _max_message_size - 2) {
-		line.erase(_max_message_size - 7);
-		line += "[CUT]";
-	}
-	line += "\r\n";
-
-	return line;
-}
-
 std::string Client::_create_reply(reply_code code, const std::string &arg, const std::string &message) const
 {
 	std::ostringstream oss;
+
 	oss << ':' << _server.get_name() << ' ' << std::setfill('0') << std::setw(3) << code << ' ' << get_nickname(false);
 
 	if (!arg.empty())
 		oss << ' ' << arg;
 
-	if (!message.empty())
-	{
+	if (!message.empty()) {
 		oss << ' ';
 		if (message.find(' ') != std::string::npos)
 			oss << ':';
 		oss << message;
 	}
-
 	return _create_line(oss.str());
 }
 
@@ -329,13 +344,7 @@ const int &Client::get_fd( void )
 	return _fd;
 }
 
-bool	Client::is_invited_to(Channel &channel)
-{
-	bool is_invited = std::find(_channel_invitations.begin(), _channel_invitations.end(), channel.get_name()) != _channel_invitations.end();
-	return (is_invited);
-}
-
-std::string	Client::get_mask(void) const
+std::string Client::get_mask(void) const
 {
 	return std::string(_nickname + "!" + _username + "@" + _ip);
 }
@@ -350,27 +359,28 @@ size_t Client::get_channels_count(void) const
 	return _active_channels.size();
 }
 
-void Client::invite_to_channel(Client &target, Channel &channel)
+Channel *Client::get_channel(const std::string &name)
 {
-	target._channel_invitations.push_back(channel.get_name());
+	channels_t::iterator it = _active_channels.find(name);
+	if (it == _active_channels.end())
+		return NULL;
 
-	// TODO: this function also needs to send a privmsg to target, but this scope is not
-	// necessary as the /invite command is a bonus part
+	return it->second;
 }
 
-void Client::join_channel(Channel &channel, std::string passkey)
+void	Client::join_channel(Channel &channel, std::string passkey)
 {
 	if (channel.is_client_member(*this))
 		return ;
 
-	if (channel.is_full())
+	if (!channel.is_client_invited(*this) && channel.is_invite_only())
+		this->reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
+
+	else if (channel.is_full())
 		this->reply(ERR_CHANNELISFULL, channel.get_name(), "Cannot join channel (+l)");
 
 	else if (!channel.check_passkey(passkey))
 		this->reply(ERR_BADCHANNELKEY, channel.get_name(), "Cannot join channel (+k) - bad key");
-
-	else if (channel.is_invite_only() && !this->is_invited_to(channel))
-		this->reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
 
 	else if (channel.is_client_banned(*this))
 		this->reply(ERR_BANNEDFROMCHAN, channel.get_name(), "Cannot join channel (+b)");
@@ -380,6 +390,68 @@ void Client::join_channel(Channel &channel, std::string passkey)
 
 	channel.add_client(*this);
 	_active_channels[channel.get_name()] = &channel;
+
+}
+
+void	Client::kick_channel(Channel &channel, std::string kicked_client, args_t args)
+{
+	Server &server = this->get_server();
+	Client *client_to_be_kicked = server.get_client(kicked_client);
+
+	if (!channel.is_client_member(*this))
+		this->reply(ERR_NOTONCHANNEL, channel.get_name(), "You're not on that channel");
+	else if (!this->is_channel_operator(channel.get_name()))
+		this->reply(ERR_CHANOPRIVSNEEDED, channel.get_name(), "You're not channel operator");
+	else if (!client_to_be_kicked)
+		this->reply(ERR_NOSUCHNICK, channel.get_name(), "No such nick/channel");
+	else if (!channel.is_client_member(*client_to_be_kicked))
+		this->reply(ERR_USERNOTINCHANNEL, channel.get_name(), "They aren't on that channel");
+	else
+	{
+		channel.send_broadcast(this->create_cmd_reply(
+			this->get_mask(), "KICK", args
+		));
+		channel.remove_client(*client_to_be_kicked);
+		client_to_be_kicked->get_active_channels().erase(channel.get_name());
+	}
+}
+
+void Client::notify_quit()
+{
+	clients_t clients_to_notify;
+
+	for (channels_t::iterator it = _active_channels.begin(); it != _active_channels.end(); ++it) {
+		Channel *channel = it->second;
+
+		clients_t members = channel->get_members();
+		for (clients_t::iterator member = members.begin(); member != members.end(); ++member) {
+			Client *member_client = member->second;
+			clients_to_notify[member_client->get_fd()] = member_client;
+		}
+	}
+
+	clients_to_notify.erase(_fd);
+
+	args_t response_args;
+	response_args.push_back(_quit_reason);
+
+	std::string cmd_reply = Client::create_cmd_reply(get_mask(), "QUIT", response_args);
+
+	for (clients_t::iterator it = clients_to_notify.begin(); it != clients_to_notify.end(); ++it)
+		it->second->send(cmd_reply);
+}
+
+std::string Client::_create_line(const std::string &content)
+{
+	std::string line = content;
+
+	if (line.size() > _max_message_size - 2) {
+		line.erase(_max_message_size - 7);
+		line += "[CUT]";
+	}
+	line += "\r\n";
+
+	return line;
 }
 
 bool Client::is_channel_op(std::string ) const
