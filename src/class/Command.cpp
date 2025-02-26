@@ -215,51 +215,48 @@ void	Command::_kick(const args_t &args, Client &client)
 
 void Command::_mode(const args_t &args, Client &client)
 {
-	std::string target = args[1];
+	std::string channel_name = args[1];
 	Server *server = &client.get_server();
 
-	Channel *channel = server->find_channel(target);
-	// The real message would be "No such nick or ..", but in kittirc, only channel modes can be edied, not the user modes
+	Channel *channel = server->find_channel(channel_name);
 	if (!channel)
-		return client.reply(ERR_NOSUCHNICK, target, "No such channel name");
+		return client.reply(ERR_NOSUCHNICK, channel_name, "No such channel name");
 
-	if (args.size() == 2)
-	{
-		client.reply(RPL_CHANNELMODEIS, target, channel->get_modes(channel->is_client_member(client)));
-		client.reply(RPL_CREATIONTIME, target, channel->get_creation_timestamp());		
+	if (args.size() == 2) {
+		client.reply(RPL_CHANNELMODEIS, channel_name, channel->get_modes(channel->is_client_member(client)));
+		client.reply(RPL_CREATIONTIME, channel_name, channel->get_creation_timestamp());		
 		return ;
 	}
 
 	std::vector<std::string> applied_flags;
 	std::map<char, std::string> modes_values;
-
 	size_t argument_index = 3;
+	char sign, mode;
 
-	bool add_mode = true;
+	sign = '+';
 	for (size_t i = 0; i < args[2].size(); i++)
 	{
 		char mode = args[2][i];
-
 		if (mode == '-' || mode == '+') {
-			if (mode == '-') add_mode = false;
+			sign = mode;
 			continue ;
 		}
 
 		if (std::string("itokl").find(mode) == std::string::npos) {
-			std::string mode_str(1, mode);
-			client.reply(ERR_UNKNOWNMODE, mode_str, "is unknown mode char for " + target);
+			client.reply(ERR_UNKNOWNMODE, std::string(1, mode), "is unknown mode char for " + channel_name);
 			continue ;
 		}
-		else if ((mode == 'k' || mode == 'l') && add_mode && args.size() < argument_index + 1) {
+		else if ((mode == 'k' || mode == 'l') && sign == '+' && args.size() < argument_index + 1) {
 			client.reply(ERR_NEEDMOREPARAMS, args[0], "Syntax error");
 			continue ;
 		}
-		else if (!client.is_channel_op(target)) {
-			client.reply(ERR_CHANOPRIVSNEEDED, target, "You are not channel operator");
+		else if (!client.is_channel_operator(channel_name)) {
+			client.reply(ERR_CHANOPRIVSNEEDED, channel_name, "You are not channel operator");
 			continue ;
 		}
 
-		std::string argument = args[argument_index];
+		std::string value = args.size() > argument_index ? args[argument_index] : "";
+		bool add_mode = sign == '+';
 
 		if (mode == 'i') {
 			if (channel->is_invite_only() == add_mode) continue ;
@@ -271,41 +268,36 @@ void Command::_mode(const args_t &args, Client &client)
 			channel->set_is_topic_protected(add_mode);
 		}
 
-		else if (mode == 'k' && add_mode) {
-			channel->set_passkey(argument);
-			modes_values[mode] = argument;
-		}
-		
-		else if (mode == 'k' && !add_mode) {
+		else if (mode == 'k') {
 			std::string empty_pass = "";
-			channel->set_passkey(empty_pass);
-			modes_values[mode] = "*";
+			channel->set_passkey(add_mode ? value : empty_pass);
+			modes_values[mode] = add_mode ? value : "*";
 		}
 
 		else if (mode == 'l' && add_mode) {
-			channel->set_max_members(std::atoi(argument.c_str()));
-			modes_values[mode] = argument;
+			if (add_mode) channel->set_max_members(std::atoi(value.c_str()));
+			else channel->unset_members_limit();
+			modes_values[mode] = value;
 		}
-		
-		else if (mode  == 'l' && !add_mode)
-			channel->unset_members_limit();
 
 		else if (mode == 'o') {
-			Client *new_op = server->get_client(argument);
-			if (new_op == NULL) {
-				client.reply(ERR_NOSUCHNICK, argument, "No such nick or channel name");
+			if (value.empty()) continue ;
+
+			Client *new_op = server->get_client(value);
+			if (!new_op) {
+				client.reply(ERR_NOSUCHNICK, value, "No such nick or channel name");
 				continue ;
 			}
 
 			if (!channel->is_client_member(*new_op)) {
-				client.reply(ERR_USERNOTINCHANNEL, argument + ' ' + target, "They aren't on that channel");
+				client.reply(ERR_USERNOTINCHANNEL, value + " " + channel_name, "They aren't on that channel");
 				continue ;
 			}
 
 			if (add_mode)
-				new_op->give_op_permissions_to(*channel);
+				new_op->set_channel_operator(channel_name);
 			else
-				new_op->remove_op_permissions_from(*channel);
+				new_op->remove_channel_operator(channel_name);
 		}
 
 		std::string flag = add_mode ? "+" : "-";
@@ -318,14 +310,14 @@ void Command::_mode(const args_t &args, Client &client)
 	if (!applied_flags.empty())
 	{	
 		args_t response_args;
-		response_args.push_back(target);
+		response_args.push_back(channel_name);
 			
 		Channel::modes_t modes = { flags: applied_flags, values: modes_values };
 
 		response_args.push_back(Channel::stringify_modes(&modes));
 		channel->add_modes(&modes);
 
-		channel->send_broadcast(client.create_cmd_reply(
+		channel->send_broadcast(Client::create_cmd_reply(
 			client.get_mask(), "MODE", response_args
 		));
 	}

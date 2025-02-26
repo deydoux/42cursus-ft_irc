@@ -204,7 +204,12 @@ const std::string Client::create_cmd_reply(const std::string &prefix, const std:
 
 	if (!args.empty()) {
 		for (args_t::iterator it = args.begin(); it != args.end(); it++) {
-			oss << ' ' << *it;
+			oss << ' ';
+
+			if (it + 1 == args.end())
+				oss << ':';
+
+			oss << *it;
 		}
 	}
 
@@ -452,17 +457,4 @@ std::string Client::_create_line(const std::string &content)
 	line += "\r\n";
 
 	return line;
-}
-
-bool Client::is_channel_op(std::string ) const
-{
-	return true;
-}
-
-void Client::give_op_permissions_to(Channel &) const
-{
-}
-
-void Client::remove_op_permissions_from(Channel &) const
-{
 }

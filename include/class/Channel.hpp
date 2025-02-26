@@ -23,7 +23,6 @@ public:
 
 	void	send_broadcast(const std::string &message);
 
-
 	void	set_passkey(std::string &passkey);
 	void	set_max_members(size_t max_members);
 	void	unset_members_limit( void );

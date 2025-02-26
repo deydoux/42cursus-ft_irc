@@ -36,10 +36,7 @@ public:
 	std::string			get_mask( void ) const;
 	channels_t			&get_active_channels( void );
 	size_t				get_channels_count( void ) const;
-	
-	bool				is_channel_op(std::string channel_name) const;
-	void				give_op_permissions_to(Channel &channel) const;
-	void				remove_op_permissions_from(Channel &channel) const;
+
 	Channel				*get_channel(const std::string &name);
 
 	Server	&get_server() const;
@@ -49,8 +46,8 @@ public:
 	void	set_realname(const std::string &realname);
 	void	set_password(const std::string &password);
 	void	set_quit_reason(const std::string &reason);
-	void	set_channel_operator(std::string channel);
-	void	remove_channel_operator(std::string channel);
+	void	set_channel_operator(std::string channel_name);
+	void	remove_channel_operator(std::string channel_name);
 
 	bool	operator==(const Client &other) const;
 
