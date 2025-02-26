@@ -399,3 +399,8 @@ void	Server::add_channel(Channel &new_channel)
 {
 	_channels[new_channel.get_name()] = &new_channel;
 }
+
+void	Server::delete_channel(std::string channel_name)
+{
+	_channels.erase(channel_name);
+}

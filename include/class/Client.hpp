@@ -20,7 +20,7 @@ public:
 	void	send_error(const std::string &message);
 
 	void	invite_to_channel(Client &target, Channel &channel);
-	void	join_channel(Channel &channel, std::string passkey);
+	bool	join_channel(Channel &channel, std::string passkey);
 	void	kick_channel(Channel &chennel, std::string kicked_client, args_t args);
 
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;

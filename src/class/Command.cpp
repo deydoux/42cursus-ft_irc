@@ -114,14 +114,18 @@ void Command::_join(const args_t &args, Client &client)
 		Channel *channel = channels_to_be_joined[i];
 
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
-		client.join_channel(*channel, passkey);
 
-		// TODO: dont send anything if join channel and delete channel (maybe do that before ??)
 		args_t response_args;
 		response_args.push_back(channel->get_name());
-		channel->send_broadcast(Client::create_cmd_reply(
+
+		if (!client.join_channel(*channel, passkey))
+			server.delete_channel(channel->get_name());
+		else
+		{
+			channel->send_broadcast(Client::create_cmd_reply(
 			client_mask, "JOIN", response_args
-		));
+			));
+		}
 	}
 }
 
