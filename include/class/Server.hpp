@@ -79,6 +79,7 @@ private:
 	void	_loop();
 	void	_accept();
 	void	_read();
+	void	_down();
 
 	void	_disconnect_client(int fd);
 
