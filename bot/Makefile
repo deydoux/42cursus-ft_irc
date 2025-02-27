@@ -43,8 +43,8 @@ $(BUILD_DIR)/$(CURL_TARBALL):
 $(CURL_DIR): $(BUILD_DIR)/$(CURL_TARBALL)
 	$(TAR) -xzf $< -C $(BUILD_DIR)
 
-$(CURL_DIR)/Makefile: $(CURL_DIR)
-	cd $< && ./configure --with-openssl --without-libpsl
+$(CURL_DIR)/Makefile: $(CURL_DIR) Makefile
+	cd $< && test -f Makefile || ./configure --with-openssl --without-libpsl
 
 $(CURL_LIB): $(CURL_DIR)/Makefile
 	$(MAKE) -C $(CURL_DIR)
