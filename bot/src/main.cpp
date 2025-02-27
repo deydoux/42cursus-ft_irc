@@ -6,5 +6,5 @@ int main(void)
 {
 	Curl curl;
 
-	std::cout << curl.get("https://neofetch.dorian.cool") << std::endl;
+	std::cout << curl.post("http://localhost:11434/api/generate", "{\"model\":\"llama3.2:1b\",\"prompt\":\"Hello Kitty\",\"stream\":false}") << std::endl;
 }

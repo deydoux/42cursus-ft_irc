@@ -15,6 +15,7 @@ Curl::Exception::Exception(const std::string &message) : std::runtime_error(mess
 std::string Curl::get(const std::string &url)
 {
 	_init(url);
+
 	return _perform();
 }
 
@@ -22,12 +23,13 @@ std::string Curl::post(const std::string &url, const std::string &data)
 {
 	_init(url);
 	_setopt(CURLOPT_POSTFIELDS, data.c_str());
+
 	return _perform();
 }
 
 void Curl::_reset()
 {
-	return curl_easy_reset(_handle);
+	curl_easy_reset(_handle);
 }
 
 CURLcode Curl::_setopt(CURLoption option, const void *data)
