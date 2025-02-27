@@ -349,22 +349,36 @@ void Command::_mode(const args_t &args, Client &client)
 
 void Command::_who(const args_t &args, Client &client)
 {
-	// store the name mask in a variable
 	std::string mask = "*";
-	if (args.size() > 1)
+	if (args.size() > 1 && args[1] != "0")
 		mask = args[1];
 
-	// retrieve the users matching the <name> query (if there's one)
-	// think about the 'o' extra parameter
+	Server *server = &client.get_server();
+	Channel *channel = server->find_channel(mask);
 	bool operator_flag = args.size() > 2 && args[2] == "o";
-	clients_t clients = client.get_server().get_clients(mask, operator_flag);
+	std::string context = "*";
+	clients_t clients;
+
+	if (channel && !operator_flag) {
+		clients = channel->get_members();
+		context = mask;
+	} else if (!operator_flag) {
+		clients = server->get_clients(mask);
+	}
 
 	std::string reply;
-	for (clients_t::iterator it = clients.begin(); it != clients.end(); it++) {
-		Client *visible_client = it->second;
-
-		// std::string reply_string = visible_client->generate_who_reply();
-		// client.create_reply();
+	for (clients_t::iterator it = clients.begin(); it != clients.end(); it++)
+	{
+		Client *found_client = it->second;
+		reply += client.create_reply(
+			RPL_WHOREPLY,
+			found_client->generate_who_reply(context), 
+			"0 " + found_client->get_realname()
+		);
 	}
-	client.send(reply);
+
+	if (!reply.empty())
+		client.send(reply);
+
+	client.send(client.create_reply(RPL_ENDOFWHO, context, "End of WHO list"));
 }

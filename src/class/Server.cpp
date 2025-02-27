@@ -99,6 +99,23 @@ Client *Server::get_client(const std::string &nickname) const
 	return NULL;
 }
 
+clients_t Server::get_clients(const std::string &mask)
+{
+	clients_t clients;
+
+	bool has_wildcards = mask.find_first_of("*?") != std::string::npos;
+	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); it++)
+	{
+		Client *client = it->second;
+
+		if ((!has_wildcards && client->get_nickname() == mask)
+			|| (match_mask(mask, client->get_mask())))
+			clients[client->get_fd()] = client;
+	}
+
+	return clients;
+}
+
 size_t Server::get_connections() const
 {
 	return _connections;
