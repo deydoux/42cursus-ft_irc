@@ -7,15 +7,16 @@ SRC_DIR = src
 INC_DIR = include
 BUILD_DIR = build
 
-CXX = c++
-CXXFLAGS = -I$(INC_DIR) -MD -Wall -Wextra -Werror -std=c++98 -g
-
 CURL_VERSION = 8.12.1
 CURL_NAME = curl-$(CURL_VERSION)
 CURL_TARBALL = $(CURL_NAME).tar.gz
 CURL_URL = https://curl.se/download/$(CURL_TARBALL)
 CURL_DIR = $(BUILD_DIR)/$(CURL_NAME)
 CURL_LIB = $(CURL_DIR)/lib/.libs/libcurl.a
+CURL_INC = $(CURL_DIR)/include
+
+CXX = c++
+CXXFLAGS = -I$(INC_DIR) -I$(CURL_INC) -MD -Wall -Wextra -Werror -std=c++98 -g
 
 CURL = curl
 MKDIR = mkdir -p
