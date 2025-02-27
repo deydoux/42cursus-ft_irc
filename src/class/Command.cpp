@@ -373,7 +373,7 @@ void Command::_who(const args_t &args, Client &client)
 		Client *found_client = it->second;
 		reply += client.create_reply(
 			RPL_WHOREPLY,
-			found_client->generate_who_reply(context), 
+			found_client->generate_who_reply(context),
 			"0 " + found_client->get_realname()
 		);
 	}
@@ -381,5 +381,5 @@ void Command::_who(const args_t &args, Client &client)
 	if (!reply.empty())
 		client.send(reply);
 
-	client.send(client.create_reply(RPL_ENDOFWHO, context, "End of WHO list"));
+	client.reply(RPL_ENDOFWHO, context, "End of WHO list");
 }
