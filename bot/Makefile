@@ -1,6 +1,7 @@
 NAME = ircbot
 
 SRC = \
+	class/Curl.cpp \
 	main.cpp
 
 SRC_DIR = src
@@ -29,27 +30,27 @@ DEP = $(OBJ:.o=.d)
 
 .DEFAULT_GOAL = all
 
-$(NAME): $(OBJ)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LFLAGS)
-
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(CURL_INC) Makefile
-	@$(MKDIR) $(@D)
-	$(CXX) $(CXXFLAGS) -o $@ -c $<
-
--include $(DEP)
-
 $(BUILD_DIR)/$(CURL_TARBALL):
-	@$(MKDIR) $(@D)
+	$(MKDIR) $(@D)
 	$(CURL) -L $(CURL_URL) -o $@
 
 $(CURL_DIR) $(CURL_INC): $(BUILD_DIR)/$(CURL_TARBALL)
 	$(TAR) -xzf $< -C $(BUILD_DIR)
 
-$(CURL_DIR)/Makefile: $(CURL_DIR) Makefile
-	cd $< && test -f Makefile || ./configure --with-openssl --without-libpsl
+$(CURL_DIR)/Makefile: Makefile | $(CURL_DIR)
+	cd $(@D) && ./configure --with-openssl --without-libpsl
 
 $(CURL_LIB): $(CURL_DIR)/Makefile
-	$(MAKE) -C $(CURL_DIR)
+	$(MAKE) -C $(CURL_DIR) --no-print-directory
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp Makefile | $(CURL_INC)
+	$(MKDIR) $(@D)
+	$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(NAME): $(OBJ) $(CURL_LIB)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJ) $(LFLAGS)
+
+-include $(DEP)
 
 .PHONY: all clean fclean re
 
