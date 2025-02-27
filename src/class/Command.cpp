@@ -19,6 +19,7 @@ void Command::init()
 	_commands["privmsg"] = (_command_t) {&_privmsg, 0, 2, true};
 	_commands["quit"] = (_command_t) {&_quit, 0, 1, true};
 	_commands["user"] = (_command_t) {&_user, 4, 4, false};
+	_commands["who"] = (_command_t) {&_who, 0, 2, true};
 }
 
 void Command::execute(const args_t &args, Client &client)
@@ -370,4 +371,26 @@ void Command::_mode(const args_t &args, Client &client)
 			client.get_mask(), "MODE", response_args
 		));
 	}
+}
+
+void Command::_who(const args_t &args, Client &client)
+{
+	// store the name mask in a variable
+	std::string mask = "*";
+	if (args.size() > 1)
+		mask = args[1];
+
+	// retrieve the users matching the <name> query (if there's one)
+	// think about the 'o' extra parameter
+	bool operator_flag = args.size() > 2 && args[2] == "o";
+	clients_t clients = client.get_server().get_clients(mask, operator_flag);
+
+	std::string reply;
+	for (clients_t::iterator it = clients.begin(); it != clients.end(); it++) {
+		Client *visible_client = it->second;
+
+		// std::string reply_string = visible_client->generate_who_reply();
+		// client.create_reply();
+	}
+	client.send(reply);
 }
