@@ -354,14 +354,15 @@ void Command::_who(const args_t &args, Client &client)
 		mask = args[1];
 
 	Server *server = &client.get_server();
-	Channel *channel = server->find_channel(mask);
 	bool operator_flag = args.size() > 2 && args[2] == "o";
 	std::string context = "*";
 	clients_t clients;
 
-	if (channel && !operator_flag) {
-		clients = channel->get_members();
+	if (std::string("#&").find(mask[0]) != std::string::npos) {
 		context = mask;
+		Channel *channel = server->find_channel(mask);
+		if (channel)
+			clients = channel->get_members();	
 	} else if (!operator_flag) {
 		clients = server->get_clients(mask);
 	}
