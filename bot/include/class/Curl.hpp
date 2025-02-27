@@ -20,6 +20,7 @@ public:
 	public:
 		Exception(const std::string &message);
 	};
+
 private:
 	CURL		*_handle;
 	std::string	_buffer;
