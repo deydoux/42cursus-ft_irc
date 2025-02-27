@@ -67,9 +67,9 @@ void Client::reply(reply_code code, const std::string &arg, const std::string &m
 	send(_create_reply(code, arg, message));
 }
 
-void Client::cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const
+void Client::cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg, const std::string &message) const
 {
-	send(create_cmd_reply(prefix, cmd, args));
+	send(create_cmd_reply(prefix, cmd, arg, message));
 }
 
 void Client::send_error(const std::string &message)
@@ -194,24 +194,16 @@ bool Client::operator==(const Client &other) const
 	return get_mask() == other.get_mask();
 }
 
-const std::string Client::create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args)
+const std::string Client::create_cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg, const std::string &message)
 {
 	std::ostringstream oss;
-	oss << ':' << prefix;
+	oss << ':' << prefix << ' ' << cmd;
 
-	if (!cmd.empty())
-		oss << ' ' << cmd;
+	if (!arg.empty())
+		oss << ' ' << arg;
 
-	if (!args.empty()) {
-		for (args_t::iterator it = args.begin(); it != args.end(); it++) {
-			oss << ' ';
-
-			if (it + 1 == args.end())
-				oss << ':';
-
-			oss << *it;
-		}
-	}
+	if (!message.empty())
+		oss << " :" << message;
 
 	return _create_line(oss.str());
 }
@@ -263,12 +255,9 @@ std::string Client::_create_reply(reply_code code, const std::string &arg, const
 	if (!arg.empty())
 		oss << ' ' << arg;
 
-	if (!message.empty()) {
-		oss << ' ';
-		if (message.find(' ') != std::string::npos)
-			oss << ':';
-		oss << message;
-	}
+	if (!message.empty())
+		oss << " :" << message;
+
 	return _create_line(oss.str());
 }
 
@@ -396,13 +385,13 @@ bool	Client::join_channel(Channel &channel, std::string passkey)
 	{
 		channel.add_client(*this);
 		_active_channels[channel.get_name()] = &channel;
-		
+
 		return (true);
 	}
 	return (false);
 }
 
-void	Client::kick_channel(Channel &channel, std::string kicked_client, args_t args)
+void	Client::kick_channel(Channel &channel, const std::string &kicked_client, const std::string &reason)
 {
 	Server &server = this->get_server();
 	Client *client_to_be_kicked = server.get_client(kicked_client);
@@ -418,7 +407,7 @@ void	Client::kick_channel(Channel &channel, std::string kicked_client, args_t ar
 	else
 	{
 		channel.send_broadcast(this->create_cmd_reply(
-			this->get_mask(), "KICK", args
+			this->get_mask(), "KICK", channel.get_name() + ' ' + kicked_client, reason
 		));
 		channel.remove_client(*client_to_be_kicked);
 		client_to_be_kicked->get_active_channels().erase(channel.get_name());
@@ -441,10 +430,7 @@ void Client::notify_quit()
 
 	clients_to_notify.erase(_fd);
 
-	args_t response_args;
-	response_args.push_back(_quit_reason);
-
-	std::string cmd_reply = Client::create_cmd_reply(get_mask(), "QUIT", response_args);
+	std::string cmd_reply = Client::create_cmd_reply(get_mask(), "QUIT", "", _quit_reason);
 
 	for (clients_t::iterator it = clients_to_notify.begin(); it != clients_to_notify.end(); ++it)
 		it->second->send(cmd_reply);
