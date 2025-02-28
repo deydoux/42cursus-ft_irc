@@ -44,7 +44,6 @@ class JSON
 	static std::string	stringify(const bool &boolean);
 	static std::string	stringify(const char *str);
 	static std::string	stringify(const std::string &str);
-	static std::string	stringify(const Object &obj);
 	template <typename T>
 	static std::string	stringify(const std::vector<T> &vec);
 	template <typename T>

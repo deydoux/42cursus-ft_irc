@@ -71,11 +71,6 @@ std::string JSON::stringify(const std::string &str)
 	return result;
 }
 
-std::string JSON::stringify(const Object &obj)
-{
-	return obj.stringify();
-}
-
 std::ostream &operator<<(std::ostream &os, const JSON::Value &value)
 {
 	os << value.stringify();
