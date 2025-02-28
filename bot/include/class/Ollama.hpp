@@ -6,15 +6,24 @@
 #include <string>
 #include <vector>
 
+#ifndef OLLAMA_BASE_URI
+# define OLLAMA_BASE_URI "http://localhost:11434"
+#endif
+
 class Ollama
 {
 public:
+	typedef std::vector<size_t>	context_t;
+
 	Ollama(const std::string &model);
 
-	std::string	generate(const std::string &prompt);
+	std::string	generate(const std::string &prompt, context_t &context);
+
 private:
 	std::string	_model;
-	Curl		_curl;
+
+	static Curl			_curl;
+	static std::string	_base_uri;
 };
 
 #endif

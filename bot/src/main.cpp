@@ -1,10 +1,11 @@
-#include "class/Curl.hpp"
+#include "class/Ollama.hpp"
 
 #include <iostream>
 
 int main(void)
 {
-	Curl curl;
+	Ollama ollama("llama3.2:1b");
+	Ollama::context_t context;
 
-	std::cout << curl.post("http://localhost:11434/api/generate", "{\"model\":\"llama3.2:1b\",\"prompt\":\"Shortly brief what's Hello Kitty\",\"stream\":false}") << std::endl;
+	std::cout << ollama.generate("Bonjour", context) << std::endl;
 }
