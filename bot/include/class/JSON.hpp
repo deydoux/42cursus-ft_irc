@@ -19,6 +19,9 @@ public:
 
 		_data_t _data;
 	};
+
+	static std::string	stringify(const std::string &str);
+	static std::string	stringify(const size_t &num);
 };
 
 #endif

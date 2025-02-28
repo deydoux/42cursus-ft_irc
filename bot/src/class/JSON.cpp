@@ -16,9 +16,16 @@ std::string JSON::SimpleObject::stringify() const
 		if (it != _data.begin())
 			oss << ",";
 
-		oss << "\"" << it->first << "\":\"" << it->second << "\"";
+		oss << "\"" << it->first << "\":" << it->second << "";
 	}
 
 	oss << "}";
 	return oss.str();
+}
+
+std::string JSON::stringify(const std::string &str)
+{
+	std::string result = str;
+
+	return "\"" + result + "\"";
 }
