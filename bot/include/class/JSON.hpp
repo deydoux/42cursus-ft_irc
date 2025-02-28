@@ -41,6 +41,7 @@ class JSON
 		_data_t _data;
 	};
 
+	static std::string	stringify(const bool &boolean);
 	static std::string	stringify(const char *str);
 	static std::string	stringify(const std::string &str);
 	static std::string	stringify(const Object &obj);

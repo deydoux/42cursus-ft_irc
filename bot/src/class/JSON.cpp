@@ -39,8 +39,15 @@ std::string JSON::Object::stringify() const
 	return result;
 }
 
+std::string JSON::stringify(const bool &boolean)
+{
+	return boolean ? "true" : "false";
+}
+
 std::string JSON::stringify(const char *str)
 {
+	if (!str)
+		return "null";
 	return stringify(std::string(str));
 }
 
