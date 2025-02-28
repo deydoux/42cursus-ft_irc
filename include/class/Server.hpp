@@ -32,7 +32,8 @@ public:
 
 	const std::vector<std::string>	&get_motd_lines() const;
 
-	Client	*get_client(const std::string &nickname) const;
+	Client		*get_client(const std::string &nickname) const;
+	clients_t	get_clients(const std::string &mask);
 
 	size_t	get_connections() const;
 	size_t	get_max_connections() const;

@@ -19,13 +19,12 @@ public:
 	ssize_t	send(const std::string &message) const;
 	void	send_error(const std::string &message);
 
-	void	invite_to_channel(Client &target, Channel &channel);
 	bool	join_channel(Channel &channel, std::string passkey);
-	void	kick_channel(Channel &chennel, std::string kicked_client, args_t args);
+	void	kick_channel(Channel &channel, const std::string &kicked_client, const std::string &reason);
 	void	notify_quit();
 
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
-	void	cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const;
+	void	cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg = "", const std::string &message = "") const;
 
 	const std::string	create_motd_reply() const;
 
@@ -37,6 +36,8 @@ public:
 	std::string			get_mask( void ) const;
 	channels_t			&get_active_channels( void );
 	size_t				get_channels_count( void ) const;
+	std::string			get_realname( void ) const;
+	std::string			generate_who_reply(const std::string &context) const;
 
 	Channel				*get_channel(const std::string &name);
 
@@ -52,7 +53,8 @@ public:
 
 	bool	operator==(const Client &other) const;
 
-	static const std::string	create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args);
+	static const std::string	create_cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg = "", const std::string &message = "");
+	std::string					create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 
 private:
 	const int			_fd;
@@ -74,8 +76,6 @@ private:
 	std::vector<std::string>		_channel_operator;
 
 	void		_handle_message(std::string message);
-
-	std::string	_create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 
 	void	_check_registration();
 	void	_greet() const;

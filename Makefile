@@ -10,7 +10,7 @@ SRC = \
 	lib/to_lower.cpp \
 	lib/split.cpp \
 	lib/match_mask.cpp \
-	lib/timestamp.cpp \
+	lib/unix_timestamp.cpp \
 	main.cpp
 
 SRC_DIR = src

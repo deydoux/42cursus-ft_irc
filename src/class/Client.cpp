@@ -64,12 +64,12 @@ ssize_t Client::send(const std::string &message) const
 
 void Client::reply(reply_code code, const std::string &arg, const std::string &message) const
 {
-	send(_create_reply(code, arg, message));
+	send(create_reply(code, arg, message));
 }
 
-void Client::cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args) const
+void Client::cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg, const std::string &message) const
 {
-	send(create_cmd_reply(prefix, cmd, args));
+	send(create_cmd_reply(prefix, cmd, arg, message));
 }
 
 void Client::send_error(const std::string &message)
@@ -90,14 +90,14 @@ const std::string Client::create_motd_reply() const
 	std::vector<std::string> motd_lines = _server.get_motd_lines();
 
 	if (motd_lines.empty())
-		return _create_reply(ERR_NOMOTD, "", "MOTD File is missing");
+		return create_reply(ERR_NOMOTD, "", "MOTD File is missing");
 
-	std::string reply = _create_reply(RPL_MOTDSTART, "", "- " + _server.get_name() + " message of the day");
+	std::string reply = create_reply(RPL_MOTDSTART, "", "- " + _server.get_name() + " message of the day");
 
 	for (std::vector<std::string>::iterator it = motd_lines.begin(); it != motd_lines.end(); ++it)
-		reply += _create_reply(RPL_MOTD, "", "- " + *it);
+		reply += create_reply(RPL_MOTD, "", "- " + *it);
 
-	reply += _create_reply(RPL_ENDOFMOTD, "", "End of MOTD command");
+	reply += create_reply(RPL_ENDOFMOTD, "", "End of MOTD command");
 
 	return reply;
 }
@@ -194,24 +194,16 @@ bool Client::operator==(const Client &other) const
 	return get_mask() == other.get_mask();
 }
 
-const std::string Client::create_cmd_reply(const std::string &prefix, const std::string &cmd, args_t &args)
+const std::string Client::create_cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg, const std::string &message)
 {
 	std::ostringstream oss;
-	oss << ':' << prefix;
+	oss << ':' << prefix << ' ' << cmd;
 
-	if (!cmd.empty())
-		oss << ' ' << cmd;
+	if (!arg.empty())
+		oss << ' ' << arg;
 
-	if (!args.empty()) {
-		for (args_t::iterator it = args.begin(); it != args.end(); it++) {
-			oss << ' ';
-
-			if (it + 1 == args.end())
-				oss << ':';
-
-			oss << *it;
-		}
-	}
+	if (!message.empty())
+		oss << " :" << message;
 
 	return _create_line(oss.str());
 }
@@ -254,7 +246,7 @@ void Client::_handle_message(std::string message)
 	Command::execute(args, *this);
 }
 
-std::string Client::_create_reply(reply_code code, const std::string &arg, const std::string &message) const
+std::string Client::create_reply(reply_code code, const std::string &arg, const std::string &message) const
 {
 	std::ostringstream oss;
 
@@ -263,12 +255,9 @@ std::string Client::_create_reply(reply_code code, const std::string &arg, const
 	if (!arg.empty())
 		oss << ' ' << arg;
 
-	if (!message.empty()) {
-		oss << ' ';
-		if (message.find(' ') != std::string::npos)
-			oss << ':';
-		oss << message;
-	}
+	if (!message.empty())
+		oss << " :" << message;
+
 	return _create_line(oss.str());
 }
 
@@ -289,18 +278,18 @@ void Client::_check_registration()
 void Client::_greet() const
 {
 	std::string reply = // https://modern.ircdocs.horse/#rplwelcome-001
-		_create_reply(RPL_WELCOME, "", "Welcome to the Internet Relay Network " + get_mask())
-		+ _create_reply(RPL_YOURHOST, "", "Your host is " + _server.get_name() + ", running version " VERSION)
-		+ _create_reply(RPL_CREATED, "", "This server has been started " + _server.get_start_time())
-		+ _create_reply(RPL_MYINFO, _server.get_name() + " " VERSION " o iklt")
-		+ _create_reply(RPL_ISUPPORT, "RFC2812 IRCD=ft_irc CHARSET=UTF-8 CASEMAPPING=ascii PREFIX=(o)@ CHANTYPES=#& CHANMODES=,k,l,it", "are supported on this server")
-		+ _create_reply(RPL_ISUPPORT, "CHANLIMIT=#&:" + to_string(Client::_max_channels) + " CHANNELLEN=" + to_string(Channel::max_channel_name_size) + " NICKLEN=" + to_string(_max_nickname_size) + " TOPICLEN=490 AWAYLEN=127 KICKLEN=400 MODES=5", "are supported on this server")
-		+ _create_reply(RPL_LUSERCLIENT, "", "There are " + to_string(_server.get_clients_count()) + " users and 0 services on 1 servers")
-		+ _create_reply(RPL_LUSERCHANNELS, to_string(_server.get_channels_count()), "channels formed")
-		+ _create_reply(RPL_LUSERME, "", "I have " + to_string(_server.get_clients_count()) + " users, 0 services and 0 servers")
-		+ _create_reply(RPL_LOCALUSERS, to_string(_server.get_clients_count()) + ' ' + to_string(_server.get_max_clients()), "Current local users: " + to_string(_server.get_clients_count()) + ", Max: " + to_string(_server.get_max_clients()))
-		+ _create_reply(RPL_LOCALUSERS, to_string(_server.get_clients_count()) + ' ' + to_string(_server.get_max_clients()), "Current global users: " + to_string(_server.get_clients_count()) + ", Max: " + to_string(_server.get_max_clients()))
-		+ _create_reply(RPL_STATSDLINE, "", "Highest connection count: " + to_string(_server.get_max_connections()) + " (" + to_string(_server.get_connections()) + " connections received)")
+		create_reply(RPL_WELCOME, "", "Welcome to the Internet Relay Network " + get_mask())
+		+ create_reply(RPL_YOURHOST, "", "Your host is " + _server.get_name() + ", running version " VERSION)
+		+ create_reply(RPL_CREATED, "", "This server has been started " + _server.get_start_time())
+		+ create_reply(RPL_MYINFO, _server.get_name() + " " VERSION " o iklt")
+		+ create_reply(RPL_ISUPPORT, "RFC2812 IRCD=ft_irc CHARSET=UTF-8 CASEMAPPING=ascii PREFIX=(o)@ CHANTYPES=#& CHANMODES=,k,l,it", "are supported on this server")
+		+ create_reply(RPL_ISUPPORT, "CHANLIMIT=#&:" + to_string(Client::_max_channels) + " CHANNELLEN=" + to_string(Channel::max_channel_name_size) + " NICKLEN=" + to_string(_max_nickname_size) + " TOPICLEN=490 AWAYLEN=127 KICKLEN=400 MODES=5", "are supported on this server")
+		+ create_reply(RPL_LUSERCLIENT, "", "There are " + to_string(_server.get_clients_count()) + " users and 0 services on 1 servers")
+		+ create_reply(RPL_LUSERCHANNELS, to_string(_server.get_channels_count()), "channels formed")
+		+ create_reply(RPL_LUSERME, "", "I have " + to_string(_server.get_clients_count()) + " users, 0 services and 0 servers")
+		+ create_reply(RPL_LOCALUSERS, to_string(_server.get_clients_count()) + ' ' + to_string(_server.get_max_clients()), "Current local users: " + to_string(_server.get_clients_count()) + ", Max: " + to_string(_server.get_max_clients()))
+		+ create_reply(RPL_LOCALUSERS, to_string(_server.get_clients_count()) + ' ' + to_string(_server.get_max_clients()), "Current global users: " + to_string(_server.get_clients_count()) + ", Max: " + to_string(_server.get_max_clients()))
+		+ create_reply(RPL_STATSDLINE, "", "Highest connection count: " + to_string(_server.get_max_connections()) + " (" + to_string(_server.get_connections()) + " connections received)")
 		+ create_motd_reply();
 
 	send(reply);
@@ -396,13 +385,13 @@ bool	Client::join_channel(Channel &channel, std::string passkey)
 	{
 		channel.add_client(*this);
 		_active_channels[channel.get_name()] = &channel;
-		
+
 		return (true);
 	}
 	return (false);
 }
 
-void	Client::kick_channel(Channel &channel, std::string kicked_client, args_t args)
+void	Client::kick_channel(Channel &channel, const std::string &kicked_client, const std::string &reason)
 {
 	Server &server = this->get_server();
 	Client *client_to_be_kicked = server.get_client(kicked_client);
@@ -418,7 +407,7 @@ void	Client::kick_channel(Channel &channel, std::string kicked_client, args_t ar
 	else
 	{
 		channel.send_broadcast(this->create_cmd_reply(
-			this->get_mask(), "KICK", args
+			this->get_mask(), "KICK", channel.get_name() + ' ' + kicked_client, reason
 		));
 		channel.remove_client(*client_to_be_kicked);
 		client_to_be_kicked->get_active_channels().erase(channel.get_name());
@@ -441,10 +430,7 @@ void Client::notify_quit()
 
 	clients_to_notify.erase(_fd);
 
-	args_t response_args;
-	response_args.push_back(_quit_reason);
-
-	std::string cmd_reply = Client::create_cmd_reply(get_mask(), "QUIT", response_args);
+	std::string cmd_reply = Client::create_cmd_reply(get_mask(), "QUIT", "", _quit_reason);
 
 	for (clients_t::iterator it = clients_to_notify.begin(); it != clients_to_notify.end(); ++it)
 		it->second->send(cmd_reply);
@@ -461,4 +447,27 @@ std::string Client::_create_line(const std::string &content)
 	line += "\r\n";
 
 	return line;
+}
+
+std::string Client::get_realname( void ) const
+{
+	return _realname;
+}
+
+std::string Client::generate_who_reply(const std::string &context) const
+{
+	std::ostringstream oss;
+
+	std::string status_flags = "H";
+	if (context != "*" && std::find(_channel_operator.begin(), _channel_operator.end(), context) != _channel_operator.end())
+		status_flags += "@";
+
+	oss << context 
+		<< " ~" << _username 
+		<< " " << _ip 
+		<< " " << _server.get_name() 
+		<< " " << _nickname 
+		<< " " << status_flags;
+
+	return oss.str();
 }

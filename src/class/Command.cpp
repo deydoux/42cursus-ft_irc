@@ -19,6 +19,8 @@ void Command::init()
 	_commands["privmsg"] = (_command_t) {&_privmsg, 0, 2, true};
 	_commands["quit"] = (_command_t) {&_quit, 0, 1, true};
 	_commands["user"] = (_command_t) {&_user, 4, 4, false};
+	_commands["topic"] = (_command_t) {&_topic, 1, 2, true};
+	_commands["who"] = (_command_t) {&_who, 0, 2, true};
 }
 
 void Command::execute(const args_t &args, Client &client)
@@ -65,11 +67,7 @@ void Command::_invite(const args_t &args, Client &client)
 		channel->invite_client(*target);
 	}
 
-	args_t response_args;
-	response_args.push_back(args[1]);
-	response_args.push_back(args[2]);
-
-	target->cmd_reply(client.get_mask(), "INVITE", response_args);
+	target->cmd_reply(client.get_mask(), "INVITE", args[1], args[2]);
 	client.reply(RPL_INVITING, args[1] + ' ' + args[2]);
 }
 
@@ -150,15 +148,12 @@ void Command::_join(const args_t &args, Client &client)
 
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
 
-		args_t response_args;
-		response_args.push_back(channel->get_name());
-
 		if (!client.join_channel(*channel, passkey))
 			server.delete_channel(channel->get_name());
 		else
 		{
 			channel->send_broadcast(Client::create_cmd_reply(
-			client_mask, "JOIN", response_args
+			client_mask, "JOIN", "", channel->get_name()
 			));
 		}
 	}
@@ -166,11 +161,7 @@ void Command::_join(const args_t &args, Client &client)
 
 void Command::_ping(const args_t &args, Client &client)
 {
-	args_t response_args;
-	response_args.push_back(client.get_server().get_name());
-	response_args.push_back(args[1]);
-
-	client.cmd_reply(client.get_server().get_name(), "PONG", response_args);
+	client.cmd_reply(client.get_server().get_name(), "PONG", client.get_server().get_name(), args[1]);
 }
 
 void Command::_quit(const args_t &args, Client &client)
@@ -196,10 +187,6 @@ void Command::_privmsg(const args_t &args, Client &client)
 	for (std::vector<std::string>::iterator it = recipients.begin(); it != recipients.end(); it++) {
 		std::string recipient = *it;
 
-		args_t response_args;
-		response_args.push_back(recipient);
-		response_args.push_back(message);
-
 		if (recipient[0] == '#' || recipient[0] == '&') {
 			Channel *channel = client.get_server().find_channel(recipient);
 
@@ -210,7 +197,7 @@ void Command::_privmsg(const args_t &args, Client &client)
 				client.reply(ERR_NOTONCHANNEL, recipient, "You are not on that channel");
 
 			else {
-				std::string message = Client::create_cmd_reply(client.get_mask(), "PRIVMSG", response_args);
+				std::string message = Client::create_cmd_reply(client.get_mask(), "PRIVMSG", recipient, message);
 				channel->send_broadcast(message, client.get_fd());
 			}
 		}
@@ -221,7 +208,7 @@ void Command::_privmsg(const args_t &args, Client &client)
 			if (!target)
 				return client.reply(ERR_NOSUCHNICK, recipient, "No such nick or channel name");
 
-			target->cmd_reply(client.get_mask(), "PRIVMSG", response_args);
+			target->cmd_reply(client.get_mask(), "PRIVMSG", recipient, message);
 		}
 	}
 }
@@ -252,14 +239,7 @@ void Command::_kick(const args_t &args, Client &client)
 	}
 
 	for (size_t i = 0; i < channels_to_kick_from.size(); i++)
-	{
-		args_t args;
-		args.push_back(channels_to_kick_from[i]->get_name());
-		args.push_back(kicked_client);
-		args.push_back(reason);
-
-		client.kick_channel(*channels_to_kick_from[i], kicked_client, args);
-	}
+		client.kick_channel(*channels_to_kick_from[i], kicked_client, reason);
 }
 
 void Command::_mode(const args_t &args, Client &client)
@@ -273,7 +253,7 @@ void Command::_mode(const args_t &args, Client &client)
 
 	if (args.size() == 2) {
 		client.reply(RPL_CHANNELMODEIS, channel_name, channel->get_modes(channel->is_client_member(client)));
-		client.reply(RPL_CREATIONTIME, channel_name, channel->get_creation_timestamp());		
+		client.reply(RPL_CREATIONTIME, channel_name, channel->get_creation_timestamp());
 		return ;
 	}
 
@@ -357,17 +337,93 @@ void Command::_mode(const args_t &args, Client &client)
 	}
 
 	if (!applied_flags.empty())
-	{	
-		args_t response_args;
-		response_args.push_back(channel_name);
-			
+	{
 		Channel::modes_t modes = { flags: applied_flags, values: modes_values };
 
-		response_args.push_back(Channel::stringify_modes(&modes));
 		channel->add_modes(&modes);
 
 		channel->send_broadcast(Client::create_cmd_reply(
-			client.get_mask(), "MODE", response_args
+			client.get_mask(), "MODE", channel_name + ' ' + Channel::stringify_modes(&modes)
 		));
 	}
+}
+
+void Command::_topic(const args_t &args, Client &client)
+{
+	std::string channel_name = args[1];
+	Channel *channel = client.get_server().find_channel(channel_name);
+
+	if (!channel)
+		return client.reply(ERR_NOSUCHCHANNEL, channel_name, "No such channel");
+
+	if (!channel->is_client_member(client))
+		return client.reply(ERR_NOTONCHANNEL, channel_name, "You are not on that channel");
+	
+	std::string channel_topic = channel->get_topic();
+
+	if (args.size() == 2)
+	{
+		if (channel_topic.empty())
+			return client.reply(RPL_NOTOPIC, channel_name, "No topic is set");
+		
+		std::string reply = client.create_reply(
+			RPL_TOPIC,
+			channel_name, 
+			channel_topic
+		);
+		reply += client.create_reply(
+			RPL_TOPICWHOTIME, 
+			channel_name + " " + channel->get_topic_last_edited_by(), 
+			channel->get_topic_last_edited_at()
+		);
+		
+		client.send(reply);
+		return ;
+	}
+
+	if (channel->is_topic_protected() && !client.is_channel_operator(channel_name))
+		return client.reply(ERR_CHANOPRIVSNEEDED, channel_name, "You are not channel operator");
+
+	std::string new_topic = args[2];
+	channel->set_topic(client, new_topic);
+	channel->send_broadcast(client.create_cmd_reply(
+		client.get_mask(), "TOPIC", channel_name, new_topic
+	));
+}
+
+void Command::_who(const args_t &args, Client &client)
+{
+	std::string mask = "*";
+	if (args.size() > 1 && args[1] != "0")
+		mask = args[1];
+
+	Server *server = &client.get_server();
+	bool operator_flag = args.size() > 2 && args[2] == "o";
+	std::string context = "*";
+	clients_t clients;
+
+	if (std::string("#&").find(mask[0]) != std::string::npos) {
+		context = mask;
+		Channel *channel = server->find_channel(mask);
+		if (channel)
+			clients = channel->get_members();	
+	} else if (!operator_flag) {
+		clients = server->get_clients(mask);
+	}
+
+	std::string reply;
+	for (clients_t::iterator it = clients.begin(); it != clients.end(); it++)
+	{
+		Client *found_client = it->second;
+		reply += client.create_reply(
+			RPL_WHOREPLY,
+			found_client->generate_who_reply(context),
+			"0 " + found_client->get_realname()
+		);
+	}
+
+	if (!reply.empty())
+		client.send(reply);
+
+	client.reply(RPL_ENDOFWHO, context, "End of WHO list");
 }
