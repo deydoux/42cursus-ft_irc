@@ -30,6 +30,12 @@ TAR = tar
 OBJ = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 DEP = $(OBJ:.o=.d)
 
+ifeq ($(shell uname), Darwin)
+CURL_CONFIG = --with-openssl=/opt/homebrew/opt/openssl --without-libpsl
+else
+CURL_CONFIG = --with-openssl --without-libpsl
+endif
+
 .DEFAULT_GOAL = all
 
 $(BUILD_DIR)/$(CURL_TARBALL):
@@ -40,7 +46,7 @@ $(CURL_DIR) $(CURL_INC): $(BUILD_DIR)/$(CURL_TARBALL)
 	$(TAR) -xzf $< -C $(BUILD_DIR)
 
 $(CURL_DIR)/Makefile: Makefile | $(CURL_DIR)
-	cd $(@D) && ./configure --with-openssl --without-libpsl
+	cd $(@D) && ./configure $(CURL_CONFIG)
 
 $(CURL_LIB): $(CURL_DIR)/Makefile
 	$(MAKE) -C $(CURL_DIR) --no-print-directory
