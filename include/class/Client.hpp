@@ -36,6 +36,8 @@ public:
 	std::string			get_mask( void ) const;
 	channels_t			&get_active_channels( void );
 	size_t				get_channels_count( void ) const;
+	std::string			get_realname( void ) const;
+	std::string			generate_who_reply(const std::string &context) const;
 
 	Channel				*get_channel(const std::string &name);
 
@@ -52,7 +54,7 @@ public:
 	bool	operator==(const Client &other) const;
 
 	static const std::string	create_cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg = "", const std::string &message = "");
-	std::string	create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
+	std::string					create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 
 private:
 	const int			_fd;
@@ -74,8 +76,6 @@ private:
 	std::vector<std::string>		_channel_operator;
 
 	void		_handle_message(std::string message);
-
-	std::string	_create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 
 	void	_check_registration();
 	void	_greet() const;

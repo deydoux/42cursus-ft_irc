@@ -20,6 +20,7 @@ void Command::init()
 	_commands["quit"] = (_command_t) {&_quit, 0, 1, true};
 	_commands["user"] = (_command_t) {&_user, 4, 4, false};
 	_commands["topic"] = (_command_t) {&_topic, 1, 2, true};
+	_commands["who"] = (_command_t) {&_who, 0, 2, true};
 }
 
 void Command::execute(const args_t &args, Client &client)
@@ -388,4 +389,41 @@ void Command::_topic(const args_t &args, Client &client)
 	channel->send_broadcast(client.create_cmd_reply(
 		client.get_mask(), "TOPIC", channel_name, new_topic
 	));
+}
+
+void Command::_who(const args_t &args, Client &client)
+{
+	std::string mask = "*";
+	if (args.size() > 1 && args[1] != "0")
+		mask = args[1];
+
+	Server *server = &client.get_server();
+	bool operator_flag = args.size() > 2 && args[2] == "o";
+	std::string context = "*";
+	clients_t clients;
+
+	if (std::string("#&").find(mask[0]) != std::string::npos) {
+		context = mask;
+		Channel *channel = server->find_channel(mask);
+		if (channel)
+			clients = channel->get_members();	
+	} else if (!operator_flag) {
+		clients = server->get_clients(mask);
+	}
+
+	std::string reply;
+	for (clients_t::iterator it = clients.begin(); it != clients.end(); it++)
+	{
+		Client *found_client = it->second;
+		reply += client.create_reply(
+			RPL_WHOREPLY,
+			found_client->generate_who_reply(context),
+			"0 " + found_client->get_realname()
+		);
+	}
+
+	if (!reply.empty())
+		client.send(reply);
+
+	client.reply(RPL_ENDOFWHO, context, "End of WHO list");
 }
