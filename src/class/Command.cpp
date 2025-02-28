@@ -19,6 +19,7 @@ void Command::init()
 	_commands["privmsg"] = (_command_t) {&_privmsg, 0, 2, true};
 	_commands["quit"] = (_command_t) {&_quit, 0, 1, true};
 	_commands["user"] = (_command_t) {&_user, 4, 4, false};
+	_commands["topic"] = (_command_t) {&_topic, 1, 2, true};
 }
 
 void Command::execute(const args_t &args, Client &client)
@@ -344,4 +345,47 @@ void Command::_mode(const args_t &args, Client &client)
 			client.get_mask(), "MODE", channel_name + ' ' + Channel::stringify_modes(&modes)
 		));
 	}
+}
+
+void Command::_topic(const args_t &args, Client &client)
+{
+	std::string channel_name = args[1];
+	Channel *channel = client.get_server().find_channel(channel_name);
+
+	if (!channel)
+		return client.reply(ERR_NOSUCHCHANNEL, channel_name, "No such channel");
+
+	if (!channel->is_client_member(client))
+		return client.reply(ERR_NOTONCHANNEL, channel_name, "You are not on that channel");
+	
+	std::string channel_topic = channel->get_topic();
+
+	if (channel_topic.empty())
+		return client.reply(RPL_NOTOPIC, channel_name, "No topic is set");
+
+	if (args.size() == 2)
+	{
+		std::string reply = client.create_reply(
+			RPL_TOPIC,
+			channel_name, 
+			channel_topic
+		);
+		reply += client.create_reply(
+			RPL_TOPICWHOTIME, 
+			channel_name + " " + channel->get_topic_last_edited_by(), 
+			channel->get_topic_last_edited_at()
+		);
+		
+		client.send(reply);
+		return ;
+	}
+
+	if (channel->is_topic_protected() && !client.is_channel_operator(channel_name))
+		return client.reply(ERR_CHANOPRIVSNEEDED, channel_name, "You are not channel operator");
+
+	std::string new_topic = args[2];
+	channel->set_topic(client, new_topic);
+	channel->send_broadcast(client.create_cmd_reply(
+		client.get_mask(), "TOPIC", channel_name, new_topic
+	));
 }

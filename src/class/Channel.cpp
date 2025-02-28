@@ -217,3 +217,25 @@ void Channel::add_modes(modes_t *modes)
 		_modes.values[it->first] = it->second;
 	}
 }
+
+const std::string Channel::get_topic( void ) const
+{
+	return _topic;
+}
+
+void Channel::set_topic(Client &editor, const std::string topic)
+{
+	_topic = topic;
+	_topic_last_edited_by = editor.get_nickname();
+	_topic_last_edited_at = unix_timestamp();
+}
+
+const std::string Channel::get_topic_last_edited_at( void ) const
+{
+	return _topic_last_edited_at;
+}
+
+const std::string Channel::get_topic_last_edited_by( void ) const
+{
+	return _topic_last_edited_by;
+}

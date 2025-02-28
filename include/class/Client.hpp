@@ -52,6 +52,7 @@ public:
 	bool	operator==(const Client &other) const;
 
 	static const std::string	create_cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg = "", const std::string &message = "");
+	std::string	create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 
 private:
 	const int			_fd;
