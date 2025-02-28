@@ -31,10 +31,10 @@ std::string JSON::stringify(const std::vector<T> &vec)
 }
 
 template <typename T>
-std::string JSON::stringify(const T &num)
+std::string JSON::stringify(const T &other)
 {
 	std::ostringstream oss;
-	oss << num;
+	oss << other;
 	return oss.str();
 }
 
