@@ -56,8 +56,9 @@ class JSON
 	template <typename T>
 	static std::string	stringify(const T &value);
 
+	static std::string	parse(const std::string &str);
 	template <typename T>
-	static T	parse(const std::string &str);
+	static T			parse(const std::string &str);
 };
 
 std::ostream	&operator<<(std::ostream &os, const JSON::Value &value);

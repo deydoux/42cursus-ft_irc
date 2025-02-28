@@ -82,6 +82,34 @@ std::string JSON::stringify(const std::string &str)
 	return result;
 }
 
+std::string JSON::parse(const std::string &str)
+{
+	if (str.size() < 2 || str[0] != '"' || str[str.size() - 1] != '"')
+		throw Exception("Invalid JSON string");
+
+	std::string value = str.substr(1, str.size() - 2);
+
+	for (size_t pos = 0; pos < value.size(); pos++) {
+		switch (value[pos]) {
+		case '\\':
+			if (pos + 1 >= value.size())
+				throw Exception("Invalid JSON string");
+
+			if (value[pos + 1] == '\\')
+				value.replace(pos, 2, "\\");
+			else if (value[pos + 1] == '"')
+				value.replace(pos, 2, "\"");
+			else
+				throw Exception("Invalid JSON string");
+			break;
+		case '"':
+			throw Exception("Invalid JSON string");
+		}
+	}
+
+	return value;
+}
+
 std::ostream &operator<<(std::ostream &os, const JSON::Value &value)
 {
 	os << value.stringify();
