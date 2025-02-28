@@ -361,11 +361,11 @@ void Command::_topic(const args_t &args, Client &client)
 	
 	std::string channel_topic = channel->get_topic();
 
-	if (channel_topic.empty())
-		return client.reply(RPL_NOTOPIC, channel_name, "No topic is set");
-
 	if (args.size() == 2)
 	{
+		if (channel_topic.empty())
+			return client.reply(RPL_NOTOPIC, channel_name, "No topic is set");
+		
 		std::string reply = client.create_reply(
 			RPL_TOPIC,
 			channel_name, 
