@@ -29,6 +29,7 @@ std::string Curl::post(const std::string &url, const std::string &data)
 
 void Curl::_reset()
 {
+	_buffer.clear();
 	curl_easy_reset(_handle);
 }
 
