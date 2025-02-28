@@ -12,4 +12,4 @@ std::string Ollama::generate(const std::string &prompt, context_t &context)
 }
 
 Curl Ollama::_curl;
-std::string Ollama::_base_uri = OLLAMA_BASE_URI;
+const std::string Ollama::_base_uri = OLLAMA_BASE_URI;

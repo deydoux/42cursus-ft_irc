@@ -20,10 +20,10 @@ public:
 	std::string	generate(const std::string &prompt, context_t &context);
 
 private:
-	std::string	_model;
+	const std::string	_model;
 
-	static Curl			_curl;
-	static std::string	_base_uri;
+	static Curl					_curl;
+	static const std::string	_base_uri;
 };
 
 #endif
