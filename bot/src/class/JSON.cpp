@@ -86,6 +86,11 @@ std::ostream &operator<<(std::ostream &os, const JSON::Value &value)
 	return os;
 }
 
+std::ostream &operator<<(std::ostream &os, const JSON::Array &array)
+{
+	os << array.stringify();
+	return os;
+}
 std::ostream &operator<<(std::ostream &os, const JSON::Object &obj)
 {
 	os << obj.stringify();
