@@ -15,7 +15,7 @@ class JSON
 		Value();
 		Value(const Value &other);
 		template <typename T>
-		Value(const T &other);
+		Value(const T &value);
 
 		Value	&operator=(const Value &rhs);
 		template <typename T>
@@ -39,7 +39,7 @@ class JSON
 	template <typename T>
 	static std::string	stringify(const std::vector<T> &vec);
 	template <typename T>
-	static std::string	stringify(const T &other);
+	static std::string	stringify(const T &value);
 };
 
 std::ostream	&operator<<(std::ostream &os, const JSON::Value &value);

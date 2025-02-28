@@ -6,7 +6,7 @@
 #include <sstream>
 
 template <typename T>
-JSON::Value::Value(const T &other) : _str(JSON::stringify(other)) {}
+JSON::Value::Value(const T &value) : _str(JSON::stringify(value)) {}
 
 template <typename T>
 JSON::Value &JSON::Value::operator=(const T &rhs)
@@ -31,10 +31,10 @@ std::string JSON::stringify(const std::vector<T> &vec)
 }
 
 template <typename T>
-std::string JSON::stringify(const T &other)
+std::string JSON::stringify(const T &value)
 {
 	std::ostringstream oss;
-	oss << other;
+	oss << value;
 	return oss.str();
 }
 
