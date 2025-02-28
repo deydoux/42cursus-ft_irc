@@ -2,6 +2,7 @@ NAME = ircbot
 
 SRC = \
 	class/Curl.cpp \
+	class/JSON.cpp \
 	class/Ollama.cpp \
 	main.cpp
 
