@@ -4,7 +4,7 @@
 #include "class/JSON.hpp"
 
 #include <sstream>
-#include "JSON.hpp"
+#include <typeinfo>
 
 template <typename T>
 JSON::Value::Value(const T &value) : _str(JSON::stringify(value)) {}
@@ -48,6 +48,9 @@ std::string JSON::stringify(const T &value)
 template <typename T>
 T JSON::parse(const std::string &str)
 {
+	if (typeid(T) == typeid(std::string))
+		return JSON::_parse_string(str);
+
 	std::istringstream iss(str);
 
 	T value;

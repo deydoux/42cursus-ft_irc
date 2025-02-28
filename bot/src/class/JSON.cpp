@@ -82,7 +82,7 @@ std::string JSON::stringify(const std::string &str)
 	return result;
 }
 
-std::string JSON::parse(const std::string &str)
+std::string JSON::_parse_string(const std::string &str)
 {
 	if (str.size() < 2 || str[0] != '"' || str[str.size() - 1] != '"')
 		throw Exception("Invalid JSON string");

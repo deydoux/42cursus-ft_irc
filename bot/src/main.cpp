@@ -4,5 +4,5 @@
 
 int main(void)
 {
-	std::cout << JSON::parse<int>("42") << std::endl;
+	std::cout << JSON::parse<std::string>("42") << std::endl;
 }
