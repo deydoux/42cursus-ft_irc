@@ -1,11 +1,8 @@
-#include "class/Ollama.hpp"
+#include "class/JSON.hpp"
 
 #include <iostream>
 
 int main(void)
 {
-	Ollama ollama("llama3.2:1b");
-	Ollama::context_t context;
-
-	std::cout << ollama.generate("Hello Kitty", context) << std::endl;
+	std::cout << JSON::parse<int>("42") << std::endl;
 }

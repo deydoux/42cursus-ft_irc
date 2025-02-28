@@ -23,6 +23,9 @@ class JSON
 
 		std::string	stringify() const;
 
+		template <typename T>
+		T	parse() const;
+
 	private:
 		std::string _str;
 	};
@@ -39,6 +42,12 @@ class JSON
 		std::string	stringify() const;
 	};
 
+	class Exception : public std::invalid_argument
+	{
+	public:
+		Exception(const std::string &message);
+	};
+
 	static std::string	stringify(const bool &boolean);
 	static std::string	stringify(const char *str);
 	static std::string	stringify(const std::string &str);
@@ -46,6 +55,9 @@ class JSON
 	static std::string	stringify(const std::vector<T> &vec);
 	template <typename T>
 	static std::string	stringify(const T &value);
+
+	template <typename T>
+	static T	parse(const std::string &str);
 };
 
 std::ostream	&operator<<(std::ostream &os, const JSON::Value &value);

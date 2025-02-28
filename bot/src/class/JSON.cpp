@@ -48,6 +48,8 @@ std::string JSON::Object::stringify() const
 	return result;
 }
 
+JSON::Exception::Exception(const std::string &message) : std::invalid_argument(message) {}
+
 std::string JSON::stringify(const bool &boolean)
 {
 	return boolean ? "true" : "false";
