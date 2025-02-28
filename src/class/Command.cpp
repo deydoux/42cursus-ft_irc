@@ -10,7 +10,7 @@ void Command::init()
 {
 	_commands["invite"] = (_command_t) {&_invite, 2, 2, true};
 	_commands["join"] = (_command_t) {&_join, 1, 2, true};
-	_commands["kick"] = (_command_t) {&_kick, 2, 4, true};
+	_commands["kick"] = (_command_t) {&_kick, 2, 3, true};
 	_commands["motd"] = (_command_t) {&_motd, 0, 1, true};
 	_commands["mode"] = (_command_t) {&_mode, 1, 5, true};
 	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
@@ -217,12 +217,9 @@ void Command::_kick(const args_t &args, Client &client)
 {
 	Server						&server = client.get_server();
 	std::vector<Channel *>		channels_to_kick_from;
-
-	bool is_first_arg_channel_name = args.size() >= 4 && args[1] == server.get_name();
-
-	std::vector<std::string>	kicked_client = is_first_arg_channel_name ? ft_split(args[3], ',') : ft_split(args[2], ',');
-	std::vector<std::string>	channels_name = is_first_arg_channel_name ? ft_split(args[2], ',') : ft_split(args[1], ',');
-	std::string 				reason = ((args.size() == 5 && args[1] == server.get_name()) || (args.size() == 4 && args[1] != server.get_name())) ? args[args.size() - 1] : client.get_nickname();
+	std::vector<std::string>	kicked_client = ft_split(args[2], ',');
+	std::vector<std::string>	channels_name = ft_split(args[1], ',');
+	std::string 				reason = args.size() == 4 ? args[args.size() - 1] : client.get_nickname();
 
 	for (size_t i = 0; i < channels_name.size(); i++)
 	{
