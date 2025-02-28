@@ -215,12 +215,11 @@ void Command::_privmsg(const args_t &args, Client &client)
 
 void Command::_kick(const args_t &args, Client &client)
 {
-	std::vector<Channel *>		channels_to_kick_from;
-	std::string					kicked_client = args[2];
 	Server						&server = client.get_server();
-
+	std::vector<Channel *>		channels_to_kick_from;
+	std::vector<std::string>	kicked_client = ft_split(args[2], ',');
 	std::vector<std::string>	channels_name = ft_split(args[1], ',');
-	std::string 				reason = (args.size() == 4) ? args[3] : client.get_nickname();
+	std::string 				reason = args.size() == 4 ? args[args.size() - 1] : client.get_nickname();
 
 	for (size_t i = 0; i < channels_name.size(); i++)
 	{
@@ -238,8 +237,9 @@ void Command::_kick(const args_t &args, Client &client)
 			channels_to_kick_from.push_back(new_channel);
 	}
 
-	for (size_t i = 0; i < channels_to_kick_from.size(); i++)
-		client.kick_channel(*channels_to_kick_from[i], kicked_client, reason);
+	for (size_t i = 0; i < kicked_client.size(); i++)
+		for (size_t j = 0; j < channels_to_kick_from.size(); j++)
+			client.kick_channel(*channels_to_kick_from[j], kicked_client[i], reason);
 }
 
 void Command::_mode(const args_t &args, Client &client)
