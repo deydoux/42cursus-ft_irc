@@ -1,7 +1,6 @@
 #include "class/Ollama.hpp"
 
-Ollama::Ollama(const std::string &model) : _model(model)
-{}
+Ollama::Ollama(const std::string &model) : _model(model) {}
 
 std::string Ollama::generate(const std::string &prompt, context_t &context)
 {
