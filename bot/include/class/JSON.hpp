@@ -27,6 +27,12 @@ class JSON
 		std::string _str;
 	};
 
+	class Array : public std::vector<Value>
+	{
+	public:
+		std::string	stringify() const;
+	};
+
 	class Object : public std::map<std::string, Value>
 	{
 	public:
