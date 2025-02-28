@@ -10,7 +10,7 @@ void Command::init()
 {
 	_commands["invite"] = (_command_t) {&_invite, 2, 2, true};
 	_commands["join"] = (_command_t) {&_join, 1, 2, true};
-	_commands["kick"] = (_command_t) {&_kick, 2, 3, true};
+	_commands["kick"] = (_command_t) {&_kick, 2, 4, true};
 	_commands["motd"] = (_command_t) {&_motd, 0, 1, true};
 	_commands["mode"] = (_command_t) {&_mode, 1, 5, true};
 	_commands["nick"] = (_command_t) {&_nick, 1, 1, false};
@@ -213,12 +213,14 @@ void Command::_privmsg(const args_t &args, Client &client)
 
 void Command::_kick(const args_t &args, Client &client)
 {
-	std::vector<Channel *>		channels_to_kick_from;
-	std::string					kicked_client = args[2];
 	Server						&server = client.get_server();
+	std::vector<Channel *>		channels_to_kick_from;
 
-	std::vector<std::string>	channels_name = ft_split(args[1], ',');
-	std::string 				reason = (args.size() == 4) ? args[3] : client.get_nickname();
+	bool is_first_arg_channel_name = args.size() >= 4 && args[1] == server.get_name();
+
+	std::vector<std::string>	kicked_client = is_first_arg_channel_name ? ft_split(args[3], ',') : ft_split(args[2], ',');
+	std::vector<std::string>	channels_name = is_first_arg_channel_name ? ft_split(args[2], ',') : ft_split(args[1], ',');
+	std::string 				reason = ((args.size() == 5 && args[1] == server.get_name()) || (args.size() == 4 && args[1] != server.get_name())) ? args[args.size() - 1] : client.get_nickname();
 
 	for (size_t i = 0; i < channels_name.size(); i++)
 	{
@@ -236,8 +238,9 @@ void Command::_kick(const args_t &args, Client &client)
 			channels_to_kick_from.push_back(new_channel);
 	}
 
-	for (size_t i = 0; i < channels_to_kick_from.size(); i++)
-		client.kick_channel(*channels_to_kick_from[i], kicked_client, reason);
+	for (size_t i = 0; i < kicked_client.size(); i++)
+		for (size_t j = 0; j < channels_to_kick_from.size(); j++)
+			client.kick_channel(*channels_to_kick_from[j], kicked_client[i], reason);
 }
 
 void Command::_mode(const args_t &args, Client &client)
