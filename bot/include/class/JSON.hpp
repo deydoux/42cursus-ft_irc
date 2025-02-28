@@ -27,18 +27,10 @@ class JSON
 		std::string _str;
 	};
 
-	class Object
+	class Object : public std::map<std::string, Value>
 	{
 	public:
-		Value	&operator[](const std::string &key);
-
 		std::string	stringify() const;
-
-	private:
-		typedef std::string				_key_t;
-		typedef std::map<_key_t, Value>	_data_t;
-
-		_data_t _data;
 	};
 
 	static std::string	stringify(const bool &boolean);

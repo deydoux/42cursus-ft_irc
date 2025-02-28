@@ -17,17 +17,12 @@ std::string JSON::Value::stringify() const
 	return _str;
 }
 
-JSON::Value &JSON::Object::operator[](const std::string &key)
-{
-	return _data[key];
-}
-
 std::string JSON::Object::stringify() const
 {
 	std::string result = "{";
 
-	for (_data_t::const_iterator it = _data.begin(); it != _data.end(); ++it) {
-		if (it != _data.begin())
+	for (const_iterator it = begin(); it != end(); ++it) {
+		if (it != begin())
 			result += ",";
 
 		std::string key = it->first;
