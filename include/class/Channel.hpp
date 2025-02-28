@@ -13,6 +13,9 @@ public:
 
 	const std::string	&get_name( void );
 	const std::string	get_creation_timestamp( void ) const;
+	const std::string	get_topic( void ) const;
+	const std::string	get_topic_last_edited_at( void ) const;
+	const std::string	get_topic_last_edited_by( void ) const;
 	bool				is_full( void );
 	bool				check_passkey(std::string &passkey);
 	bool				is_invite_only( void );
@@ -28,6 +31,7 @@ public:
 	void	unset_members_limit( void );
 	void	set_is_invite_only(bool invite_only);
 	void	set_is_topic_protected(bool is_topic_protected);
+	void	set_topic(Client &editor, const std::string topic);
 
 	void	invite_client(Client &client);
 	void	add_client(Client &client);
@@ -57,6 +61,8 @@ private:
 	std::string		_passkey;
 	
 	std::string		_topic;
+	std::string		_topic_last_edited_at; // unix timestamp
+	std::string		_topic_last_edited_by; // client nickname
 	bool			_is_topic_protected;
 
 	bool			_limit_members;
