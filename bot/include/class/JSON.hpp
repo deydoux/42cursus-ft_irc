@@ -61,6 +61,7 @@ class JSON
 
 private:
 	static std::string	_parse_string(const std::string &str);
+	static Object		_parse_object(const std::string &str);
 };
 
 std::ostream	&operator<<(std::ostream &os, const JSON::Value &value);

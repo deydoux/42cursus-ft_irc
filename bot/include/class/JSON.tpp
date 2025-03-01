@@ -45,12 +45,21 @@ std::string JSON::stringify(const T &value)
 	return oss.str();
 }
 
+template <>
+inline std::string JSON::parse<std::string>(const std::string &str)
+{
+	return _parse_string(str);
+}
+
+template <>
+inline JSON::Object JSON::parse<JSON::Object>(const std::string &str)
+{
+	return _parse_object(str);
+}
+
 template <typename T>
 T JSON::parse(const std::string &str)
 {
-	if (typeid(T) == typeid(std::string))
-		return JSON::_parse_string(str);
-
 	std::istringstream iss(str);
 
 	T value;

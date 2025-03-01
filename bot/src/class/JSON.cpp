@@ -110,6 +110,12 @@ std::string JSON::_parse_string(const std::string &str)
 	return value;
 }
 
+JSON::Object JSON::_parse_object(const std::string &str)
+{
+	return Object();
+	(void)str;
+}
+
 std::ostream &operator<<(std::ostream &os, const JSON::Value &value)
 {
 	os << value.stringify();
