@@ -18,6 +18,7 @@ public:
 	void	log(const std::string &message, const log_level level = info) const;
 	ssize_t	send(const std::string &message) const;
 	void	send_error(const std::string &message);
+	void	broadcast(const std::string &message) const;
 
 	bool	join_channel(Channel &channel, std::string passkey);
 	void	kick_channel(Channel &channel, const std::string &kicked_client, const std::string &reason);

@@ -85,6 +85,26 @@ void Client::send_error(const std::string &message)
 	_disconnect_request = true;
 }
 
+void Client::broadcast(const std::string &message) const
+{
+	clients_t clients_to_notify;
+
+	for (channels_t::const_iterator it = _active_channels.begin(); it != _active_channels.end(); ++it) {
+		Channel *channel = it->second;
+
+		clients_t members = channel->get_members();
+		for (clients_t::iterator member = members.begin(); member != members.end(); ++member) {
+			Client *member_client = member->second;
+			clients_to_notify[member_client->get_fd()] = member_client;
+		}
+	}
+
+	clients_to_notify.erase(_fd);
+
+	for (clients_t::iterator it = clients_to_notify.begin(); it != clients_to_notify.end(); ++it)
+		it->second->send(message);
+}
+
 const std::string Client::create_motd_reply() const
 {
 	std::vector<std::string> motd_lines = _server.get_motd_lines();
@@ -152,8 +172,11 @@ void Client::set_nickname(const std::string &nickname)
 	if (_server.get_client(nickname) != NULL)
 		return reply(ERR_NICKNAMEINUSE, nickname, "Nickname is already in use");
 
-	if (_registered)
-		cmd_reply(get_mask(), "NICK", "", nickname);
+	if (_registered) {
+		const std::string cmd_reply = create_cmd_reply(get_mask(), "NICK", "", nickname);
+		send(cmd_reply);
+		broadcast(cmd_reply);
+	}
 
 	_nickname = nickname;
 
@@ -419,24 +442,7 @@ void	Client::kick_channel(Channel &channel, const std::string &kicked_client, co
 
 void Client::notify_quit()
 {
-	clients_t clients_to_notify;
-
-	for (channels_t::iterator it = _active_channels.begin(); it != _active_channels.end(); ++it) {
-		Channel *channel = it->second;
-
-		clients_t members = channel->get_members();
-		for (clients_t::iterator member = members.begin(); member != members.end(); ++member) {
-			Client *member_client = member->second;
-			clients_to_notify[member_client->get_fd()] = member_client;
-		}
-	}
-
-	clients_to_notify.erase(_fd);
-
-	std::string cmd_reply = Client::create_cmd_reply(get_mask(), "QUIT", "", _quit_reason);
-
-	for (clients_t::iterator it = clients_to_notify.begin(); it != clients_to_notify.end(); ++it)
-		it->second->send(cmd_reply);
+	broadcast(create_cmd_reply(get_mask(), "QUIT", "", _quit_reason));
 }
 
 std::string Client::_create_line(const std::string &content)
