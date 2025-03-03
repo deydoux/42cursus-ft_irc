@@ -215,12 +215,11 @@ void Command::_privmsg(const args_t &args, Client &client)
 
 void Command::_kick(const args_t &args, Client &client)
 {
-	std::vector<Channel *>		channels_to_kick_from;
-	std::string					kicked_client = args[2];
 	Server						&server = client.get_server();
-
+	std::vector<Channel *>		channels_to_kick_from;
+	std::vector<std::string>	kicked_client = ft_split(args[2], ',');
 	std::vector<std::string>	channels_name = ft_split(args[1], ',');
-	std::string 				reason = (args.size() == 4) ? args[3] : client.get_nickname();
+	std::string 				reason = args.size() == 4 ? args[args.size() - 1] : client.get_nickname();
 
 	for (size_t i = 0; i < channels_name.size(); i++)
 	{
@@ -238,8 +237,9 @@ void Command::_kick(const args_t &args, Client &client)
 			channels_to_kick_from.push_back(new_channel);
 	}
 
-	for (size_t i = 0; i < channels_to_kick_from.size(); i++)
-		client.kick_channel(*channels_to_kick_from[i], kicked_client, reason);
+	for (size_t i = 0; i < kicked_client.size(); i++)
+		for (size_t j = 0; j < channels_to_kick_from.size(); j++)
+			client.kick_channel(*channels_to_kick_from[j], kicked_client[i], reason);
 }
 
 void Command::_mode(const args_t &args, Client &client)
@@ -338,7 +338,10 @@ void Command::_mode(const args_t &args, Client &client)
 
 	if (!applied_flags.empty())
 	{
-		Channel::modes_t modes = { flags: applied_flags, values: modes_values };
+		Channel::modes_t modes = {
+			.flags = applied_flags,
+			.values = modes_values
+		};
 
 		channel->add_modes(&modes);
 
@@ -358,25 +361,25 @@ void Command::_topic(const args_t &args, Client &client)
 
 	if (!channel->is_client_member(client))
 		return client.reply(ERR_NOTONCHANNEL, channel_name, "You are not on that channel");
-	
+
 	std::string channel_topic = channel->get_topic();
 
 	if (args.size() == 2)
 	{
 		if (channel_topic.empty())
 			return client.reply(RPL_NOTOPIC, channel_name, "No topic is set");
-		
+
 		std::string reply = client.create_reply(
 			RPL_TOPIC,
-			channel_name, 
+			channel_name,
 			channel_topic
 		);
 		reply += client.create_reply(
-			RPL_TOPICWHOTIME, 
-			channel_name + " " + channel->get_topic_last_edited_by(), 
+			RPL_TOPICWHOTIME,
+			channel_name + " " + channel->get_topic_last_edited_by(),
 			channel->get_topic_last_edited_at()
 		);
-		
+
 		client.send(reply);
 		return ;
 	}
@@ -406,7 +409,7 @@ void Command::_who(const args_t &args, Client &client)
 		context = mask;
 		Channel *channel = server->find_channel(mask);
 		if (channel)
-			clients = channel->get_members();	
+			clients = channel->get_members();
 	} else if (!operator_flag) {
 		clients = server->get_clients(mask);
 	}
