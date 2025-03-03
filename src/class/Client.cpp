@@ -152,6 +152,9 @@ void Client::set_nickname(const std::string &nickname)
 	if (_server.get_client(nickname) != NULL)
 		return reply(ERR_NICKNAMEINUSE, nickname, "Nickname is already in use");
 
+	if (_registered)
+		cmd_reply(get_mask(), "NICK", "", nickname);
+
 	_nickname = nickname;
 
 	if (!_registered)
@@ -462,11 +465,11 @@ std::string Client::generate_who_reply(const std::string &context) const
 	if (context != "*" && std::find(_channel_operator.begin(), _channel_operator.end(), context) != _channel_operator.end())
 		status_flags += "@";
 
-	oss << context 
-		<< " ~" << _username 
-		<< " " << _ip 
-		<< " " << _server.get_name() 
-		<< " " << _nickname 
+	oss << context
+		<< " ~" << _username
+		<< " " << _ip
+		<< " " << _server.get_name()
+		<< " " << _nickname
 		<< " " << status_flags;
 
 	return oss.str();
