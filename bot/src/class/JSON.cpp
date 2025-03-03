@@ -64,7 +64,7 @@ std::string JSON::stringify(const char *str)
 
 std::string JSON::stringify(const std::string &str)
 {
-	std::string result = "\"" + str;
+	std::string result = str;
 
 	size_t pos = 0;
 	while ((pos = result.find('\\', pos)) != std::string::npos) {
@@ -78,7 +78,7 @@ std::string JSON::stringify(const std::string &str)
 		pos += 2;
 	}
 
-	result += "\"";
+	result = "\"" + result + "\"";
 	return result;
 }
 
@@ -86,12 +86,6 @@ void JSON::_skip_spaces(const std::string &str, size_t &pos)
 {
 	while (std::isspace(str[pos]))
 		pos++;
-}
-
-JSON::Value JSON::_parse_value(const std::string &str)
-{
-	size_t pos = 0;
-	return _parse_value(str, pos);
 }
 
 JSON::Value JSON::_parse_value(const std::string &str, size_t &pos, bool next)
@@ -173,19 +167,20 @@ JSON::Object JSON::_parse_object(const std::string &str)
 
 		if (!obj.empty())
 			if (str[pos++] != ',')
-				throw Exception(exception_message);
+				throw Exception(exception_message + ",");
 
 		std::string key = _parse_string(str, pos, true);
 
 		_skip_spaces(str, ++pos);
 		if (str[pos++] != ':')
-			throw Exception(exception_message);
+		throw Exception(exception_message + ":");
 
 		obj[key] = _parse_value(str, pos, true);
+		pos++;
 	}
 
 	if (pos != str.size() - 1)
-		throw Exception(exception_message);
+		throw Exception(exception_message + "0");
 
 	return obj;
 }
