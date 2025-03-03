@@ -144,7 +144,7 @@ std::string JSON::_parse_string(const std::string &str, size_t &pos, bool next)
 	if (!next) {
 		size_t end = pos;
 		_skip_spaces(str, end);
-		if (end < str.size() - 1)
+		if (end + 1 < str.size())
 			throw Exception("Invalid JSON string");
 	}
 
@@ -202,8 +202,9 @@ JSON::Object JSON::_parse_object(const std::string &str, size_t &pos, bool next)
 	}
 
 	if (!next) {
-		_skip_spaces(str, pos);
-		if (pos != str.size())
+		size_t end = pos;
+		_skip_spaces(str, end);
+		if (end + 1 < str.size())
 			throw Exception("Invalid JSON object");
 	}
 

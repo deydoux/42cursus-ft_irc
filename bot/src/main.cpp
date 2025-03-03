@@ -5,6 +5,6 @@
 
 int main(void)
 {
-	JSON::Object obj = JSON::parse<JSON::Object>("{\"hello\":\"world\"}");
+	JSON::Object obj = JSON::parse<JSON::Object>("            {             \"hello\"             :             \"world\"         }       ");
 	std::cout << obj["hello"].parse<std::string>() << std::endl;
 }
