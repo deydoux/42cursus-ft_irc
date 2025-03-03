@@ -172,7 +172,7 @@ std::string Channel::stringify_modes(Channel::modes_t *modes, bool add_modes_val
 {
 	if (modes->flags.empty())
 		return "+";
-    
+
 	std::string str_flags;
 	std::string str_values;
 	char current_sign = 0;
@@ -205,9 +205,9 @@ void Channel::add_modes(modes_t *modes)
 			_modes.flags.push_back(modes->flags[i]);
 		} else {
 			_modes.flags.erase(std::find(
-				_modes.flags.begin(), 
-				_modes.flags.end(), 
-				"-" + mode
+				_modes.flags.begin(),
+				_modes.flags.end(),
+				std::string("-") + mode
 			));
 		}
 	}
