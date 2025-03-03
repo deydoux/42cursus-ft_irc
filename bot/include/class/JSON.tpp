@@ -64,6 +64,13 @@ inline std::string JSON::parse<std::string>(const std::string &str)
 }
 
 template <>
+inline JSON::Array JSON::parse<JSON::Array>(const std::string &str)
+{
+	size_t pos = 0;
+	return _parse_array(str, pos);
+}
+
+template <>
 inline JSON::Object JSON::parse<JSON::Object>(const std::string &str)
 {
 	size_t pos = 0;
