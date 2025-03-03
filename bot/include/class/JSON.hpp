@@ -62,7 +62,6 @@ class JSON
 private:
 	static void			_skip_spaces(const std::string &str, size_t &pos);
 
-	static Value		_parse_value(const std::string &str);
 	static Value		_parse_value(const std::string &str, size_t &pos, bool next = false);
 	static std::string	_parse_string(const std::string &str);
 	static std::string	_parse_string(const std::string &str, size_t &pos, bool next = false);
