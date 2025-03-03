@@ -1,9 +1,8 @@
-#include "class/JSON.hpp"
 #include "class/Ollama.hpp"
 
 Ollama::Ollama(const std::string &model) : _model(model) {}
 
-std::string Ollama::generate(const std::string &prompt, context_t &context)
+JSON::Object Ollama::generate(const std::string &prompt, context_t &context)
 {
 	static const std::string endpoint = _base_uri + "/api/generate";
 
@@ -12,7 +11,8 @@ std::string Ollama::generate(const std::string &prompt, context_t &context)
 	data["prompt"] = prompt;
 	data["stream"] = false;
 
-	return _curl.post(endpoint, data.stringify());
+	const std::string res = _curl.post(endpoint, data.stringify());
+	return JSON::parse<JSON::Object>(res);
 	(void)context;
 }
 

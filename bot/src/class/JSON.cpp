@@ -154,7 +154,7 @@ std::string JSON::_parse_string(const std::string &str, size_t &pos, bool next)
 	_skip_spaces(str, pos);
 	size_t start = pos++;
 
-	while (pos < str.size() && str[pos] != '"' && (pos == 0 || str[pos - 1] != '\\'))
+	while (pos < str.size() && (str[pos] != '"' || str[pos - 1] == '\\'))
 		pos++;
 
 	if (!next) {

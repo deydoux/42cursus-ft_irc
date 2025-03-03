@@ -1,4 +1,3 @@
-//c++ -Iinclude -Wall -Wextra -Werror -std=c++98 src/class/JSON.cpp tests/json.cpp -o json_test
 #include "class/JSON.hpp"
 
 #include <iostream>

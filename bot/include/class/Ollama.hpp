@@ -2,6 +2,7 @@
 #define OLLAMA_HPP
 
 #include "class/Curl.hpp"
+#include "class/JSON.hpp"
 
 #include <string>
 #include <vector>
@@ -17,7 +18,7 @@ public:
 
 	Ollama(const std::string &model);
 
-	std::string	generate(const std::string &prompt, context_t &context);
+	JSON::Object	generate(const std::string &prompt, context_t &context);
 
 private:
 	const std::string	_model;
