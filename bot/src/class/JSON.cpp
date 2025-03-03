@@ -140,8 +140,6 @@ std::string JSON::_parse_string(const std::string &str)
 				value.replace(pos, 2, "\n");
 			else
 				pos++;
-
-			break;
 		} else if (value[pos] == '"')
 			throw Exception(exception_message);
 	}
