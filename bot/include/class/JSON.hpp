@@ -65,6 +65,8 @@ private:
 	static Value		_parse_value(const std::string &str, size_t &pos, bool next = false);
 	static std::string	_parse_string(const std::string &str);
 	static std::string	_parse_string(const std::string &str, size_t &pos, bool next = false);
+	static Array		_parse_array(const std::string &str);
+	static Array		_parse_array(const std::string &str, size_t &pos, bool next = false);
 	static Object		_parse_object(const std::string &str);
 	static Object		_parse_object(const std::string &str, size_t &pos, bool next = false);
 };
