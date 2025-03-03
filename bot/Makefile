@@ -66,6 +66,9 @@ $(NAME): $(OBJ) $(CURL_LIB)
 json_test: $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/$(TESTS_DIR)/json.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
+ollama-cli_test: $(BUILD_DIR)/class/Curl.o $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/class/Ollama.o $(BUILD_DIR)/$(TESTS_DIR)/ollama-cli.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LFLAGS)
+
 -include $(DEP)
 
 .PHONY: all clean fclean re
