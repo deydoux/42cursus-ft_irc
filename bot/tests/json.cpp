@@ -22,6 +22,6 @@ int main(void)
 	JSON::Array fib = obj["fib"].parse<JSON::Array>();
 	std::cout << "obj.fib = " << fib << std::endl;
 	for (size_t i = 0; i < fib.size(); ++i) {
-		std::cout << "obj.fib[" << i << "] = " << fib[i].parse<size_t>() << std::endl;
+		std::cout << "obj.fib[" << i << "] = " << fib[i] << std::endl;
 	}
 }
