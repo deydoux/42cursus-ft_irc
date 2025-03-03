@@ -5,7 +5,7 @@
 
 int main(void)
 {
-	JSON::Object obj = JSON::parse<JSON::Object>("   {   \"hello\"   :   \"world\"   ,   \"school\"   :   42   ,   \"truth\"   :   true   ,   \"cat\"   :   { \"height\" : 5 , \"color\" : \"orange\" }   }   ");
+	JSON::Object obj = JSON::parse<JSON::Object>("   {   \"hello\"   :   \"world\"   ,   \"school\"   :   42   ,   \"truth\"   :   true   ,   \"cat\"   :   { \"height\" : 5 , \"color\" : \"orange\" },\"empty\":null}");
 	JSON::Object cat = obj["cat"].parse<JSON::Object>();
 
 	std::cout << "obj.hello = " << obj["hello"] << std::endl;
@@ -14,4 +14,5 @@ int main(void)
 	std::cout << "obj.cat = " << cat << std::endl;
 	std::cout << "obj.cat.height = " << cat["height"] << std::endl;
 	std::cout << "obj.cat.color = " << cat["color"] << std::endl;
+	std::cout << "obj.empty = " << obj["empty"] << std::endl;
 }
