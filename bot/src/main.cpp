@@ -8,6 +8,7 @@ int main(void)
 	JSON::Object obj = JSON::parse<JSON::Object>("   {   \"hello\"   :   \"world\"   ,   \"school\"   :   42   ,   \"truth\"   :   true   ,   \"cat\"   :   { \"height\" : 5 , \"color\" : \"orange\" },\"empty\":null}");
 	JSON::Object cat = obj["cat"].parse<JSON::Object>();
 
+	std::cout << "obj = " << obj << std::endl;
 	std::cout << "obj.hello = " << obj["hello"] << std::endl;
 	std::cout << "obj.school = " << obj["school"] << std::endl;
 	std::cout << "obj.truth = " << obj["truth"] << std::endl;
