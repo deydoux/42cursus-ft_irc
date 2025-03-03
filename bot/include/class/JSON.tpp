@@ -46,6 +46,17 @@ std::string JSON::stringify(const T &value)
 }
 
 template <>
+inline bool JSON::parse<bool>(const std::string &str)
+{
+	if (str.substr(0, 4) == "true")
+		return true;
+	else if (str.substr(0, 5) == "false")
+		return false;
+	else
+		throw Exception("Invalid JSON boolean");
+}
+
+template <>
 inline std::string JSON::parse<std::string>(const std::string &str)
 {
 	size_t pos = 0;
@@ -62,14 +73,22 @@ inline JSON::Object JSON::parse<JSON::Object>(const std::string &str)
 template <typename T>
 T JSON::parse(const std::string &str)
 {
-	std::istringstream iss(str);
+	size_t pos = 0;
+	return _parse<T>(str, pos);
+}
+
+template <typename T>
+T JSON::_parse(const std::string &str, size_t &pos, bool next)
+{
+	std::istringstream iss(str.substr(pos));
 
 	T value;
 	iss >> value;
 
-	if (!iss.eof() || iss.fail())
+	if ((!next && !iss.eof()) || iss.fail())
 		throw Exception("Invalid JSON value");
 
+	pos += iss.tellg();
 	return value;
 }
 

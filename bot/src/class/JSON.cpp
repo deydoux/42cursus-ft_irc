@@ -96,6 +96,20 @@ JSON::Value JSON::_parse_value(const std::string &str, size_t &pos, bool next)
 		return Value(_parse_string(str, pos, next));
 	else if (str[pos] == '{')
 		return Value(_parse_object(str, pos, next));
+	else if (str.substr(pos, 4) == "true") {
+		pos += 4;
+		return Value(true);
+	}
+	else if (str.substr(pos, 5) == "false") {
+		pos += 5;
+		return Value(false);
+	}
+	else if (str.substr(pos, 4) == "null") {
+		pos += 4;
+		return Value();
+	}
+	else
+		return Value(_parse<double>(str, pos, next));
 
 	throw Exception("Invalid JSON value");
 }
@@ -149,7 +163,7 @@ std::string JSON::_parse_string(const std::string &str, size_t &pos, bool next)
 			throw Exception("Invalid JSON string");
 	}
 
-	return _parse_string(str.substr(start, pos - start + 1));
+	return _parse_string(str.substr(start, ++pos - start));
 }
 
 JSON::Object JSON::_parse_object(const std::string &str)
@@ -162,27 +176,26 @@ JSON::Object JSON::_parse_object(const std::string &str)
 	Object obj;
 	size_t pos = 1;
 
-	while (pos < str.size() - 1) {
+	while (pos < str.size()) {
 		_skip_spaces(str, pos);
-		if (str[pos] == '}')
+		if (pos + 1 == str.size())
 			break;
 
 		if (!obj.empty())
 			if (str[pos++] != ',')
-				throw Exception(exception_message + ",");
+				throw Exception(exception_message);
 
 		std::string key = _parse_string(str, pos, true);
 
-		_skip_spaces(str, ++pos);
+		_skip_spaces(str, pos);
 		if (str[pos++] != ':')
-		throw Exception(exception_message + ":");
+		throw Exception(exception_message);
 
 		obj[key] = _parse_value(str, pos, true);
-		pos++;
 	}
 
-	if (pos != str.size() - 1)
-		throw Exception(exception_message + "0");
+	if (pos + 1 < str.size())
+		throw Exception(exception_message);
 
 	return obj;
 }
