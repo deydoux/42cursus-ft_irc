@@ -142,8 +142,9 @@ std::string JSON::_parse_string(const std::string &str, size_t &pos, bool next)
 		pos++;
 
 	if (!next) {
-		_skip_spaces(str, pos);
-		if (pos != str.size())
+		size_t end = pos;
+		_skip_spaces(str, end);
+		if (end < str.size() - 1)
 			throw Exception("Invalid JSON string");
 	}
 
