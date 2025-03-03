@@ -94,6 +94,8 @@ JSON::Value JSON::_parse_value(const std::string &str, size_t &pos, bool next)
 
 	if (str[pos] == '"')
 		return Value(_parse_string(str, pos, next));
+	else if (str[pos] == '[')
+		return Value(_parse_array(str, pos, next));
 	else if (str[pos] == '{')
 		return Value(_parse_object(str, pos, next));
 	else if (str.substr(pos, 4) == "true") {
