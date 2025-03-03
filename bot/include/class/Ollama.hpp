@@ -18,6 +18,12 @@ public:
 
 	Ollama(const std::string &model);
 
+	class Exception : public std::runtime_error
+	{
+	public:
+		Exception(const std::string &message);
+	};
+
 	JSON::Object	generate(const std::string &prompt, context_t &context);
 
 private:
