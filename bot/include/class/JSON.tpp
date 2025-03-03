@@ -48,13 +48,15 @@ std::string JSON::stringify(const T &value)
 template <>
 inline std::string JSON::parse<std::string>(const std::string &str)
 {
-	return _parse_string(str);
+	size_t pos = 0;
+	return _parse_string(str, pos);
 }
 
 template <>
 inline JSON::Object JSON::parse<JSON::Object>(const std::string &str)
 {
-	return _parse_object(str);
+	size_t pos = 0;
+	return _parse_object(str, pos);
 }
 
 template <typename T>
