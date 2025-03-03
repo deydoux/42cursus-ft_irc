@@ -17,4 +17,9 @@ int main(void)
 	std::cout << "obj.cat.color = " << cat["color"] << std::endl;
 	std::cout << "obj.empty = " << obj["empty"] << std::endl;
 	std::cout << "obj.fib = " << obj["fib"] << std::endl;
+
+	JSON::Array fib = obj["fib"].parse<JSON::Array>();
+	for (size_t i = 0; i < fib.size(); ++i) {
+		std::cout << "obj.fib[" << i << "] = " << fib[i].parse<size_t>() << std::endl;
+	}
 }
