@@ -27,4 +27,6 @@ int main(int argc, char *argv[])
 		JSON::Object res = ollama.generate(prompt, context);
 		std::cout << std::endl << res["response"].parse<std::string>() << std::endl << std::endl;
 	}
+
+	std::cout << std::endl;
 }
