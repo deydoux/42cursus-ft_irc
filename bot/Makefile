@@ -9,6 +9,7 @@ SRC = \
 SRC_DIR = src
 INC_DIR = include
 BUILD_DIR = build
+TESTS_DIR = tests
 
 CURL_VERSION = 8.12.1
 CURL_NAME = curl-$(CURL_VERSION)
@@ -55,8 +56,15 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp Makefile | $(CURL_INC)
 	$(MKDIR) $(@D)
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
+$(BUILD_DIR)/$(TESTS_DIR)/%.o: $(TESTS_DIR)/%.cpp Makefile
+	$(MKDIR) $(@D)
+	$(CXX) $(CXXFLAGS) -o $@ -c $<
+
 $(NAME): $(OBJ) $(CURL_LIB)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJ) $(LFLAGS)
+
+json_test: $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/$(TESTS_DIR)/json.o
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
 -include $(DEP)
 
@@ -68,6 +76,6 @@ clean:
 	$(RM) $(BUILD_DIR)
 
 fclean:
-	$(RM) $(BUILD_DIR) $(NAME)
+	$(RM) $(BUILD_DIR) $(NAME) json_test
 
 re: fclean all
