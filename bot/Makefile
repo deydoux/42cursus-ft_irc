@@ -69,6 +69,9 @@ json_test: $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/$(TESTS_DIR)/json.o
 ollama-cli_test: $(BUILD_DIR)/class/Curl.o $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/class/Ollama.o $(BUILD_DIR)/$(TESTS_DIR)/ollama-cli.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LFLAGS)
 
+trivia_test: $(BUILD_DIR)/class/Curl.o $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/$(TESTS_DIR)/trivia.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LFLAGS)
+
 -include $(DEP)
 
 .PHONY: all clean fclean re
@@ -79,6 +82,6 @@ clean:
 	$(RM) $(BUILD_DIR)
 
 fclean:
-	$(RM) $(BUILD_DIR) $(NAME) json_test ollama-cli_test
+	$(RM) $(BUILD_DIR) $(NAME) json_test ollama-cli_test trivia_test
 
 re: fclean all
