@@ -79,6 +79,6 @@ clean:
 	$(RM) $(BUILD_DIR)
 
 fclean:
-	$(RM) $(BUILD_DIR) $(NAME) json_test
+	$(RM) $(BUILD_DIR) $(NAME) json_test ollama-cli_test
 
 re: fclean all
