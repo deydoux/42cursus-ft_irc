@@ -63,7 +63,8 @@ std::string Curl::_perform()
 
 size_t Curl::_write_callback(char *ptr, size_t size, size_t nmemb, std::string *userdata)
 {
-	userdata->append(ptr, size * nmemb);
-	return size * nmemb;
+	size_t total = size * nmemb;
+	userdata->append(ptr, total);
+	return total;
 }
 
