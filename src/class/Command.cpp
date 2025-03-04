@@ -61,11 +61,15 @@ void Command::_invite(const args_t &args, Client &client)
 		Channel *channel = server.find_channel(channels[i]);
 
 		if (channel) {
-			if (!channel->is_client_member(client))
-				return client.reply(ERR_NOTONCHANNEL, channel->get_name(), "You are not on that channel");
+			if (!channel->is_client_member(client)) {
+				client.reply(ERR_NOTONCHANNEL, channel->get_name(), "You are not on that channel");
+				continue;
+			}
 
-			if (channel->is_client_member(*target))
-				return client.reply(ERR_USERONCHANNEL, target->get_nickname(), "is already on channel");
+			if (channel->is_client_member(*target)) {
+				client.reply(ERR_USERONCHANNEL, target->get_nickname(), "is already on channel");
+				continue;
+			}
 
 			channel->invite_client(*target);
 		}
