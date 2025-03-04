@@ -50,21 +50,25 @@ Command::_commands_t Command::_commands;
 void Command::_invite(const args_t &args, Client &client)
 {
 	Server &server = client.get_server();
-
 	Client *target = server.get_client(args[1]);
-	Channel *channel = server.find_channel(args[2]);
 
 	if (!target)
 		return client.reply(ERR_NOSUCHNICK, args[1], "No such nick or channel name");
 
-	if (channel) {
-		if (!channel->is_client_member(client))
-			return client.reply(ERR_NOTONCHANNEL, channel->get_name(), "You are not on that channel");
+	std::vector<std::string> channels = ft_split(args[2], ',');
+	for (size_t i = 0; i < channels.size(); i++)
+	{
+		Channel *channel = server.find_channel(channels[i]);
 
-		if (channel->is_client_member(*target))
-			return client.reply(ERR_USERONCHANNEL, target->get_nickname(), "is already on channel");
+		if (channel) {
+			if (!channel->is_client_member(client))
+				return client.reply(ERR_NOTONCHANNEL, channel->get_name(), "You are not on that channel");
 
-		channel->invite_client(*target);
+			if (channel->is_client_member(*target))
+				return client.reply(ERR_USERONCHANNEL, target->get_nickname(), "is already on channel");
+
+			channel->invite_client(*target);
+		}
 	}
 
 	target->cmd_reply(client.get_mask(), "INVITE", args[1], args[2]);
