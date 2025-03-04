@@ -9,7 +9,6 @@ SRC = \
 SRC_DIR = src
 INC_DIR = include
 BUILD_DIR = build
-TEST_DIR = test
 
 CURL_VERSION = 8.12.1
 CURL_NAME = curl-$(CURL_VERSION)
@@ -56,21 +55,8 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp Makefile | $(CURL_INC)
 	$(MKDIR) $(@D)
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
-$(BUILD_DIR)/$(TEST_DIR)/%.o: $(TEST_DIR)/%.cpp Makefile
-	$(MKDIR) $(@D)
-	$(CXX) $(CXXFLAGS) -o $@ -c $<
-
 $(NAME): $(OBJ) $(CURL_LIB)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJ) $(LFLAGS)
-
-json_test: $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/$(TEST_DIR)/json.o
-	$(CXX) $(CXXFLAGS) -o $@ $^
-
-ollama-cli_test: $(BUILD_DIR)/class/Curl.o $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/class/Ollama.o $(BUILD_DIR)/$(TEST_DIR)/ollama-cli.o
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LFLAGS)
-
-trivia_test: $(BUILD_DIR)/class/Curl.o $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/$(TEST_DIR)/trivia.o
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LFLAGS)
 
 -include $(DEP)
 
@@ -82,6 +68,6 @@ clean:
 	$(RM) $(BUILD_DIR)
 
 fclean:
-	$(RM) $(BUILD_DIR) $(NAME) json_test ollama-cli_test trivia_test
+	$(RM) $(BUILD_DIR) $(NAME)
 
 re: fclean all
