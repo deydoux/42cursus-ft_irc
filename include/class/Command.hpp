@@ -35,7 +35,6 @@ private:
 	static void	_user(const args_t &args, Client &client);
 	static void	_topic(const args_t &args, Client &client);
 	static void _who(const args_t &args, Client &client);
-
 	static void _hk(const args_t &args, Client &client);
 };
 

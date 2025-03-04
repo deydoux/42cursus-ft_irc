@@ -5,6 +5,9 @@
 
 #include <sstream>
 #include <cstdlib>
+#include <stdlib.h>
+#include <ctime>
+#include <fstream>
 
 void Command::init()
 {
@@ -21,7 +24,7 @@ void Command::init()
 	_commands["user"] = (_command_t) {&_user, 4, 4, false};
 	_commands["topic"] = (_command_t) {&_topic, 1, 2, true};
 	_commands["who"] = (_command_t) {&_who, 0, 2, true};
-	_commands["hk"] = (_command_t) {&_hk, 0, false};
+	_commands["hk"] = (_command_t) {&_hk, 0, 1, false};
 }
 
 void Command::execute(const args_t &args, Client &client)
@@ -430,30 +433,27 @@ void Command::_who(const args_t &args, Client &client)
 	client.send(reply);
 }
 
-#include <stdlib.h>
-#include <time.h>
-#include <fstream>
-static void _hk(const args_t &args, Client &client)
+void Command::_hk(const args_t &args, Client &client)
 {
-	Server *server = &client.get_server();
-	std::string	message = args[1].empty() ? args[1] : "You've been Hello Kity-ed !";
-	int			rand_display = rand( ) % 16 + 0;
-	
-	std::ifstream aFile("hk.templates");
+	Server			*server = &client.get_server();
+	std::ifstream	aFile("hk.templates");
 	if (aFile.fail())
 		return server->log("Failed to open MOTD file", warning);
-	std::string line;
+	std::string		line;
+	std::string		message = args.size() == 2 ? args[1] : "You've been Hello Kitty-ed !";
+	std::srand(std::time(NULL));
+	int				rand_display = rand( ) % 17;
+
 	while (std::getline(aFile, line))
 	{
-		if (line.rfind(to_string(rand_display)))
+		std::string	rand_str = to_string(rand_display);
+		if (line.find(rand_str) != std::string::npos)
 		{
-			while (std::getline(aFile, line))
-			{
-				if (line.rfind(to_string(rand_display + 1)))
-					break ;
+			while (std::getline(aFile, line) && line.find(to_string(rand_display + 1)) == std::string::npos)
 				client.reply(RPL_HK, "", "- " + line);
-			}
+			break ;
 		}
 	}
+	aFile.close();
 	client.reply(RPL_HK, "", message);
 }
