@@ -44,7 +44,7 @@ public:
 
 	Channel				*get_channel(const std::string &name);
 
-	Server	&get_server() const;	
+	Server	&get_server() const;
 
 	void	set_nickname(const std::string &nickname);
 	void	set_username(const std::string &username);
