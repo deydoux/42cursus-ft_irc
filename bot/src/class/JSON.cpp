@@ -30,8 +30,8 @@ std::string JSON::Object::stringify() const
 		if (it != begin())
 			result += ",";
 
-		std::string key = it->first;
-		std::string value = it->second.stringify();
+		const std::string &key = it->first;
+		const std::string &value = it->second.stringify();
 		result += "\"" + key + "\":" + value;
 	}
 
