@@ -19,16 +19,7 @@ std::string JSON::Value::stringify() const
 
 std::string JSON::Array::stringify() const
 {
-	std::string result = "[";
-
-	for (const_iterator it = begin(); it != end(); ++it) {
-		if (it != begin())
-			result += ",";
-		result += it->stringify();
-	}
-
-	result += "]";
-	return result;
+	return JSON::stringify<std::vector<JSON::Value> >(*this);
 }
 
 std::string JSON::Object::stringify() const
