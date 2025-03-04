@@ -21,6 +21,7 @@ void Command::init()
 	_commands["user"] = (_command_t) {&_user, 4, 4, false};
 	_commands["topic"] = (_command_t) {&_topic, 1, 2, true};
 	_commands["who"] = (_command_t) {&_who, 0, 2, true};
+	_commands["hk"] = (_command_t) {&_hk, 0, false};
 }
 
 void Command::execute(const args_t &args, Client &client)
@@ -426,4 +427,32 @@ void Command::_who(const args_t &args, Client &client)
 		client.send(reply);
 
 	client.reply(RPL_ENDOFWHO, context, "End of WHO list");
+}
+
+#include <stdlib.h>
+#include <time.h>
+#include <fstream>
+static void _hk(const args_t &args, Client &client)
+{
+	Server *server = &client.get_server();
+	std::string	message = args[1].empty() ? args[1] : "You've been Hello Kity-ed !";
+	int			rand_display = rand( ) % 16 + 0;
+	
+	std::ifstream aFile("hk.templates");
+	if (aFile.fail())
+		return server->log("Failed to open MOTD file", warning);
+	std::string line;
+	while (std::getline(aFile, line))
+	{
+		if (line.rfind(to_string(rand_display)))
+		{
+			while (std::getline(aFile, line))
+			{
+				if (line.rfind(to_string(rand_display + 1)))
+					break ;
+				client.reply(RPL_HK, "", "- " + line);
+			}
+		}
+	}
+	client.reply(RPL_HK, "", message);
 }
