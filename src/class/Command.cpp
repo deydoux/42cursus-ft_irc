@@ -440,7 +440,6 @@ void Command::_who(const args_t &args, Client &client)
 
 void Command::_names(const args_t &args, Client &client)
 {
-
 	std::string reply;
 
 	Server &server = client.get_server();
@@ -450,7 +449,7 @@ void Command::_names(const args_t &args, Client &client)
 
 		for (channels_t::iterator it = channels.begin(); it != channels.end(); it++)
 			reply += client.create_reply(RPL_NAMREPLY, "= " + it->first, it->second->list_members());
-		
+
 		std::string lost_clients_nicknames;
 		clients_t clients = server.get_clients("*");
 
@@ -471,7 +470,7 @@ void Command::_names(const args_t &args, Client &client)
 
 			if (channel)
 				reply += client.create_reply(RPL_NAMREPLY, "= " + channel_name, channel->list_members());
-			
+
 			reply += client.create_reply(RPL_ENDOFNAMES, channel_name, "End of NAMES list");
 		}
 	}

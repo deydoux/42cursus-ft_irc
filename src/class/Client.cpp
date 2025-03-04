@@ -309,6 +309,12 @@ void Client::_greet() const
 	std::string topiclen = to_string(Channel::max_topic_len);
 	std::string kicklen = to_string(Client::_max_kick_message_len);
 
+	std::string clients_count = to_string(_server.get_clients_count());
+	std::string channels_count = to_string(_server.get_channels_count());
+	std::string max_clients = to_string(_server.get_max_clients());
+	std::string max_connections = to_string(_server.get_max_connections());
+	std::string connections = to_string(_server.get_connections());
+
 	std::string reply = // https://modern.ircdocs.horse/#rplwelcome-001
 		create_reply(RPL_WELCOME, "", "Welcome to the Internet Relay Network " + get_mask())
 		+ create_reply(RPL_YOURHOST, "", "Your host is " + _server.get_name() + ", running version " VERSION)
@@ -316,12 +322,12 @@ void Client::_greet() const
 		+ create_reply(RPL_MYINFO, _server.get_name() + " " VERSION " o iklt")
 		+ create_reply(RPL_ISUPPORT, "RFC2812 IRCD=ft_irc CHARSET=UTF-8 CASEMAPPING=ascii PREFIX=(o)@ CHANTYPES=#& CHANMODES=,k,l,it", "are supported on this server")
 		+ create_reply(RPL_ISUPPORT, "CHANLIMIT=#&:" + chanlimit + " CHANNELLEN=" + channellen + " NICKLEN=" + nicklen + " TOPICLEN=" + topiclen + " AWAYLEN=127 KICKLEN=" + kicklen + " MODES=5", "are supported on this server")
-		+ create_reply(RPL_LUSERCLIENT, "", "There are " + to_string(_server.get_clients_count()) + " users and 0 services on 1 servers")
-		+ create_reply(RPL_LUSERCHANNELS, to_string(_server.get_channels_count()), "channels formed")
-		+ create_reply(RPL_LUSERME, "", "I have " + to_string(_server.get_clients_count()) + " users, 0 services and 0 servers")
-		+ create_reply(RPL_LOCALUSERS, to_string(_server.get_clients_count()) + ' ' + to_string(_server.get_max_clients()), "Current local users: " + to_string(_server.get_clients_count()) + ", Max: " + to_string(_server.get_max_clients()))
-		+ create_reply(RPL_LOCALUSERS, to_string(_server.get_clients_count()) + ' ' + to_string(_server.get_max_clients()), "Current global users: " + to_string(_server.get_clients_count()) + ", Max: " + to_string(_server.get_max_clients()))
-		+ create_reply(RPL_STATSDLINE, "", "Highest connection count: " + to_string(_server.get_max_connections()) + " (" + to_string(_server.get_connections()) + " connections received)")
+		+ create_reply(RPL_LUSERCLIENT, "", "There are " + clients_count + " users and 0 services on 1 servers")
+		+ create_reply(RPL_LUSERCHANNELS, channels_count, "channels formed")
+		+ create_reply(RPL_LUSERME, "", "I have " + clients_count + " users, 0 services and 0 servers")
+		+ create_reply(RPL_LOCALUSERS, clients_count + ' ' + max_clients, "Current local users: " + clients_count + ", Max: " + max_clients)
+		+ create_reply(RPL_LOCALUSERS, clients_count + ' ' + max_clients, "Current global users: " + clients_count + ", Max: " + max_clients)
+		+ create_reply(RPL_STATSDLINE, "", "Highest connection count: " + max_connections + " (" + connections + " connections received)")
 		+ create_motd_reply();
 
 	send(reply);
