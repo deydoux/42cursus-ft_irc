@@ -245,8 +245,7 @@ void Client::_handle_message(std::string message)
 	if (message[message.size() - 1] == '\r')
 		message.erase(message.size() - 1);
 
-	args_t args;
-	size_t pos;
+	args_t args;remove_channel_operator
 	while ((pos = message.find(' ')) != std::string::npos && message.find(':') != 0)
 	{
 		if (pos > 0)
@@ -472,8 +471,7 @@ void	Client::part_channel(Channel &channel, std::string &reason)
 		));
 		channel.remove_client(*this);
 		get_active_channels().erase(channel.get_name());
-		std::vector<std::string> chan_op = get_channels_operator();
-		chan_op.erase(std::remove(chan_op.begin(), chan_op.end(), channel.get_name()), chan_op.end());
+		remove_channel_operator(channel.get_name());
 	}
 	if (channel.get_members().empty())
 		server.delete_channel(channel.get_name());
