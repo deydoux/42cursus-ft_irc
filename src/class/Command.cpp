@@ -3,11 +3,10 @@
 #include "class/Channel.hpp"
 #include "class/Server.hpp"
 
-#include <sstream>
 #include <cstdlib>
-#include <stdlib.h>
 #include <ctime>
 #include <fstream>
+#include <sstream>
 
 void Command::init()
 {
@@ -26,6 +25,8 @@ void Command::init()
 	_commands["who"] = (_command_t) {&_who, 0, 2, true};
 	_commands["hk"] = (_command_t) {&_hk, 0, 1, false};
 	_commands["names"] = (_command_t) {&_names, 0, 1, true};
+
+	std::srand(std::time(NULL));
 }
 
 void Command::execute(const args_t &args, Client &client)
@@ -450,7 +451,6 @@ void Command::_hk(const args_t &args, Client &client)
 		return server->log("Failed to open MOTD file", warning);
 	std::string		line;
 	std::string		message = args.size() == 2 ? args[1] : "You've been Hello Kitty-ed !";
-	std::srand(std::time(NULL));
 	int				rand_display = rand( ) % 17;
 
 	while (std::getline(aFile, line))
