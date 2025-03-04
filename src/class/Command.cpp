@@ -25,6 +25,7 @@ void Command::init()
 	_commands["who"] = (_command_t) {&_who, 0, 2, true};
 	_commands["hk"] = (_command_t) {&_hk, 0, 1, false};
 	_commands["names"] = (_command_t) {&_names, 0, 1, true};
+	_commands["part"] = (_command_t) {&_part, 1, 2, true};
 
 	std::srand(std::time(NULL));
 }
@@ -505,4 +506,31 @@ void Command::_names(const args_t &args, Client &client)
 	}
 
 	client.send(reply);
+}
+
+void Command::_part(const args_t &args, Client &client)
+{
+	Server						&server = client.get_server();
+	std::vector<Channel *>		channels_to_quit;
+	std::vector<std::string>	channels_name = ft_split(args[1], ',');
+	std::string 				reason = args.size() == 3 ? args[2] : "Leaving";
+
+	for (size_t i = 0; i < channels_name.size(); i++)
+	{
+		std::string channel_name = channels_name[i];
+		Channel *new_channel = server.get_channel(channel_name);
+		if (!new_channel)
+		{
+			client.reply(
+				ERR_NOSUCHCHANNEL,
+				channels_name[i],
+				"No such channel"
+			);
+		}
+		else
+			channels_to_quit.push_back(new_channel);
+	}
+
+	for (size_t j = 0; j < channels_to_quit.size(); j++)
+		client.part_channel(*channels_to_quit[j], reason);
 }

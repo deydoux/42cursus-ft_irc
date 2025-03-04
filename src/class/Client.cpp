@@ -245,8 +245,7 @@ void Client::_handle_message(std::string message)
 	if (message[message.size() - 1] == '\r')
 		message.erase(message.size() - 1);
 
-	args_t args;
-	size_t pos;
+	args_t args;remove_channel_operator
 	while ((pos = message.find(' ')) != std::string::npos && message.find(':') != 0)
 	{
 		if (pos > 0)
@@ -400,6 +399,12 @@ Channel *Client::get_channel(const std::string &name)
 	return it->second;
 }
 
+std::vector<std::string>	&Client::get_channels_operator( void )
+{
+	return _channel_operator;
+}
+
+
 bool	Client::join_channel(Channel &channel, std::string passkey)
 {
 	if (channel.is_client_member(*this))
@@ -453,6 +458,25 @@ void	Client::kick_channel(Channel &channel, const std::string &kicked_client, st
 		client_to_be_kicked->get_active_channels().erase(channel.get_name());
 	}
 }
+
+void	Client::part_channel(Channel &channel, std::string &reason)
+{
+	Server &server = this->get_server();
+	if (!channel.is_client_member(*this))
+		this->reply(ERR_NOTONCHANNEL, channel.get_name(), "You're not on that channel");
+	else
+	{
+		channel.send_broadcast(this->create_cmd_reply(
+			this->get_mask(), "PART", channel.get_name() , reason
+		));
+		channel.remove_client(*this);
+		get_active_channels().erase(channel.get_name());
+		remove_channel_operator(channel.get_name());
+	}
+	if (channel.get_members().empty())
+		server.delete_channel(channel.get_name());
+}
+
 
 void Client::notify_quit()
 {
