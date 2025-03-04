@@ -21,7 +21,7 @@ public:
 	void	broadcast(const std::string &message) const;
 
 	bool	join_channel(Channel &channel, std::string passkey);
-	void	kick_channel(Channel &channel, const std::string &kicked_client, const std::string &reason);
+	void	kick_channel(Channel &channel, const std::string &kicked_client, std::string &reason);
 	void	notify_quit();
 
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
@@ -86,6 +86,7 @@ private:
 	static const size_t _max_channels = 50;
 	static const size_t	_max_message_size = 512;
 	static const size_t	_max_nickname_size = 9;
+	static const size_t	_max_kick_message_len = 400;
 
 	static bool	_is_valid_nickname(const std::string &nickname);
 	static bool	_is_valid_username(const std::string &username);

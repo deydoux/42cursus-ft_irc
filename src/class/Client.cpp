@@ -303,13 +303,19 @@ void Client::_check_registration()
 
 void Client::_greet() const
 {
+	std::string chanlimit = to_string(Client::_max_channels);
+	std::string channellen = to_string(Channel::max_channel_name_size);
+	std::string nicklen = to_string(Client::_max_nickname_size);
+	std::string topiclen = to_string(Channel::max_topic_len);
+	std::string kicklen = to_string(Client::_max_kick_message_len);
+
 	std::string reply = // https://modern.ircdocs.horse/#rplwelcome-001
 		create_reply(RPL_WELCOME, "", "Welcome to the Internet Relay Network " + get_mask())
 		+ create_reply(RPL_YOURHOST, "", "Your host is " + _server.get_name() + ", running version " VERSION)
 		+ create_reply(RPL_CREATED, "", "This server has been started " + _server.get_start_time())
 		+ create_reply(RPL_MYINFO, _server.get_name() + " " VERSION " o iklt")
 		+ create_reply(RPL_ISUPPORT, "RFC2812 IRCD=ft_irc CHARSET=UTF-8 CASEMAPPING=ascii PREFIX=(o)@ CHANTYPES=#& CHANMODES=,k,l,it", "are supported on this server")
-		+ create_reply(RPL_ISUPPORT, "CHANLIMIT=#&:" + to_string(Client::_max_channels) + " CHANNELLEN=" + to_string(Channel::max_channel_name_size) + " NICKLEN=" + to_string(_max_nickname_size) + " TOPICLEN=490 AWAYLEN=127 KICKLEN=400 MODES=5", "are supported on this server")
+		+ create_reply(RPL_ISUPPORT, "CHANLIMIT=#&:" + chanlimit + " CHANNELLEN=" + channellen + " NICKLEN=" + nicklen + " TOPICLEN=" + topiclen + " AWAYLEN=127 KICKLEN=" + kicklen + " MODES=5", "are supported on this server")
 		+ create_reply(RPL_LUSERCLIENT, "", "There are " + to_string(_server.get_clients_count()) + " users and 0 services on 1 servers")
 		+ create_reply(RPL_LUSERCHANNELS, to_string(_server.get_channels_count()), "channels formed")
 		+ create_reply(RPL_LUSERME, "", "I have " + to_string(_server.get_clients_count()) + " users, 0 services and 0 servers")
@@ -417,10 +423,13 @@ bool	Client::join_channel(Channel &channel, std::string passkey)
 	return (false);
 }
 
-void	Client::kick_channel(Channel &channel, const std::string &kicked_client, const std::string &reason)
+void	Client::kick_channel(Channel &channel, const std::string &kicked_client, std::string &reason)
 {
 	Server &server = this->get_server();
 	Client *client_to_be_kicked = server.get_client(kicked_client);
+
+	if (reason.size() > _max_kick_message_len)
+		reason.resize(_max_kick_message_len);
 
 	if (!channel.is_client_member(*this))
 		this->reply(ERR_NOTONCHANNEL, channel.get_name(), "You're not on that channel");
@@ -430,8 +439,7 @@ void	Client::kick_channel(Channel &channel, const std::string &kicked_client, co
 		this->reply(ERR_NOSUCHNICK, channel.get_name(), "No such nick/channel");
 	else if (!channel.is_client_member(*client_to_be_kicked))
 		this->reply(ERR_USERNOTINCHANNEL, channel.get_name(), "They aren't on that channel");
-	else
-	{
+	else {
 		channel.send_broadcast(this->create_cmd_reply(
 			this->get_mask(), "KICK", channel.get_name() + ' ' + kicked_client, reason
 		));

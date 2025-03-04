@@ -394,6 +394,9 @@ void Command::_topic(const args_t &args, Client &client)
 		return client.reply(ERR_CHANOPRIVSNEEDED, channel_name, "You are not channel operator");
 
 	std::string new_topic = args[2];
+	if (new_topic.size() > Channel::max_topic_len)
+		new_topic.resize(Channel::max_topic_len);
+
 	channel->set_topic(client, new_topic);
 	channel->send_broadcast(client.create_cmd_reply(
 		client.get_mask(), "TOPIC", channel_name, new_topic

@@ -41,6 +41,7 @@ public:
 	const std::string list_members( void );
 
 	static const size_t max_channel_name_size = 50;
+	static const size_t max_topic_len = 490;
 
 	static bool			is_valid_name(const std::string &name);
 
