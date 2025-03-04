@@ -2,7 +2,7 @@
 
 Curl::Curl() : _handle(curl_easy_init())
 {
-	if (!_handle) throw std::runtime_error("Failed to initialize curl");
+	if (!_handle) throw Curl::Exception("Failed to initialize curl");
 }
 
 Curl::~Curl()
