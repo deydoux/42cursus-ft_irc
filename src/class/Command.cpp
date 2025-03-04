@@ -425,8 +425,6 @@ void Command::_who(const args_t &args, Client &client)
 		);
 	}
 
-	if (!reply.empty())
-		client.send(reply);
-
-	client.reply(RPL_ENDOFWHO, context, "End of WHO list");
+	reply += client.create_reply(RPL_ENDOFWHO, context, "End of WHO list");
+	client.send(reply);
 }
