@@ -366,7 +366,7 @@ const int &Client::get_fd( void )
 
 std::string Client::get_mask(void) const
 {
-	return std::string(_nickname + "!" + _username + "@" + _ip);
+	return std::string(_nickname + "!~" + _username + "@" + _ip);
 }
 
 channels_t &Client::get_active_channels( void )
