@@ -38,6 +38,7 @@ public:
 	void	remove_client(Client &client);
 
 	const clients_t	&get_members();
+	const std::string list_members( void );
 
 	static const size_t max_channel_name_size = 50;
 
