@@ -22,6 +22,7 @@ public:
 
 	bool	join_channel(Channel &channel, std::string passkey);
 	void	kick_channel(Channel &channel, const std::string &kicked_client, std::string &reason);
+	void	part_channel(Channel &channel, std::string &reason);
 	void	notify_quit();
 
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
@@ -29,20 +30,21 @@ public:
 
 	const std::string	create_motd_reply() const;
 
-	const bool			&has_disconnect_request() const;
-	const bool			&is_registered() const;
-	bool				is_channel_operator(std::string channel_name) const;
-	const std::string	&get_nickname(bool allow_empty = true) const;
-	const int			&get_fd( void );
-	std::string			get_mask( void ) const;
-	channels_t			&get_active_channels( void );
-	size_t				get_channels_count( void ) const;
-	std::string			get_realname( void ) const;
-	std::string			generate_who_reply(const std::string &context) const;
+	const bool					&has_disconnect_request() const;
+	const bool					&is_registered() const;
+	bool						is_channel_operator(std::string channel_name) const;
+	std::vector<std::string>	&get_channels_operator( void );
+	const std::string			&get_nickname(bool allow_empty = true) const;
+	const int					&get_fd( void );
+	std::string					get_mask( void ) const;
+	channels_t					&get_active_channels( void );
+	size_t						get_channels_count( void ) const;
+	std::string					get_realname( void ) const;
+	std::string					generate_who_reply(const std::string &context) const;
 
 	Channel				*get_channel(const std::string &name);
 
-	Server	&get_server() const;
+	Server	&get_server() const;	
 
 	void	set_nickname(const std::string &nickname);
 	void	set_username(const std::string &username);
