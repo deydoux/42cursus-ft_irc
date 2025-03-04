@@ -113,7 +113,7 @@ JSON::Value JSON::_parse_value(const std::string &str, size_t &pos, bool next)
 	else
 		return Value(_parse<double>(str, pos, next));
 
-	throw Exception("Invalid JSON value");
+	throw JSON::Exception("Invalid JSON value");
 }
 
 std::string JSON::_parse_string(const std::string &str)
@@ -121,14 +121,14 @@ std::string JSON::_parse_string(const std::string &str)
 	static const std::string exception_message = "Invalid JSON string";
 
 	if (str.size() < 2 || str[0] != '"' || str[str.size() - 1] != '"')
-		throw Exception(exception_message);
+		throw JSON::Exception(exception_message);
 
 	std::string value = str.substr(1, str.size() - 2);
 
 	for (size_t pos = 0; pos < value.size(); pos++) {
 		if (value[pos] == '\\') {
 			if (pos + 1 >= value.size())
-				throw Exception(exception_message);
+				throw JSON::Exception(exception_message);
 
 			char next = value[pos + 1];
 
@@ -141,7 +141,7 @@ std::string JSON::_parse_string(const std::string &str)
 			else
 				pos++;
 		} else if (value[pos] == '"')
-			throw Exception(exception_message);
+			throw JSON::Exception(exception_message);
 	}
 
 	return value;
@@ -160,7 +160,7 @@ std::string JSON::_parse_string(const std::string &str, size_t &pos, bool next)
 		_skip_spaces(str, end);
 
 		if (end + 1 < str.size())
-			throw Exception("Invalid JSON string");
+			throw JSON::Exception("Invalid JSON string");
 	}
 
 	return _parse_string(str.substr(start, ++pos - start));
@@ -171,7 +171,7 @@ JSON::Array JSON::_parse_array(const std::string &str)
 	static const std::string exception_message = "Invalid JSON array";
 
 	if (str.size() < 2 || str[0] != '[' || str[str.size() - 1] != ']')
-		throw Exception(exception_message);
+		throw JSON::Exception(exception_message);
 
 	Array arr;
 	size_t pos = 1;
@@ -183,13 +183,13 @@ JSON::Array JSON::_parse_array(const std::string &str)
 
 		if (!arr.empty())
 			if (str[pos++] != ',')
-				throw Exception(exception_message);
+				throw JSON::Exception(exception_message);
 
 		arr.push_back(_parse_value(str, pos, true));
 	}
 
 	if (pos + 1 < str.size())
-		throw Exception(exception_message);
+		throw JSON::Exception(exception_message);
 
 	return arr;
 }
@@ -214,7 +214,7 @@ JSON::Array JSON::_parse_array(const std::string &str, size_t &pos, bool next)
 		_skip_spaces(str, end);
 
 		if (end + 1 < str.size())
-			throw Exception("Invalid JSON array");
+			throw JSON::Exception("Invalid JSON array");
 	}
 
 	return _parse_array(str.substr(start, pos - start));
@@ -225,7 +225,7 @@ JSON::Object JSON::_parse_object(const std::string &str)
 	static const std::string exception_message = "Invalid JSON object";
 
 	if (str.size() < 2 || str[0] != '{' || str[str.size() - 1] != '}')
-		throw Exception(exception_message);
+		throw JSON::Exception(exception_message);
 
 	Object obj;
 	size_t pos = 1;
@@ -237,19 +237,19 @@ JSON::Object JSON::_parse_object(const std::string &str)
 
 		if (!obj.empty())
 			if (str[pos++] != ',')
-				throw Exception(exception_message);
+				throw JSON::Exception(exception_message);
 
 		std::string key = _parse_string(str, pos, true);
 
 		_skip_spaces(str, pos);
 		if (str[pos++] != ':')
-		throw Exception(exception_message);
+		throw JSON::Exception(exception_message);
 
 		obj[key] = _parse_value(str, pos, true);
 	}
 
 	if (pos + 1 < str.size())
-		throw Exception(exception_message);
+		throw JSON::Exception(exception_message);
 
 	return obj;
 }
@@ -274,7 +274,7 @@ JSON::Object JSON::_parse_object(const std::string &str, size_t &pos, bool next)
 		_skip_spaces(str, end);
 
 		if (end + 1 < str.size())
-			throw Exception("Invalid JSON object");
+			throw JSON::Exception("Invalid JSON object");
 	}
 
 	return _parse_object(str.substr(start, pos - start));
