@@ -245,7 +245,8 @@ void Client::_handle_message(std::string message)
 	if (message[message.size() - 1] == '\r')
 		message.erase(message.size() - 1);
 
-	args_t args;remove_channel_operator
+	args_t args;
+	size_t pos;
 	while ((pos = message.find(' ')) != std::string::npos && message.find(':') != 0)
 	{
 		if (pos > 0)
