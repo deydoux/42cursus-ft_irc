@@ -197,8 +197,8 @@ void Command::_privmsg(const args_t &args, Client &client)
 				client.reply(ERR_NOTONCHANNEL, recipient, "You are not on that channel");
 
 			else {
-				std::string message = Client::create_cmd_reply(client.get_mask(), "PRIVMSG", recipient, message);
-				channel->send_broadcast(message, client.get_fd());
+				std::string reply = Client::create_cmd_reply(client.get_mask(), "PRIVMSG", recipient, message);
+				channel->send_broadcast(reply, client.get_fd());
 			}
 		}
 
