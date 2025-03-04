@@ -9,7 +9,7 @@ SRC = \
 SRC_DIR = src
 INC_DIR = include
 BUILD_DIR = build
-TESTS_DIR = tests
+TEST_DIR = test
 
 CURL_VERSION = 8.12.1
 CURL_NAME = curl-$(CURL_VERSION)
@@ -56,20 +56,20 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp Makefile | $(CURL_INC)
 	$(MKDIR) $(@D)
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
-$(BUILD_DIR)/$(TESTS_DIR)/%.o: $(TESTS_DIR)/%.cpp Makefile
+$(BUILD_DIR)/$(TEST_DIR)/%.o: $(TEST_DIR)/%.cpp Makefile
 	$(MKDIR) $(@D)
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(NAME): $(OBJ) $(CURL_LIB)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJ) $(LFLAGS)
 
-json_test: $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/$(TESTS_DIR)/json.o
+json_test: $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/$(TEST_DIR)/json.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-ollama-cli_test: $(BUILD_DIR)/class/Curl.o $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/class/Ollama.o $(BUILD_DIR)/$(TESTS_DIR)/ollama-cli.o
+ollama-cli_test: $(BUILD_DIR)/class/Curl.o $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/class/Ollama.o $(BUILD_DIR)/$(TEST_DIR)/ollama-cli.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LFLAGS)
 
-trivia_test: $(BUILD_DIR)/class/Curl.o $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/$(TESTS_DIR)/trivia.o
+trivia_test: $(BUILD_DIR)/class/Curl.o $(BUILD_DIR)/class/JSON.o $(BUILD_DIR)/$(TEST_DIR)/trivia.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LFLAGS)
 
 -include $(DEP)

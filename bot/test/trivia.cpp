@@ -1,10 +1,11 @@
+//
 #include "class/Curl.hpp"
 #include "class/JSON.hpp"
 
 #include <iostream>
 #include <string>
 
-int main(void)
+int main()
 {
 	Curl curl;
 
