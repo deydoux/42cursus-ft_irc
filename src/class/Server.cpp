@@ -103,6 +103,9 @@ clients_t Server::get_clients(const std::string &mask)
 {
 	clients_t clients;
 
+	if (mask == "*")
+		return _clients;
+
 	bool has_wildcards = mask.find_first_of("*?") != std::string::npos;
 	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
@@ -425,12 +428,17 @@ void Server::_signal_handler(int)
 	stop = true;
 }
 
-Channel	*Server::find_channel(const std::string &channel_name)
+Channel	*Server::get_channel(const std::string &channel_name)
 {
 	channels_t::iterator channel = _channels.find(channel_name);
 	if (channel == _channels.end())
 		return NULL;
 	return channel->second;
+}
+
+channels_t	Server::get_channels( void )
+{
+	return _channels;
 }
 
 void	Server::add_channel(Channel &new_channel)
