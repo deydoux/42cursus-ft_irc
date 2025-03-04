@@ -35,6 +35,7 @@ private:
 	static void	_user(const args_t &args, Client &client);
 	static void	_topic(const args_t &args, Client &client);
 	static void _who(const args_t &args, Client &client);
+	static void _names(const args_t &args, Client &client);
 };
 
 #endif // COMMAND_HPP

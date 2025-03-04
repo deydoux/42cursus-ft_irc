@@ -25,7 +25,6 @@ public:
 	const std::string	&get_name() const;
 	const bool			&is_verbose() const;
 	const std::string	&get_start_time() const;
-	Channel				*find_channel(const std::string &channel_name);
 
 	void	add_channel(Channel &new_channel);
 	void	delete_channel(std::string name);
@@ -34,6 +33,9 @@ public:
 
 	Client		*get_client(const std::string &nickname) const;
 	clients_t	get_clients(const std::string &mask);
+	
+	Channel		*get_channel(const std::string &channel_name);
+	channels_t	get_channels( void );
 
 	size_t	get_connections() const;
 	size_t	get_max_connections() const;
