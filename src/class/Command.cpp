@@ -149,16 +149,15 @@ void Command::_join(const args_t &args, Client &client)
 
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
 
-		if (!client.join_channel(*channel, passkey)) {
-			server.delete_channel(channel_name); // TODO wtf
-		} else {
-			channel->send_broadcast(Client::create_cmd_reply(
-			client_mask, "JOIN", "", channel_name
-			));
+		if (client.join_channel(*channel, passkey)) {
+			channel->send_broadcast(
+				Client::create_cmd_reply(client_mask, "JOIN", "", channel_name)
+			);
 
 			args_t names_args;
 			names_args.push_back("NAMES");
 			names_args.push_back(channel_name);
+
 			_names(names_args, client);
 		}
 	}
