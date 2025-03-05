@@ -14,7 +14,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - run: make -j $(nproc)
+    - name: make
+      run: make -j $(nproc)
 
   build-ircbot:
     name: Build ircbot
@@ -23,5 +24,5 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - run: echo $(nproc)
-    - run: make -j $(nproc) -C bot
+    - name: make
+      run: make -j $(nproc) -C bot
