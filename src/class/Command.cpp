@@ -511,7 +511,6 @@ void Command::_names(const args_t &args, Client &client)
 void Command::_part(const args_t &args, Client &client)
 {
 	Server						&server = client.get_server();
-	std::vector<Channel *>		channels_to_quit;
 	std::vector<std::string>	channels_name = ft_split(args[1], ',');
 	std::string 				reason = args.size() == 3 ? args[2] : "Leaving";
 
@@ -528,9 +527,6 @@ void Command::_part(const args_t &args, Client &client)
 			);
 		}
 		else
-			channels_to_quit.push_back(new_channel);
+			client.part_channel(*new_channel, reason);
 	}
-
-	for (size_t j = 0; j < channels_to_quit.size(); j++)
-		client.part_channel(*channels_to_quit[j], reason);
 }
