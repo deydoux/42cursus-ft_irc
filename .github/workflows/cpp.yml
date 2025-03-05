@@ -14,8 +14,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Make
-      run: make
+    - run: make
 
   build-ircbot:
     name: Build ircbot
@@ -24,5 +23,4 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Make
-      run: make
+    - run: make
