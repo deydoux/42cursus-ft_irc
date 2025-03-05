@@ -28,6 +28,11 @@ const std::string	&Channel::get_name( void )
 	return _name;
 }
 
+bool Channel::is_prefix(const char &c)
+{
+	return (c == '#' || c == '&');
+}
+
 bool Channel::is_valid_name(const std::string &name)
 {
 	// - Max length check (50 chars)
@@ -35,7 +40,7 @@ bool Channel::is_valid_name(const std::string &name)
 		return false;
 
 	// - Must start with # or &
-	if (!(name[0] == '&' || name[0] == '#'))
+	if (!is_prefix(name[0]))
 		return false;
 
 	// - No spaces, control chars, commas

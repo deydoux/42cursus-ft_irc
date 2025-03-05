@@ -191,7 +191,7 @@ void Command::_privmsg(const args_t &args, Client &client)
 	for (std::vector<std::string>::iterator it = recipients.begin(); it != recipients.end(); it++) {
 		std::string recipient = *it;
 
-		if (recipient[0] == '#' || recipient[0] == '&') {
+		if (Channel::is_prefix(recipient[0])) {
 			Channel *channel = client.get_server().get_channel(recipient);
 
 			if (!channel)
@@ -405,7 +405,7 @@ void Command::_who(const args_t &args, Client &client)
 	std::string context = "*";
 	clients_t clients;
 
-	if (std::string("#&").find(mask[0]) != std::string::npos) {
+	if (Channel::is_prefix(mask[0])) {
 		context = mask;
 		Channel *channel = server->get_channel(mask);
 		if (channel)
