@@ -23,4 +23,5 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - run: echo $(nproc)
     - run: make -j $(nproc) -C bot
