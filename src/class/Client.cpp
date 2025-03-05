@@ -400,11 +400,6 @@ Channel *Client::get_channel(const std::string &name)
 	return it->second;
 }
 
-std::vector<std::string>	&Client::get_channels_operator( void )
-{
-	return _channel_operator;
-}
-
 
 bool	Client::join_channel(Channel &channel, std::string passkey)
 {
@@ -462,17 +457,14 @@ void	Client::kick_channel(Channel &channel, const std::string &kicked_client, st
 
 void	Client::part_channel(Channel &channel, std::string &reason)
 {
-	if (!channel.is_client_member(*this))
-		this->reply(ERR_NOTONCHANNEL, channel.get_name(), "You're not on that channel");
-	else
-	{
-		channel.send_broadcast(this->create_cmd_reply(
-			this->get_mask(), "PART", channel.get_name() , reason
-		));
-		channel.remove_client(*this);
-		_active_channels.erase(channel.get_name());
-		remove_channel_operator(channel.get_name());
-	}
+	channel.send_broadcast(this->create_cmd_reply(
+		this->get_mask(), "PART", channel.get_name() , reason
+	));
+	channel.remove_client(*this);
+	// TODO erase channel from insensitive case
+	_active_channels.erase(channel.get_name());
+	remove_channel_operator(channel.get_name());
+
 	if (channel.get_members().empty())
 		_server.delete_channel(channel.get_name());
 }

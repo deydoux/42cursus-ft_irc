@@ -520,13 +520,16 @@ void Command::_part(const args_t &args, Client &client)
 		Channel *new_channel = server.get_channel(channel_name);
 		if (!new_channel)
 		{
-			client.reply(
+			return client.reply(
 				ERR_NOSUCHCHANNEL,
 				channels_name[i],
 				"No such channel"
 			);
 		}
-		else
-			client.part_channel(*new_channel, reason);
+
+		if (new_channel->is_client_member(client))
+			return client.reply(ERR_NOTONCHANNEL, channel_name, "You're not on that channel");
+
+		client.part_channel(*new_channel, reason);
 	}
 }
