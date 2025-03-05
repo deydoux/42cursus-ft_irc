@@ -430,10 +430,13 @@ void Server::_signal_handler(int)
 
 Channel	*Server::get_channel(const std::string &channel_name)
 {
-	channels_t::iterator channel = _channels.find(channel_name);
-	if (channel == _channels.end())
-		return NULL;
-	return channel->second;
+	const std::string &lower_channel_name = to_lower(channel_name);
+
+	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); it++)
+		if (to_lower(it->first) == lower_channel_name)
+			return it->second;
+
+	return NULL;
 }
 
 channels_t	Server::get_channels( void )
@@ -448,5 +451,11 @@ void	Server::add_channel(Channel &new_channel)
 
 void	Server::delete_channel(std::string channel_name)
 {
-	_channels.erase(channel_name);
+	Channel *channel = get_channel(channel_name);
+
+	if (!channel)
+		return;
+
+	_channels.erase(channel->get_name());
+	delete channel;
 }
