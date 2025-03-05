@@ -7,11 +7,22 @@ on:
     branches: ["master"]
 
 jobs:
-  build:
+  build-ircserv:
+    name: Build ircserv
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-    - name: make
+    - name: Make
+      run: make
+
+  build-ircbot:
+    name: Build ircbot
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Make
       run: make
