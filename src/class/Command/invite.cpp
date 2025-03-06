@@ -6,10 +6,10 @@
 void Command::_invite(const args_t &args, Client &client, Server &server)
 {
 	Client *target = server.get_client(args[1]);
-	Channel *channel = server.get_channel(args[2]);
-
 	if (!target)
 		return client.reply(ERR_NOSUCHNICK, args[1], "No such nick or channel name");
+
+	Channel *channel = server.get_channel(args[2]);
 
 	if (channel) {
 		if (!channel->is_client_member(client))
