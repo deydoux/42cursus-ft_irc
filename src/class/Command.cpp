@@ -39,12 +39,23 @@ void Command::execute(const args_t &args, Client &client, Server &server)
 
 	_command_t command = command_it->second;
 
+	switch (command.register_mode)
+	{
+	case none:
+		break;
+	case unregistred_only:
+		if (client.is_registered())
+			return client.reply(ERR_ALREADYREGISTERED, "", "Connection already registered");
+		break;
+	case registred_only:
+		if (!client.is_registered())
+			return client.reply(ERR_NOTREGISTERED, "", "Connection not registered");
+		break;
+	}
+
 	size_t args_size = args.size() - 1;
 	if (args_size > command.max_args || args_size < command.min_args)
 		return client.reply(ERR_NEEDMOREPARAMS, args[0], "Syntax error");
-
-	if (command.need_registration && !client.is_registered())
-		return client.reply(ERR_NOTREGISTERED, "", "Connection not registered");
 
 	command.handler(args, client, server);
 }

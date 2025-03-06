@@ -42,5 +42,5 @@ const Command::_command_t Command::_who = {
 	.handler = &handler,
 	.min_args = 0,
 	.max_args = 2,
-	.need_registration = true
+	.register_mode = registred_only
 };

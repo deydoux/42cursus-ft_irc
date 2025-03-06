@@ -46,5 +46,5 @@ const Command::_command_t Command::_topic = {
 	.handler = &handler,
 	.min_args = 1,
 	.max_args = 2,
-	.need_registration = true
+	.register_mode = registred_only
 };

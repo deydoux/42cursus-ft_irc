@@ -13,11 +13,17 @@ public:
 private:
 	typedef void	(*_command_handler_t)(const args_t &, Client &, Server &);
 
+	typedef enum {
+		none,
+		unregistred_only,
+		registred_only
+	}	_register_mode_t;
+
 	typedef struct {
 		_command_handler_t	handler;
 		size_t				min_args;
 		size_t				max_args;
-		bool				need_registration;
+		_register_mode_t	register_mode;
 	}	_command_t;
 
 	typedef std::map<std::string, _command_t>	_commands_t;

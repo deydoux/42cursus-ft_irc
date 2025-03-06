@@ -35,5 +35,5 @@ const Command::_command_t Command::_hk = {
 	.handler = &handler,
 	.min_args = 0,
 	.max_args = 1,
-	.need_registration = false
+	.register_mode = none
 };

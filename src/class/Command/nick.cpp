@@ -10,5 +10,5 @@ const Command::_command_t Command::_nick = {
 	.handler = &handler,
 	.min_args = 1,
 	.max_args = 1,
-	.need_registration = false
+	.register_mode = none
 };

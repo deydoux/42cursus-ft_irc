@@ -16,5 +16,5 @@ const Command::_command_t Command::_motd = {
 	.handler = &handler,
 	.min_args = 0,
 	.max_args = 1,
-	.need_registration = true
+	.register_mode = registred_only
 };

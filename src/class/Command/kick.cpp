@@ -30,5 +30,5 @@ const Command::_command_t Command::_kick = {
 	.handler = &handler,
 	.min_args = 2,
 	.max_args = 3,
-	.need_registration = true
+	.register_mode = registred_only
 };
