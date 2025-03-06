@@ -275,7 +275,7 @@ void Client::_handle_message(std::string message)
 	}
 	log("Parsed command: " + oss.str(), debug);
 
-	Command::execute(args, *this);
+	Command::execute(args, *this, _server);
 }
 
 std::string Client::create_reply(reply_code code, const std::string &arg, const std::string &message) const
