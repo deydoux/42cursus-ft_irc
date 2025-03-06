@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <unistd.h>
+#include <signal.h>
 #include <cerrno>
 #include <cstring>
 
@@ -10,6 +11,8 @@ const std::string IRC::_default_hostname = "127.0.0.1";
 const std::string IRC::_default_nickname = "hkitty";
 const std::string IRC::_default_username = "hellokitty";
 const std::string IRC::_default_realname = "Hello Kitty";
+
+bool IRC::stop = false;
 
 std::string ft_strerror( void )
 {
@@ -28,9 +31,10 @@ IRC::IRC(const std::string hostname, const port_t port, const std::string pass, 
 
 IRC::~IRC()
 {
+	send_command("QUIT", "", "Leaving");
+	
 	if (_socket_fd > 0)
 		close(_socket_fd);
-
 	this->log("Destroyed", debug);
 }
 
@@ -76,13 +80,15 @@ void IRC::send_raw(const std::string &message)
 	log("Sent message:\n" + message, debug);
 }
 
-void IRC::send_command(const std::string &cmd, const std::string &args, std::string message)
+void IRC::send_command(const std::string &cmd, std::string args, std::string message)
 {
 	if (!message.empty())
 		message = " " + message;
+	if (!args.empty())
+		args = " " + args;
 	if (message.find(' ') != std::string::npos)
 		message = ":" + message;
-	return this->send_raw(cmd + " " + args + message + "\r\n");
+	return this->send_raw(cmd + args + message + "\r\n");
 }
 
 void IRC::send_registration( void )
@@ -91,6 +97,41 @@ void IRC::send_registration( void )
 		send_command("PASS", _password);
 	send_command("NICK", _default_nickname);
 	send_command("USER", _default_username + "0 *", _default_realname);
+}
+
+std::string IRC::receive( void )
+{
+	if (!is_connected)
+		throw std::runtime_error("Could not receive anything: client is not connected");
+
+	char buffer[4096];
+	memset(buffer, 0, sizeof(buffer));
+
+	ssize_t bytes_received = recv(_socket_fd, buffer, sizeof(buffer) - 1, 0);
+	if (bytes_received == 0)
+		throw std::runtime_error("Connection closed by server");
+	if (bytes_received < 0)
+		throw std::runtime_error("Error receiving data: " + ft_strerror());
+
+	buffer[bytes_received] = '\0';
+	return std::string(buffer);
+}
+
+void IRC::_signal_handler(int)
+{
+	stop = true;
+}
+
+void IRC::_loop( void )
+{
+	while (!stop)
+	{
+		std::string data = receive();
+		if (data.empty())
+			continue ;
+
+		log("Received: " + data, info);
+	}
 }
 
 IRC IRC::launch_irc_client(int argc, char **argv)
@@ -150,8 +191,12 @@ IRC IRC::launch_irc_client(int argc, char **argv)
 	if (!is_pass_set)
 		irc_client.log("No password set", warning);
 	
+	irc_client._set_signal_handler();
+
 	irc_client.connect();
 	irc_client.send_registration();
+
+	irc_client._loop();
 	return irc_client;
 }
 
@@ -173,6 +218,13 @@ IRC::port_t IRC::_parse_port(const std::string &port_str)
 		_print_usage();
 
 	return port;
+}
+
+void IRC::_set_signal_handler()
+{
+	struct sigaction act = {};
+	act.sa_handler = _signal_handler;
+	sigaction(SIGINT, &act, NULL);
 }
 
 void IRC::_print_usage(int status)

@@ -21,8 +21,11 @@ class IRC
 		
 		void	connect( void );
 		void	send_registration( void );
-		void	send_command(const std::string &cmd, const std::string &args, std::string message = "");
+		void	send_command(const std::string &cmd, std::string args = "", std::string message = "");
 		void	send_raw(const std::string &message);
+		std::string	receive( void );
+
+		static bool	stop;
 
 		static IRC	launch_irc_client(int argc, char **argv);
 		
@@ -33,6 +36,9 @@ class IRC
 		const bool			_verbose;
 
 		int					_socket_fd;
+
+		void	_set_signal_handler();
+		void	_loop();
 
 		static const std::string	_default_hostname;
 		static const port_t			_default_port = 6697;
@@ -46,6 +52,7 @@ class IRC
 		static port_t		_parse_port(const std::string &port_str);
 		static void			_print_usage(int status = 1);
 		static sockaddr_in	_init_address(port_t port);
+		static void			_signal_handler(int sig);
 };
 
 #endif // IRC_HPP
