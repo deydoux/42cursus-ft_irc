@@ -2,10 +2,22 @@
 
 #include <sstream>
 #include <vector>
+#include <unistd.h>
+#include <cerrno>
+#include <cstring>
 
 const std::string IRC::_default_hostname = "127.0.0.1";
+const std::string IRC::_default_nickname = "hkitty";
+const std::string IRC::_default_username = "hellokitty";
+const std::string IRC::_default_realname = "Hello Kitty";
+
+std::string ft_strerror( void )
+{
+	return std::string(std::strerror(errno));
+}
 
 IRC::IRC(const std::string hostname, const port_t port, const std::string pass, bool verbose) :
+	is_connected(false),
 	_hostname(hostname),
 	_port(port),
 	_password(pass),
@@ -16,6 +28,9 @@ IRC::IRC(const std::string hostname, const port_t port, const std::string pass, 
 
 IRC::~IRC()
 {
+	if (_socket_fd > 0)
+		close(_socket_fd);
+
 	this->log("Destroyed", debug);
 }
 
@@ -25,9 +40,57 @@ void IRC::log(const std::string &message, const log_level level) const
 		::log("IRC Client", message, level);
 }
 
-void IRC::connect_to_irc_server( void )
+void IRC::connect( void )
 {
 	this->log("Trying to connect to " + _hostname + " from port " + to_string(_port) + " ...");
+
+	// Creating socket
+	_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (_socket_fd == -1)
+		throw std::runtime_error("Failed to create socket");
+
+	this->log("Socket created", debug);
+
+	// Set up server address struct
+	struct sockaddr_in server_addr = _init_address(_port);
+
+	if (inet_pton(AF_INET, _hostname.c_str(), &server_addr.sin_addr) <= 0)
+		throw std::runtime_error("Invalid address");
+
+	// Connect to server
+	if (::connect(_socket_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
+		throw std::runtime_error("Error connecting to server: " + ft_strerror());
+
+	is_connected = true;
+}
+
+void IRC::send_raw(const std::string &message)
+{
+	if (!is_connected)
+		throw std::runtime_error("Could not send message: client is not connected");
+
+	ssize_t bytes_sent = send(_socket_fd, message.c_str(), message.length(), 0);
+	if (bytes_sent < 0)
+		throw std::runtime_error("Could not send message: " + ft_strerror());
+
+	log("Sent message:\n" + message, debug);
+}
+
+void IRC::send_command(const std::string &cmd, const std::string &args, std::string message)
+{
+	if (!message.empty())
+		message = " " + message;
+	if (message.find(' ') != std::string::npos)
+		message = ":" + message;
+	return this->send_raw(cmd + " " + args + message + "\r\n");
+}
+
+void IRC::send_registration( void )
+{
+	if (!_password.empty())
+		send_command("PASS", _password);
+	send_command("NICK", _default_nickname);
+	send_command("USER", _default_username + "0 *", _default_realname);
 }
 
 IRC IRC::launch_irc_client(int argc, char **argv)
@@ -87,7 +150,8 @@ IRC IRC::launch_irc_client(int argc, char **argv)
 	if (!is_pass_set)
 		irc_client.log("No password set", warning);
 	
-	irc_client.connect_to_irc_server();
+	irc_client.connect();
+	irc_client.send_registration();
 	return irc_client;
 }
 
@@ -121,4 +185,14 @@ void IRC::_print_usage(int status)
 			  << "  -v, --verbose                      Enable verbose output" << std::endl;
 
 	throw status;
+}
+
+sockaddr_in IRC::_init_address(port_t port)
+{
+	return (sockaddr_in) {
+		.sin_family = AF_INET,
+		.sin_port = htons(port),
+		.sin_addr = 0,
+		.sin_zero = {},
+	};
 }
