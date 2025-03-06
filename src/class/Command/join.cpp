@@ -3,7 +3,7 @@
 #include "class/Command.hpp"
 #include "class/Server.hpp"
 
-void Command::_join(const args_t &args, Client &client, Server &server)
+static void handler(const args_t &args, Client &client, Server &server)
 {
 	size_t args_size = args.size();
 
@@ -58,7 +58,14 @@ void Command::_join(const args_t &args, Client &client, Server &server)
 			names_args.push_back("NAMES");
 			names_args.push_back(channel_name);
 
-			_names(names_args, client, server);
+			Command::execute(names_args, client, server);
 		}
 	}
 }
+
+const Command::_command_t Command::_join = {
+	.handler = &handler,
+	.min_args = 1,
+	.max_args = 2,
+	.need_registration = true
+};

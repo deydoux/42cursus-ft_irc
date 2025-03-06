@@ -3,7 +3,7 @@
 #include "class/Command.hpp"
 #include "class/Server.hpp"
 
-void Command::_invite(const args_t &args, Client &client, Server &server)
+static void handler(const args_t &args, Client &client, Server &server)
 {
 	Client *target = server.get_client(args[1]);
 	if (!target)
@@ -24,3 +24,10 @@ void Command::_invite(const args_t &args, Client &client, Server &server)
 	target->cmd_reply(client.get_mask(), "INVITE", args[1], args[2]);
 	client.reply(RPL_INVITING, args[1] + ' ' + args[2]);
 }
+
+const Command::_command_t Command::_invite = {
+	.handler = &handler,
+	.min_args = 2,
+	.max_args = 2,
+	.need_registration = true
+};

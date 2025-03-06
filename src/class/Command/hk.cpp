@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <fstream>
 
-void Command::_hk(const args_t &args, Client &client, Server &server)
+static void handler(const args_t &args, Client &client, Server &server)
 {
 	std::string message = args.size() == 2 ? args[1] : "You've been Hello Kitty-ed !";
 	std::ifstream aFile("hk.templates");
@@ -30,3 +30,10 @@ void Command::_hk(const args_t &args, Client &client, Server &server)
 	aFile.close();
 	client.reply(RPL_HK, "", message);
 }
+
+const Command::_command_t Command::_hk = {
+	.handler = &handler,
+	.min_args = 0,
+	.max_args = 1,
+	.need_registration = false
+};

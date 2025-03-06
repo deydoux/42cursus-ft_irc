@@ -3,7 +3,7 @@
 #include "class/Command.hpp"
 #include "class/Server.hpp"
 
-void Command::_kick(const args_t &args, Client &client, Server &server)
+static void handler(const args_t &args, Client &client, Server &server)
 {
 	std::vector<std::string> channels_name = ft_split(args[1], ',');
 	std::vector<std::string> kicked_client = ft_split(args[2], ',');
@@ -25,3 +25,10 @@ void Command::_kick(const args_t &args, Client &client, Server &server)
 		for (size_t j = 0; j < channels_to_kick_from.size(); j++)
 			client.kick_channel(*channels_to_kick_from[j], kicked_client[i], reason);
 }
+
+const Command::_command_t Command::_kick = {
+	.handler = &handler,
+	.min_args = 2,
+	.max_args = 3,
+	.need_registration = true
+};

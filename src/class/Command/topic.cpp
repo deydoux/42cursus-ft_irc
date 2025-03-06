@@ -3,7 +3,7 @@
 #include "class/Command.hpp"
 #include "class/Server.hpp"
 
-void Command::_topic(const args_t &args, Client &client, Server &server)
+static void handler(const args_t &args, Client &client, Server &server)
 {
 	std::string channel_name = args[1];
 	Channel *channel = server.get_channel(channel_name);
@@ -41,3 +41,10 @@ void Command::_topic(const args_t &args, Client &client, Server &server)
 		client.create_cmd_reply(client.get_mask(), "TOPIC", channel_name, new_topic)
 	);
 }
+
+const Command::_command_t Command::_topic = {
+	.handler = &handler,
+	.min_args = 1,
+	.max_args = 2,
+	.need_registration = true
+};

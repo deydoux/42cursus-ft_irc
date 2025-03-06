@@ -1,7 +1,14 @@
 #include "class/Client.hpp"
 #include "class/Command.hpp"
 
-void Command::_pass(const args_t &args, Client &client, Server &)
+static void handler(const args_t &args, Client &client, Server &)
 {
 	client.set_password(args[1]);
 }
+
+const Command::_command_t Command::_pass = {
+	.handler = &handler,
+	.min_args = 1,
+	.max_args = 1,
+	.need_registration = false
+};

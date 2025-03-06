@@ -4,7 +4,7 @@
 #include "class/Server.hpp"
 
 // TODO ensure channel case insensitivity doesn't break
-void Command::_names(const args_t &args, Client &client, Server &server)
+static void handler(const args_t &args, Client &client, Server &server)
 {
 	std::string reply;
 
@@ -40,3 +40,10 @@ void Command::_names(const args_t &args, Client &client, Server &server)
 
 	client.send(reply);
 }
+
+const Command::_command_t Command::_names = {
+	.handler = &handler,
+	.min_args = 0,
+	.max_args = 1,
+	.need_registration = true
+};
