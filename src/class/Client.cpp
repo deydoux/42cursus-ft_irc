@@ -129,7 +129,13 @@ const bool &Client::is_registered() const
 
 bool Client::is_channel_operator(std::string channel_name) const
 {
-	return std::find(_channel_operator.begin(), _channel_operator.end(), channel_name) != _channel_operator.end();
+	const std::string &lower_channel_name = to_lower(channel_name);
+
+	for (channels_t::const_iterator it = _active_channels.begin(); it != _active_channels.end(); ++it)
+		if (to_lower(it->first) == lower_channel_name)
+			return true;
+
+	return false;
 }
 
 const std::string &Client::get_nickname(bool allow_empty) const
@@ -420,6 +426,7 @@ bool	Client::join_channel(Channel &channel, std::string passkey)
 
 	else if (this->get_channels_count() >= Client::_max_channels)
 		this->reply(ERR_TOOMANYCHANNELS, channel.get_name(), "You have joined too many channels");
+
 	else
 	{
 		channel.add_client(*this);
@@ -427,6 +434,7 @@ bool	Client::join_channel(Channel &channel, std::string passkey)
 
 		return (true);
 	}
+
 	return (false);
 }
 

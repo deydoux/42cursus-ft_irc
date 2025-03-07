@@ -43,7 +43,8 @@ public:
 	static const size_t max_channel_name_size = 50;
 	static const size_t max_topic_len = 490;
 
-	static bool			is_valid_name(const std::string &name);
+	static bool	is_prefix(const char &c);
+	static bool	is_valid_name(const std::string &name);
 
 	typedef struct modes_s {
 		std::vector<std::string> flags; // eg: ["+k", "+l", "-i"]
@@ -61,7 +62,7 @@ private:
 	clients_t			_invited_clients;
 
 	std::string		_passkey;
-	
+
 	std::string		_topic;
 	std::string		_topic_last_edited_at; // unix timestamp
 	std::string		_topic_last_edited_by; // client nickname
