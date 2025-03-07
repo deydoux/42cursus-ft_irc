@@ -9,35 +9,43 @@ class Command
 {
 public:
 	static void init();
-	static void execute(const args_t &args, Client &client);
+	static void execute(const args_t &args, Client &client, Server &server);
 private:
-	typedef void	(*_command_handler_t)(const args_t &, Client &);
+	typedef void	(*_command_handler_t)(const args_t &, Client &, Server &);
+
+	typedef enum {
+		none,
+		unregistered_only,
+		registered_only
+	}	_register_mode_t;
+
 	typedef struct {
 		_command_handler_t	handler;
 		size_t				min_args;
 		size_t				max_args;
-		bool				need_registration;
+		_register_mode_t	register_mode;
 	}	_command_t;
+
 	typedef std::map<std::string, _command_t>	_commands_t;
 
 	static _commands_t	_commands;
 
-	static void	_invite(const args_t &args, Client &client);
-	static void	_join(const args_t &args, Client &client);
-	static void	_kick(const args_t &args, Client &client);
-	static void	_motd(const args_t &args, Client &client);
-	static void	_nick(const args_t &args, Client &client);
-	static void	_pass(const args_t &args, Client &client);
-	static void	_ping(const args_t &args, Client &client);
-	static void	_privmsg(const args_t &args, Client &client);
-	static void	_quit(const args_t &args, Client &client);
-	static void	_mode(const args_t &args, Client &client);
-	static void	_user(const args_t &args, Client &client);
-	static void	_topic(const args_t &args, Client &client);
-	static void _who(const args_t &args, Client &client);
-	static void _hk(const args_t &args, Client &client);
-	static void _names(const args_t &args, Client &client);
-	static void _part(const args_t &args, Client &client);
+	static const _command_t	_hk;
+	static const _command_t	_invite;
+	static const _command_t	_join;
+	static const _command_t	_kick;
+	static const _command_t	_mode;
+	static const _command_t	_motd;
+	static const _command_t	_names;
+	static const _command_t	_nick;
+	static const _command_t	_part;
+	static const _command_t	_pass;
+	static const _command_t	_ping;
+	static const _command_t	_privmsg;
+	static const _command_t	_quit;
+	static const _command_t	_topic;
+	static const _command_t	_user;
+	static const _command_t	_who;
 };
 
 #endif // COMMAND_HPP

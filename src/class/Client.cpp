@@ -192,9 +192,6 @@ void Client::set_nickname(const std::string &nickname)
 
 void Client::set_username(const std::string &username)
 {
-	if (_registered)
-		return reply(ERR_ALREADYREGISTRED, "", "Connection already registered");
-
 	if (!_is_valid_username(username))
 		return send_error("Invalid user name");
 
@@ -210,9 +207,6 @@ void Client::set_realname(const std::string &realname)
 
 void Client::set_password(const std::string &password)
 {
-	if (!_username.empty() && !_nickname.empty())
-		return reply(ERR_ALREADYREGISTRED, "", "Connection already registered");
-
 	_password = password;
 }
 
@@ -275,7 +269,7 @@ void Client::_handle_message(std::string message)
 	}
 	log("Parsed command: " + oss.str(), debug);
 
-	Command::execute(args, *this);
+	Command::execute(args, *this, _server);
 }
 
 std::string Client::create_reply(reply_code code, const std::string &arg, const std::string &message) const
