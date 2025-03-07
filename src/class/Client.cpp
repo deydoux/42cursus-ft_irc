@@ -40,7 +40,8 @@ void Client::handle_messages(std::string messages)
 
 	_buffer += messages;
 	size_t pos;
-	while ((pos = _buffer.find('\n')) != std::string::npos) {
+	while ((pos = _buffer.find('\n')) != std::string::npos)
+	{
 		_handle_message(_buffer.substr(0, pos));
 		_buffer.erase(0, pos + 1);
 	}
@@ -246,14 +247,14 @@ void Client::_handle_message(std::string message)
 
 	args_t args;
 	size_t pos;
-	while ((pos = message.find(' ')) != std::string::npos && message.find(':') != 0) {
+	while ((pos = message.find(' ')) != std::string::npos && message.find(':') != 0)
+	{
 		if (pos > 0)
 			args.push_back(message.substr(0, pos));
-
 		message.erase(0, pos + 1);
 	}
-
-	if (!message.empty()) {
+	if (!message.empty())
+	{
 		if (message[0] == ':')
 			message.erase(0, 1);
 		args.push_back(message);
@@ -266,7 +267,6 @@ void Client::_handle_message(std::string message)
 		if (it + 1 != args.end())
 			oss << ", ";
 	}
-
 	log("Parsed command: " + oss.str(), debug);
 
 	Command::execute(args, *this, _server);
