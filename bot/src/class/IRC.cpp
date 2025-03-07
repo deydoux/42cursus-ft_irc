@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <cerrno>
 #include <cstring>
+#include <algorithm>
 
 const std::string IRC::_default_hostname = "127.0.0.1";
 const std::string IRC::_default_nickname = "hkitty";
@@ -18,6 +19,17 @@ std::string ft_strerror( void )
 {
 	return std::string(std::strerror(errno));
 }
+
+std::string extract_nickname(const std::string& input) {
+	size_t start = 0;
+	size_t end = input.find('!');
+
+	if (end == std::string::npos) return "";
+
+	return input.substr(start, end - start);
+}
+
+
 
 IRC::IRC(const std::string hostname, const port_t port, const std::string pass, bool verbose) :
 	is_connected(false),
@@ -82,12 +94,12 @@ void IRC::send_raw(const std::string &message)
 
 void IRC::send_command(const std::string &cmd, std::string args, std::string message)
 {
-	if (!message.empty())
-		message = " " + message;
 	if (!args.empty())
 		args = " " + args;
 	if (message.find(' ') != std::string::npos)
 		message = ":" + message;
+	if (!message.empty())
+		message = " " + message;
 	return this->send_raw(cmd + args + message + "\r\n");
 }
 
@@ -96,7 +108,7 @@ void IRC::send_registration( void )
 	if (!_password.empty())
 		send_command("PASS", _password);
 	send_command("NICK", _default_nickname);
-	send_command("USER", _default_username + "0 *", _default_realname);
+	send_command("USER", _default_username + " 0 *", _default_realname);
 }
 
 std::string IRC::receive( void )
@@ -129,8 +141,59 @@ void IRC::_loop( void )
 		std::string data = receive();
 		if (data.empty())
 			continue ;
+		_handle_messages(data);
+	}
+}
 
-		log("Received: " + data, info);
+void IRC::_handle_messages(const std::string &messages)
+{
+	size_t pos;
+	std::string buffer = messages;
+	while ((pos = buffer.find('\n')) != std::string::npos)
+	{
+		_handle_message(buffer.substr(0, pos));
+		buffer.erase(0, pos + 1);
+	}
+}
+
+void IRC::_handle_message(std::string message)
+{
+	if (message.empty())
+		return;
+
+	if (message[message.size() - 1] == '\r')
+		message.erase(message.size() - 1);
+	if (message[0] == ':')
+		message.erase(0, 1);
+	
+	std::vector<std::string> args;
+	args = ft_split(message.substr(0, message.find(':')), ' ');
+	args.push_back(message.substr(message.find(':') + 1));
+
+	std::ostringstream oss;
+	for (std::vector<std::string>::iterator it = args.begin(); it != args.end(); ++it)
+	{
+		std::string arg = *it;
+		if (arg[0] == ':')
+			arg.erase(0);
+
+		oss << '"' << arg << "\"";
+		if (it + 1 != args.end())
+			oss << ", ";
+	}
+
+	log("Parsed command: " + oss.str(), debug);
+
+	if (args[1] == "INVITE")
+	{
+		if (args[2] != _default_nickname)
+			return ;
+		
+		std::string channel = args[3];
+		send_command("JOIN", channel);
+
+		std::string greet_message = "Thanks for inviting me to this channel " + extract_nickname(args[0]) + "!";
+		send_command("PRIVMSG", channel, greet_message);
 	}
 }
 

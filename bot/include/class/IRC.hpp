@@ -37,6 +37,8 @@ class IRC
 
 		int					_socket_fd;
 
+		void	_handle_messages(const std::string &messages);
+		void	_handle_message(std::string message);
 		void	_set_signal_handler();
 		void	_loop();
 

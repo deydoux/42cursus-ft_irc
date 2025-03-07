@@ -267,9 +267,12 @@ void Client::_handle_message(std::string message)
 		if (it + 1 != args.end())
 			oss << ", ";
 	}
-	log("Parsed command: " + oss.str(), debug);
 
-	Command::execute(args, *this);
+	std::string raw = oss.str();
+	log("Parsed command: " + raw, debug);
+
+	if (!raw.empty())
+		Command::execute(args, *this);
 }
 
 std::string Client::create_reply(reply_code code, const std::string &arg, const std::string &message) const
