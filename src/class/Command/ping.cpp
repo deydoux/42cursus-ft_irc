@@ -17,6 +17,6 @@ static void handler(const args_t &args, Client &client, Server &server)
 const Command::_command_t Command::_ping = {
 	.handler = &handler,
 	.min_args = 0,
-	.max_args = -1,
+	.max_args = (size_t)-1,
 	.register_mode = registered_only
 };
