@@ -12,5 +12,5 @@ const Command::_command_t Command::_user = {
 	.handler = &handler,
 	.min_args = 4,
 	.max_args = 4,
-	.register_mode = unregistred_only
+	.register_mode = unregistered_only
 };

@@ -15,8 +15,8 @@ private:
 
 	typedef enum {
 		none,
-		unregistred_only,
-		registred_only
+		unregistered_only,
+		registered_only
 	}	_register_mode_t;
 
 	typedef struct {
@@ -30,21 +30,22 @@ private:
 
 	static _commands_t	_commands;
 
+	static const _command_t	_hk;
 	static const _command_t	_invite;
 	static const _command_t	_join;
 	static const _command_t	_kick;
+	static const _command_t	_mode;
 	static const _command_t	_motd;
+	static const _command_t	_names;
 	static const _command_t	_nick;
+	static const _command_t	_part;
 	static const _command_t	_pass;
 	static const _command_t	_ping;
 	static const _command_t	_privmsg;
 	static const _command_t	_quit;
-	static const _command_t	_mode;
-	static const _command_t	_user;
 	static const _command_t	_topic;
+	static const _command_t	_user;
 	static const _command_t	_who;
-	static const _command_t	_hk;
-	static const _command_t	_names;
 };
 
 #endif // COMMAND_HPP

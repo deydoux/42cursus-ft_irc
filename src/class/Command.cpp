@@ -8,21 +8,22 @@
 
 void Command::init()
 {
+	_commands["hk"] = _hk;
 	_commands["invite"] = _invite;
 	_commands["join"] = _join;
 	_commands["kick"] = _kick;
+	_commands["mode"] = _mode;
 	_commands["motd"] = _motd;
+	_commands["names"] = _names;
 	_commands["nick"] = _nick;
+	_commands["part"] = _part;
 	_commands["pass"] = _pass;
 	_commands["ping"] = _ping;
 	_commands["privmsg"] = _privmsg;
 	_commands["quit"] = _quit;
-	_commands["mode"] = _mode;
-	_commands["user"] = _user;
 	_commands["topic"] = _topic;
+	_commands["user"] = _user;
 	_commands["who"] = _who;
-	_commands["hk"] = _hk;
-	_commands["names"] = _names;
 
 	std::srand(std::time(NULL));
 }
@@ -43,11 +44,11 @@ void Command::execute(const args_t &args, Client &client, Server &server)
 	{
 	case none:
 		break;
-	case unregistred_only:
+	case unregistered_only:
 		if (client.is_registered())
 			return client.reply(ERR_ALREADYREGISTERED, "", "Connection already registered");
 		break;
-	case registred_only:
+	case registered_only:
 		if (!client.is_registered())
 			return client.reply(ERR_NOTREGISTERED, "", "Connection not registered");
 		break;

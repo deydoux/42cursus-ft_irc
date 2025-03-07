@@ -12,8 +12,8 @@ static void handler(const args_t &args, Client &client, Server &server)
 		// TODO close_all_chanels() -> would be easier to implement when the /PART command will be
 		return ;
 
-	std::vector<Channel *> channels_to_be_joined;
-	std::vector<std::string> channel_names_to_be_joined;
+	std::vector<Channel *> channels_to_join;
+	std::vector<std::string> channels_name_to_join;
 	std::vector<std::string> passkeys;
 
 	std::vector<std::string> channels_name = ft_split(args[1], ',');
@@ -29,8 +29,8 @@ static void handler(const args_t &args, Client &client, Server &server)
 				server.add_channel(*new_channel);
 			}
 
-			channels_to_be_joined.push_back(new_channel);
-			channel_names_to_be_joined.push_back(channel_name);
+			channels_to_join.push_back(new_channel);
+			channels_name_to_join.push_back(channel_name);
 
 			if (args_size == 3)
 				passkeys.push_back(input_passkeys.size() > i ? input_passkeys[i] : "");
@@ -42,10 +42,10 @@ static void handler(const args_t &args, Client &client, Server &server)
 
 	std::string client_mask = client.get_mask();
 
-	for (size_t i = 0; i < channels_to_be_joined.size(); i++)
+	for (size_t i = 0; i < channels_to_join.size(); i++)
 	{
-		Channel *channel = channels_to_be_joined[i];
-		std::string &channel_name = channel_names_to_be_joined[i];
+		Channel *channel = channels_to_join[i];
+		std::string &channel_name = channels_name_to_join[i];
 
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
 
@@ -67,5 +67,5 @@ const Command::_command_t Command::_join = {
 	.handler = &handler,
 	.min_args = 1,
 	.max_args = 2,
-	.register_mode = registred_only
+	.register_mode = registered_only
 };

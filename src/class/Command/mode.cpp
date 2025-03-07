@@ -120,5 +120,5 @@ const Command::_command_t Command::_mode = {
 	.handler = &handler,
 	.min_args = 1,
 	.max_args = 5,
-	.register_mode = registred_only
+	.register_mode = registered_only
 };

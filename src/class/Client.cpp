@@ -400,6 +400,7 @@ Channel *Client::get_channel(const std::string &name)
 	return it->second;
 }
 
+
 bool	Client::join_channel(Channel &channel, std::string passkey)
 {
 	if (channel.is_client_member(*this))
@@ -455,6 +456,21 @@ void	Client::kick_channel(Channel &channel, const std::string &kicked_client, st
 		client_to_be_kicked->get_active_channels().erase(channel.get_name());
 	}
 }
+
+void	Client::part_channel(Channel &channel, std::string &reason)
+{
+	channel.send_broadcast(this->create_cmd_reply(
+		this->get_mask(), "PART", channel.get_name() , reason
+	));
+	channel.remove_client(*this);
+	// TODO erase channel from insensitive case
+	_active_channels.erase(channel.get_name());
+	remove_channel_operator(channel.get_name());
+
+	if (channel.get_members().empty())
+		_server.delete_channel(channel.get_name());
+}
+
 
 void Client::notify_quit()
 {

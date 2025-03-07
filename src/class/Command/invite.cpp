@@ -29,5 +29,5 @@ const Command::_command_t Command::_invite = {
 	.handler = &handler,
 	.min_args = 2,
 	.max_args = 2,
-	.register_mode = registred_only
+	.register_mode = registered_only
 };

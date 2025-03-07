@@ -4,6 +4,7 @@ VERSION = $(shell git describe --tags --always --dirty=* --broken=#)
 SRC = \
 	class/Channel.cpp \
 	class/Client.cpp \
+	class/Command.cpp \
 	class/Command/hk.cpp \
 	class/Command/invite.cpp \
 	class/Command/join.cpp \
@@ -12,6 +13,7 @@ SRC = \
 	class/Command/motd.cpp \
 	class/Command/names.cpp \
 	class/Command/nick.cpp \
+	class/Command/part.cpp \
 	class/Command/pass.cpp \
 	class/Command/ping.cpp \
 	class/Command/privmsg.cpp \
@@ -19,12 +21,11 @@ SRC = \
 	class/Command/topic.cpp \
 	class/Command/user.cpp \
 	class/Command/who.cpp \
-	class/Command.cpp \
 	class/Server.cpp \
 	lib/log.cpp \
-	lib/to_lower.cpp \
-	lib/split.cpp \
 	lib/match_mask.cpp \
+	lib/split.cpp \
+	lib/to_lower.cpp \
 	lib/unix_timestamp.cpp \
 	main.cpp
 

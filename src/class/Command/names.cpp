@@ -3,7 +3,6 @@
 #include "class/Command.hpp"
 #include "class/Server.hpp"
 
-// TODO ensure channel case insensitivity doesn't break
 static void handler(const args_t &args, Client &client, Server &server)
 {
 	std::string reply;
@@ -29,12 +28,15 @@ static void handler(const args_t &args, Client &client, Server &server)
 	} else {
 		std::vector<std::string> channel_names = ft_split(args[1], ',');
 		for (size_t i = 0; i < channel_names.size(); i++) {
-			Channel *channel = server.get_channel(channel_names[i]);
+			std::string &channel_name = channel_names[i];
+			Channel *channel = server.get_channel(channel_name);
 
-			if (channel)
-				reply += client.create_reply(RPL_NAMREPLY, "= " + channel->get_name(), channel->list_members());
+			if (channel) {
+				channel_name = channel->get_name();
+				reply += client.create_reply(RPL_NAMREPLY, "= " + channel_name, channel->list_members());
+			}
 
-			reply += client.create_reply(RPL_ENDOFNAMES, channel_names[i], "End of NAMES list");
+			reply += client.create_reply(RPL_ENDOFNAMES, channel_name, "End of NAMES list");
 		}
 	}
 
@@ -45,5 +47,5 @@ const Command::_command_t Command::_names = {
 	.handler = &handler,
 	.min_args = 0,
 	.max_args = 1,
-	.register_mode = registred_only
+	.register_mode = registered_only
 };

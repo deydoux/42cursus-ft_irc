@@ -18,5 +18,5 @@ const Command::_command_t Command::_ping = {
 	.handler = &handler,
 	.min_args = 0,
 	.max_args = -1,
-	.register_mode = registred_only
+	.register_mode = registered_only
 };
