@@ -40,8 +40,7 @@ void Client::handle_messages(std::string messages)
 
 	_buffer += messages;
 	size_t pos;
-	while ((pos = _buffer.find('\n')) != std::string::npos)
-	{
+	while ((pos = _buffer.find('\n')) != std::string::npos) {
 		_handle_message(_buffer.substr(0, pos));
 		_buffer.erase(0, pos + 1);
 	}
@@ -129,7 +128,13 @@ const bool &Client::is_registered() const
 
 bool Client::is_channel_operator(std::string channel_name) const
 {
-	return std::find(_channel_operator.begin(), _channel_operator.end(), channel_name) != _channel_operator.end();
+	const std::string &lower_channel_name = to_lower(channel_name);
+
+	for (channels_t::const_iterator it = _active_channels.begin(); it != _active_channels.end(); ++it)
+		if (to_lower(it->first) == lower_channel_name)
+			return true;
+
+	return false;
 }
 
 const std::string &Client::get_nickname(bool allow_empty) const
@@ -186,9 +191,6 @@ void Client::set_nickname(const std::string &nickname)
 
 void Client::set_username(const std::string &username)
 {
-	if (_registered)
-		return reply(ERR_ALREADYREGISTRED, "", "Connection already registered");
-
 	if (!_is_valid_username(username))
 		return send_error("Invalid user name");
 
@@ -204,9 +206,6 @@ void Client::set_realname(const std::string &realname)
 
 void Client::set_password(const std::string &password)
 {
-	if (!_username.empty() && !_nickname.empty())
-		return reply(ERR_ALREADYREGISTRED, "", "Connection already registered");
-
 	_password = password;
 }
 
@@ -247,14 +246,14 @@ void Client::_handle_message(std::string message)
 
 	args_t args;
 	size_t pos;
-	while ((pos = message.find(' ')) != std::string::npos && message.find(':') != 0)
-	{
+	while ((pos = message.find(' ')) != std::string::npos && message.find(':') != 0) {
 		if (pos > 0)
 			args.push_back(message.substr(0, pos));
+
 		message.erase(0, pos + 1);
 	}
-	if (!message.empty())
-	{
+
+	if (!message.empty()) {
 		if (message[0] == ':')
 			message.erase(0, 1);
 		args.push_back(message);
@@ -268,11 +267,9 @@ void Client::_handle_message(std::string message)
 			oss << ", ";
 	}
 
-	std::string raw = oss.str();
-	log("Parsed command: " + raw, debug);
+	log("Parsed command: " + oss.str(), debug);
 
-	if (!raw.empty())
-		Command::execute(args, *this);
+	Command::execute(args, *this, _server);
 }
 
 std::string Client::create_reply(reply_code code, const std::string &arg, const std::string &message) const
@@ -423,6 +420,7 @@ bool	Client::join_channel(Channel &channel, std::string passkey)
 
 	else if (this->get_channels_count() >= Client::_max_channels)
 		this->reply(ERR_TOOMANYCHANNELS, channel.get_name(), "You have joined too many channels");
+
 	else
 	{
 		channel.add_client(*this);
@@ -430,6 +428,7 @@ bool	Client::join_channel(Channel &channel, std::string passkey)
 
 		return (true);
 	}
+
 	return (false);
 }
 
