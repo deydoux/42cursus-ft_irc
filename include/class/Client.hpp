@@ -23,6 +23,7 @@ public:
 	bool	join_channel(Channel &channel, std::string passkey);
 	void	kick_channel(Channel &channel, const std::string &kicked_client, std::string &reason);
 	void	part_channel(Channel &channel, std::string &reason);
+	void close_all_channels(std::string &reason);
 	void	notify_quit();
 
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
