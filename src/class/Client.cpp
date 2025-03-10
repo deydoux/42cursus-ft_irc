@@ -324,7 +324,7 @@ void Client::_greet() const
 		+ create_reply(RPL_CREATED, "", "This server has been started " + _server.get_start_time())
 		+ create_reply(RPL_MYINFO, _server.get_name() + " " VERSION " o iklt")
 		+ create_reply(RPL_ISUPPORT, "RFC2812 IRCD=ft_irc CHARSET=UTF-8 CASEMAPPING=ascii PREFIX=(o)@ CHANTYPES=#& CHANMODES=,k,l,it", "are supported on this server")
-		+ create_reply(RPL_ISUPPORT, "CHANLIMIT=#&:" + chanlimit + " CHANNELLEN=" + channellen + " NICKLEN=" + nicklen + " TOPICLEN=" + topiclen + " AWAYLEN=127 KICKLEN=" + kicklen + " MODES=5", "are supported on this server")
+		+ create_reply(RPL_ISUPPORT, "CHANLIMIT=#&:" + chanlimit + " CHANNELLEN=" + channellen + " NICKLEN=" + nicklen + " TOPICLEN=" + topiclen + " KICKLEN=" + kicklen, "are supported on this server")
 		+ create_reply(RPL_LUSERCLIENT, "", "There are " + clients_count + " users and 0 services on 1 servers")
 		+ create_reply(RPL_LUSERCHANNELS, channels_count, "channels formed")
 		+ create_reply(RPL_LUSERME, "", "I have " + clients_count + " users, 0 services and 0 servers")
