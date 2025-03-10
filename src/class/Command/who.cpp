@@ -12,11 +12,10 @@ static void handler(const args_t &args, Client &client, Server &server)
 
 	if (Channel::is_prefix(mask[0])) {
 		Channel *channel = server.get_channel(mask);
-
-		if (channel)
+		if (channel) {
 			clients = channel->get_members();
-
-		mask = channel->get_name();
+			mask = channel->get_name();
+		}
 	} else {
 		clients = server.get_clients(mask);
 	}
