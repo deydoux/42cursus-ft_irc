@@ -3,7 +3,7 @@
 #include "class/Command.hpp"
 #include "class/Server.hpp"
 
-static void handler(const args_t &args, Client &client, Server &server)
+static void ping_handler(const args_t &args, Client &client, Server &server)
 {
 	if (args.size() == 1)
 		return client.reply(ERR_NOORIGIN, "", "No origin specified");
@@ -15,7 +15,7 @@ static void handler(const args_t &args, Client &client, Server &server)
 }
 
 const Command::_command_t Command::_ping = {
-	.handler = &handler,
+	.handler = &ping_handler,
 	.min_args = 0,
 	.max_args = (size_t)-1,
 	.register_mode = registered_only

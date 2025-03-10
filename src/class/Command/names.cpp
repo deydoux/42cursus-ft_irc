@@ -3,7 +3,7 @@
 #include "class/Command.hpp"
 #include "class/Server.hpp"
 
-static void handler(const args_t &args, Client &client, Server &server)
+static void names_handler(const args_t &args, Client &client, Server &server)
 {
 	std::string reply;
 
@@ -44,7 +44,7 @@ static void handler(const args_t &args, Client &client, Server &server)
 }
 
 const Command::_command_t Command::_names = {
-	.handler = &handler,
+	.handler = &names_handler,
 	.min_args = 0,
 	.max_args = 1,
 	.register_mode = registered_only
