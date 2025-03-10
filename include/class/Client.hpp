@@ -84,10 +84,11 @@ private:
 
 	const std::string	_get_username(bool truncate = true) const;
 
-	static const size_t _max_channels = 50;
+	static const size_t	_max_kick_message_len = 400;
 	static const size_t	_max_message_size = 512;
 	static const size_t	_max_nickname_size = 9;
-	static const size_t	_max_kick_message_len = 400;
+	static const size_t	_max_realname_len = 127;
+	static const size_t _max_channels = 50;
 
 	static bool	_is_valid_nickname(const std::string &nickname);
 	static bool	_is_valid_username(const std::string &username);

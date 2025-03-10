@@ -203,6 +203,9 @@ void Client::set_username(const std::string &username)
 void Client::set_realname(const std::string &realname)
 {
 	_realname = realname;
+
+	if (_realname.size() > _max_realname_len)
+		_realname.resize(_max_realname_len);
 }
 
 void Client::set_password(const std::string &password)
@@ -463,7 +466,6 @@ void	Client::part_channel(Channel &channel, std::string &reason)
 		this->get_mask(), "PART", channel.get_name() , reason
 	));
 	channel.remove_client(*this);
-	// TODO erase channel from insensitive case
 	_active_channels.erase(channel.get_name());
 	remove_channel_operator(channel.get_name());
 

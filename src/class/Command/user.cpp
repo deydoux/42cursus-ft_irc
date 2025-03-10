@@ -4,7 +4,6 @@
 static void handler(const args_t &args, Client &client, Server &)
 {
 	client.set_username(args[1]);
-	// TODO check realname
 	client.set_realname(args[4]);
 }
 
