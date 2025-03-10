@@ -5,7 +5,7 @@
 
 #include <cstdlib>
 
-static void handler(const args_t &args, Client &client, Server &server)
+static void mode_handler(const args_t &args, Client &client, Server &server)
 {
 	std::string channel_name = args[1];
 	Channel *channel = server.get_channel(channel_name);
@@ -117,7 +117,7 @@ static void handler(const args_t &args, Client &client, Server &server)
 }
 
 const Command::_command_t Command::_mode = {
-	.handler = &handler,
+	.handler = &mode_handler,
 	.min_args = 1,
 	.max_args = 5,
 	.register_mode = registered_only
