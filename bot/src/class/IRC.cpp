@@ -116,17 +116,14 @@ std::string IRC::receive( void )
 	if (!is_connected)
 		throw std::runtime_error("Could not receive anything: client is not connected");
 
-	char buffer[4096];
-	memset(buffer, 0, sizeof(buffer));
-
+	char buffer[BUFSIZ];
 	ssize_t bytes_received = recv(_socket_fd, buffer, sizeof(buffer) - 1, 0);
 	if (bytes_received == 0)
 		throw std::runtime_error("Connection closed by server");
 	if (bytes_received < 0)
 		throw std::runtime_error("Error receiving data: " + ft_strerror());
 
-	buffer[bytes_received] = '\0';
-	return std::string(buffer);
+	return std::string(buffer, bytes_received);
 }
 
 void IRC::_signal_handler(int)
