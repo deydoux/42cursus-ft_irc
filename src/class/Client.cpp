@@ -471,13 +471,6 @@ void	Client::part_channel(Channel &channel, std::string &reason)
 		_server.delete_channel(channel.get_name());
 }
 
-void	Client::close_all_channels(std::string &reason)
-{
-	channels_t to_part = this->get_active_channels();
-	for (std::map<std::string, Channel *>::iterator it = to_part.begin(); it != to_part.end(); it++)
-		this->part_channel(*it->second, reason);
-}
-
 
 void Client::notify_quit()
 {
