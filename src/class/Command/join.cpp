@@ -9,11 +9,8 @@ static void handler(const args_t &args, Client &client, Server &server)
 
 	if (args_size == 2 && args[1] == "0")
 	{
-		if (client.get_channels_count() != 0)
-		{
-			std::string reason = client.get_nickname();
-			client.close_all_channels(reason);
-		}
+	        std::string reason = client.get_nickname();
+	        client.close_all_channels(reason);
 		return ;
 	}
 
