@@ -3,7 +3,7 @@
 #include "class/Command.hpp"
 #include "class/Server.hpp"
 
-static void handler(const args_t &args, Client &client, Server &server)
+static void join_handler(const args_t &args, Client &client, Server &server)
 {
 	size_t args_size = args.size();
 
@@ -64,7 +64,7 @@ static void handler(const args_t &args, Client &client, Server &server)
 }
 
 const Command::_command_t Command::_join = {
-	.handler = &handler,
+	.handler = &join_handler,
 	.min_args = 1,
 	.max_args = 2,
 	.register_mode = registered_only

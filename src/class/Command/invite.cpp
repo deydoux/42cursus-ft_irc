@@ -3,7 +3,7 @@
 #include "class/Command.hpp"
 #include "class/Server.hpp"
 
-static void handler(const args_t &args, Client &client, Server &server)
+static void invite_handler(const args_t &args, Client &client, Server &server)
 {
 	Client *target = server.get_client(args[1]);
 	if (!target)
@@ -26,7 +26,7 @@ static void handler(const args_t &args, Client &client, Server &server)
 }
 
 const Command::_command_t Command::_invite = {
-	.handler = &handler,
+	.handler = &invite_handler,
 	.min_args = 2,
 	.max_args = 2,
 	.register_mode = registered_only
