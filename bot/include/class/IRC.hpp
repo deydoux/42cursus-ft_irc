@@ -3,14 +3,19 @@
 
 #include "lib.hpp"
 
-#include <iostream>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+
 #include <cstdio>
+#include <iostream>
+#include <map>
+
+class TriviaGame;
 
 class IRC
 {
 	public:
+		typedef std::map<std::string, TriviaGame *> trivias_t; // channel_name: trivia ptr
 		typedef uint16_t	port_t;
 		
 		bool	is_connected;
@@ -22,9 +27,13 @@ class IRC
 		
 		void	connect( void );
 		void	send_registration( void );
-		void	send_command(const std::string &cmd, std::string args = "", std::string message = "");
-		void	send_raw(const std::string &message);
+		void	send_raw(const std::string &message, int send_delay = 0);
+		std::string	create_reply(const std::string &cmd, std::string args = "", std::string message = "");
 		std::string	receive( void );
+
+		std::vector<std::string> get_clients_on_channel(const std::string &channel_name);
+		bool	is_playing(const std::string &channel_name);
+		void	delete_trivia_game(TriviaGame *game);
 
 		static bool	stop;
 
@@ -36,12 +45,17 @@ class IRC
 		const std::string	_password;
 		const bool			_verbose;
 
+		trivias_t			_ongoing_trivia_games;
+		std::string			_inviting_client;
+
 		int					_socket_fd;
 
 		void	_handle_messages(const std::string &messages);
 		void	_handle_message(std::string message);
-		void	_set_signal_handler();
-		void	_loop();
+		void	_handle_command(const std::string &command, const std::vector<std::string> &args);
+		void	_set_signal_handler( void );
+		void	_update_games( void );
+		void	_loop( void );
 
 		static const std::string	_default_hostname;
 		static const port_t			_default_port = 6697;

@@ -1,4 +1,5 @@
 #include "class/IRC.hpp"
+#include "class/TriviaGame.hpp"
 
 #include <sstream>
 #include <vector>
@@ -43,7 +44,11 @@ IRC::IRC(const std::string hostname, const port_t port, const std::string pass, 
 
 IRC::~IRC()
 {
-	send_command("QUIT", "", "Leaving");
+	send_raw(create_reply("QUIT", "", "Leaving"));
+
+	for (trivias_t::iterator it = _ongoing_trivia_games.begin(); it != _ongoing_trivia_games.end(); it++) {
+		delete it->second;
+	}
 	
 	if (_socket_fd > 0)
 		close(_socket_fd);
@@ -80,10 +85,13 @@ void IRC::connect( void )
 	is_connected = true;
 }
 
-void IRC::send_raw(const std::string &message)
+void IRC::send_raw(const std::string &message, int send_after_ms)
 {
 	if (!is_connected)
 		throw std::runtime_error("Could not send message: client is not connected");
+
+	if (send_after_ms != 0)
+		usleep(send_after_ms * 1000);
 
 	ssize_t bytes_sent = send(_socket_fd, message.c_str(), message.length(), 0);
 	if (bytes_sent < 0)
@@ -92,7 +100,7 @@ void IRC::send_raw(const std::string &message)
 	log("Sent message:\n" + message, debug);
 }
 
-void IRC::send_command(const std::string &cmd, std::string args, std::string message)
+std::string IRC::create_reply(const std::string &cmd, std::string args, std::string message)
 {
 	if (!args.empty())
 		args = " " + args;
@@ -100,15 +108,18 @@ void IRC::send_command(const std::string &cmd, std::string args, std::string mes
 		message = ":" + message;
 	if (!message.empty())
 		message = " " + message;
-	return this->send_raw(cmd + args + message + "\r\n");
+	return cmd + args + message + "\r\n";
 }
 
 void IRC::send_registration( void )
 {
+	std::string registration;
+	
 	if (!_password.empty())
-		send_command("PASS", _password);
-	send_command("NICK", _default_nickname);
-	send_command("USER", _default_username + " 0 *", _default_realname);
+		registration += create_reply("PASS", _password);
+	registration += create_reply("NICK", _default_nickname);
+	registration += create_reply("USER", _default_username + " 0 *", _default_realname);
+	send_raw(registration);
 }
 
 std::string IRC::receive( void )
@@ -117,11 +128,14 @@ std::string IRC::receive( void )
 		throw std::runtime_error("Could not receive anything: client is not connected");
 
 	char buffer[BUFSIZ];
-	ssize_t bytes_received = recv(_socket_fd, buffer, sizeof(buffer) - 1, 0);
+	ssize_t bytes_received = recv(_socket_fd, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
 	if (bytes_received == 0)
 		throw std::runtime_error("Connection closed by server");
-	if (bytes_received < 0)
+	if (bytes_received < 0) {
+		if (errno == EAGAIN || errno == EWOULDBLOCK)
+			_update_games();
 		throw std::runtime_error("Error receiving data: " + ft_strerror());
+	}
 
 	return std::string(buffer, bytes_received);
 }
@@ -129,6 +143,12 @@ std::string IRC::receive( void )
 void IRC::_signal_handler(int)
 {
 	stop = true;
+}
+
+void IRC::_update_games( void )
+{
+	for (trivias_t::iterator it = _ongoing_trivia_games.begin(); it != _ongoing_trivia_games.end(); it++)
+		it->second->tick();
 }
 
 void IRC::_loop( void )
@@ -180,18 +200,106 @@ void IRC::_handle_message(std::string message)
 	}
 
 	log("Parsed command: " + oss.str(), debug);
+	_handle_command(args[1], args);
+}
 
-	if (args[1] == "INVITE")
+std::vector<std::string> IRC::get_clients_on_channel(const std::string &channel_name)
+{
+	(void)channel_name;
+	// Needs to call NAME command, and parse the clients inside the channel
+	std::vector<std::string> vec;
+	return vec;
+}
+
+bool IRC::is_playing(const std::string &channel_name)
+{
+	return _ongoing_trivia_games.find(channel_name) != _ongoing_trivia_games.end();
+}
+
+void IRC::_handle_command(const std::string &command, const std::vector<std::string> &args)
+{
+	std::string sender_nickname = extract_nickname(args[0]);
+
+	if (command == "INVITE") 
 	{
 		if (args[2] != _default_nickname)
 			return ;
 		
 		std::string channel = args[3];
-		send_command("JOIN", channel);
-
-		std::string greet_message = "Thanks for inviting me to this channel " + extract_nickname(args[0]) + "!";
-		send_command("PRIVMSG", channel, greet_message);
+		send_raw(create_reply("JOIN", channel));
+		_inviting_client = sender_nickname;
 	}
+	else if (command == "JOIN") 
+	{
+		std::string channel = args[2];
+		
+		if (_inviting_client.empty())
+			return ;
+
+		if (sender_nickname != _default_nickname && is_playing(channel)) {
+			TriviaGame *game = _ongoing_trivia_games[channel];
+			game->add_player(sender_nickname);
+			return ;
+		}
+
+		std::string greet_message = "Thanks for inviting me to this channel " + _inviting_client + "!";
+		send_raw(create_reply("PRIVMSG", channel, greet_message), 1000);
+
+		_inviting_client = "";
+	}
+	else if (command == "PRIVMSG") 
+	{
+		if (std::string("&#").find(args[2][0]) == std::string::npos)
+			// TODO: maybe act in a specific way if a pm is sent to HelloKitty ?
+			return ;
+
+		std::string channel = args[2];
+		std::string message = args[3];
+		bool playing = is_playing(channel);
+		TriviaGame *game;
+
+		if (!playing && message.substr(0, 7) == "~TRIVIA") {
+			// TODO: Maybe put a limit of simultanious trivia game ?
+
+			std::vector<std::string> clients_on_channel = get_clients_on_channel(channel);
+			if (clients_on_channel.size() < 3)
+				return send_raw(create_reply("PRIVMSG", channel, "Trivia needs at least two players to begin!"), 500);
+
+			game = new TriviaGame(*this, channel, clients_on_channel);
+			_ongoing_trivia_games[channel] = game;
+
+			game->greet_players();
+			return ;
+		} else if (!playing) {
+			return ;
+		}
+
+		game = _ongoing_trivia_games[channel];
+		
+		if (message.substr(0, 5) == "~STOP") {
+			game->show_final_results();
+			return ;
+		}
+
+		if (game->is_waiting_for_answers())
+			game->store_answer(message, sender_nickname);
+	}
+	else if (command == "PART")
+	{
+		std::string channel = args[2];
+		if (is_playing(channel))
+		{
+			TriviaGame *game = _ongoing_trivia_games[channel];
+			game->remove_player(sender_nickname);
+			return ;
+		}
+	}
+}
+
+void IRC::delete_trivia_game(TriviaGame *game)
+{
+	_ongoing_trivia_games.erase(game->get_channel());
+	delete game;
 }
 
 IRC IRC::launch_irc_client(int argc, char **argv)
@@ -304,7 +412,7 @@ sockaddr_in IRC::_init_address(port_t port)
 	return (sockaddr_in) {
 		.sin_family = AF_INET,
 		.sin_port = htons(port),
-		.sin_addr = 0,
+		.sin_addr = {},
 		.sin_zero = {},
 	};
 }

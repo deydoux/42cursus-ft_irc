@@ -5,6 +5,7 @@ SRC = \
 	class/IRC.cpp \
 	class/JSON.cpp \
 	class/Ollama.cpp \
+	class/TriviaGame.cpp \
 	lib/log.cpp \
 	lib/ft_split.cpp \
 	main.cpp
