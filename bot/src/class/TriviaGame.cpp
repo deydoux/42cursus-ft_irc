@@ -137,6 +137,25 @@ std::string format_choice(char letter, const std::string &choice)
 	return result + " " + choice;
 }
 
+std::string format_inline_choices(const std::string &choice1, const std::string &choice2, int space_between)
+{
+	std::string result;
+
+	result = choice1 + std::string(std::max(space_between, 20) - choice1.size(), ' ');
+	return result + choice2;
+}
+
+int get_max_len(std::vector<std::string> arr)
+{
+	size_t max_len = 0;
+	for (size_t i = 0; i < arr.size(); ++i) {
+		if (arr[i].size() > max_len)
+			max_len = arr[i].size();
+	}
+
+	return max_len;
+}
+
 void TriviaGame::ask_trivia_question( void )
 {
 	question_t question = _questions[_round_counter];
@@ -153,9 +172,18 @@ void TriviaGame::ask_trivia_question( void )
 	std::random_shuffle(choices.begin(), choices.end());
 
 	std::string alpha = "ABCDEFGHIJ";
+	int max_len = get_max_len(choices) + 4;
 	for (size_t i = 0; i < choices.size() && i < alpha.size(); i++) {
-		question_raw += create_reply(format_choice(alpha[i], choices[i]));
 		_choices[alpha[i]] = choices[i];
+		if (i % 2 == 1) {
+			question_raw +=  create_reply(format_inline_choices(
+				format_choice(alpha[i - 1], choices[i - 1]), 
+				format_choice(alpha[i], choices[i]),
+				max_len + 4
+			));
+		} else if (i == choices.size() - 1) {
+			question_raw += create_reply(format_choice(alpha[i], choices[i]));
+		}
 	}
 
 	question_raw += create_empty_reply();
