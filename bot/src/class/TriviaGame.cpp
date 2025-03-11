@@ -21,31 +21,63 @@ TriviaGame::~TriviaGame()
 	log("Destruction");
 }
 
-void TriviaGame::send(const std::string &message)
+void TriviaGame::send(const std::string &message, int send_delay)
 {
 	_irc_client.send_raw(
-		_irc_client.create_reply("PRIVMSG", _channel, message)
+		_irc_client.create_reply("PRIVMSG", _channel, message),
+		send_delay
 	);
 }
 
 void TriviaGame::greet_players( void )
 {
-	// First it sends a greeting message to the players, with the rules of the Trivia Game
-	// (each chunks need to be sent separatly with a delay between each one of them, 1s or so)
-	/*
-		Hello there, friends! 🎀 Welcome to the Hello Kitty Trivia Game on the KittIRC server!
-
-		Here’s how it works: every round, I’ll ask a question with multiple-choice answers. 
-		You have 30 seconds to pick the right one—just send the letter of your choice (A, B, C, or D).
-		Easy, right? But be quick! Only your first answer will count. No take-backsies! ⏳🐱
-
-		When time’s up, I’ll reveal the correct answer and either shower you with imaginary confetti or silently judge your choices (just kidding... maybe).
+	send(TriviaGame::pick_randomly(TriviaGame::greetings_part1), 500);
 	
-		Got it? Ready? Okay, let’s do this! ✨
-	*/
+	std::string rules;
+	std::vector<std::string> rules_parts = ft_split(TriviaGame::greetings_part2, '\n');
+	for (size_t i = 0; i < rules_parts.size(); i++) {
+		rules += _irc_client.create_reply("PRIVMSG", _channel, rules_parts[i]);
+	}
+	_irc_client.send_raw(rules, 1000);
+
+	send(TriviaGame::greetings_part3, 1000);
+	send(TriviaGame::greetings_part4, 1000);
+
+	_waiting_before_start = true;
+	for (size_t i = 0; i < _players.size(); i++) {
+		_ready_players[_players[i]] = false;
+	}
+}
+
+void TriviaGame::mark_user_as_ready(const std::string &client_nickname)
+{
+	_ready_players[client_nickname] = true;
 	
+	for (size_t i = 0; i < _players.size(); i++) {
+		if (!_ready_players[_players[i]])
+			return ;
+	}
+
+	_waiting_before_start = false;
+	_start_game();
+}
+
+bool TriviaGame::is_waiting_before_start( void )
+{
+	return _waiting_before_start;
+}
+
+void TriviaGame::_start_game( void )
+{
 	// Starts the round counter, and uses init_round() to prepare the coming round.
+	_round_counter = 0;
+
+	log("Starting the game!", info);
+
+	// Fetch all the questions for the trivia and store them
+
 	// Then, using ask_trivia_question(), it asks the first question to the users.
+	ask_trivia_question();
 }
 
 void TriviaGame::init_round( void )

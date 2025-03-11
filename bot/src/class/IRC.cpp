@@ -273,6 +273,8 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 			return ;
 		}
 
+		if (game->is_waiting_before_start())
+			game->mark_user_as_ready(sender_nickname);
 		if (game->is_waiting_for_answers())
 			game->store_answer(message, sender_nickname);
 	}
@@ -308,6 +310,8 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 			std::string reply = TriviaGame::pick_randomly(TriviaGame::not_enough_players_warnings);
 			return send_raw(create_reply("PRIVMSG", channel, reply), 500);
 		}
+
+		clients_on_channel.erase(std::remove(clients_on_channel.begin(), clients_on_channel.end(), _default_nickname), clients_on_channel.end());
 
 		TriviaGame *game = new TriviaGame(*this, channel, clients_on_channel);
 		_ongoing_trivia_games[channel] = game;
