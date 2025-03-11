@@ -3,8 +3,8 @@
 
 TriviaGame::TriviaGame(IRC &irc_client, const std::string channel_name, std::vector<std::string> players, bool verbose) :
 	_irc_client(irc_client),
-	_channel(channel_name),
 	_players(players),
+	_channel(channel_name),
 	_verbose(verbose)
 {
 	log("Creation");
@@ -31,7 +31,8 @@ void TriviaGame::send(const std::string &message, int send_delay)
 
 void TriviaGame::greet_players( void )
 {
-	send(format(TriviaGame::pick_randomly(TriviaGame::greetings_part1), BOLD), 500);
+	send("\t", 500);
+	send(format(TriviaGame::pick_randomly(TriviaGame::greetings_part1), BOLD), 0);
 	
 	std::string rules;
 	std::vector<std::string> rules_parts = ft_split(TriviaGame::greetings_part2, '\n');
@@ -41,7 +42,8 @@ void TriviaGame::greet_players( void )
 	_irc_client.send_raw(rules, 1000);
 
 	send(TriviaGame::greetings_part3, 1000);
-	send(TriviaGame::greetings_part4, 1000);
+	send("\t", 1000);
+	send(TriviaGame::greetings_part4, 0);
 
 	_waiting_before_start = true;
 	for (size_t i = 0; i < _players.size(); i++) {
@@ -69,68 +71,90 @@ bool TriviaGame::is_waiting_before_start( void )
 
 void TriviaGame::_start_game( void )
 {
-	// Starts the round counter, and uses init_round() to prepare the coming round.
 	_round_counter = 0;
 
-	log("Starting the game!", info);
+	send("Great! Let's start right now ...");
 
-	// Fetch all the questions for the trivia and store them
+	// It musts fetch the questions using the Curl object and the Trivia Game API (https://opentdb.com/api_config.php),
+	// with a api url looking something like this: https://opentdb.com/api.php?amount=1
+	// Then it parses the possible answers using the JSON object, and stores the answer
+	// (the users answers will not be checked in this function, so this is necessary)
+	
+	_questions.push_back((question_t) {
+		.text = "What is the capital of Australia?",
+		.answer = "Canberra",
+		.wrong_answers = std::vector<std::string>(3, "")
+	});
+	_questions.back().wrong_answers[0] = "Sydney";
+	_questions.back().wrong_answers[1] = "Melbourne";
+	_questions.back().wrong_answers[2] = "Brisbane";
 
-	// Then, using ask_trivia_question(), it asks the first question to the users.
+	_questions.push_back((question_t) {
+		.text = "Who wrote 'To Kill a Mockingbird'?",
+		.answer = "Harper Lee",
+		.wrong_answers = std::vector<std::string>(3, "")
+	});
+	_questions.back().wrong_answers[0] = "Mark Twain";
+	_questions.back().wrong_answers[1] = "J.D. Salinger";
+	_questions.back().wrong_answers[2] = "Ernest Hemingway";
+
+	_questions.push_back((question_t) {
+		.text = "Which element has the chemical symbol 'O'?",
+		.answer = "Oxygen",
+		.wrong_answers = std::vector<std::string>(3, "")
+	});
+	_questions.back().wrong_answers[0] = "Osmium";
+	_questions.back().wrong_answers[1] = "Gold";
+	_questions.back().wrong_answers[2] = "Silver";
+
+	std::random_shuffle(_questions.begin(), _questions.end());
+
 	ask_trivia_question();
 }
 
-void TriviaGame::init_round( void )
+std::string format_choice(char letter, const std::string &choice)
 {
-	// increments the round counter by 1
-	// initializes every futur data necessary for the round
-		// - the correct answer
-		// - the player answers
-		// - first player to answer
-		// - the player scores
-		// ...
+	std::string result;
+	std::ostringstream oss;
+
+	oss << "[";
+	oss << letter;
+	oss << "]";
+
+	result = format(oss.str(), BOLD);
+	return result + " " + choice;
 }
 
 void TriviaGame::ask_trivia_question( void )
 {
-	// It musts fetch the question using the Curl object and the Trivia Game API (https://opentdb.com/api_config.php),
-	// with a api url looking something like this: https://opentdb.com/api.php?amount=1
+	question_t question = _questions[_round_counter];
+	std::string question_raw;
 
-	// Then it parses the possible answers using the JSON object, and stores the answer
-	// (the users answers will not be checked in this function, so this is necessary)
+	question_raw += _irc_client.create_reply("PRIVMSG", _channel, "\t");
+	question_raw += _irc_client.create_reply("PRIVMSG", _channel, format("--- 🎯 -- QUESTION 1/" + to_string(_nb_rounds) + " -- 🎯 ---", BOLD));
+	question_raw += _irc_client.create_reply("PRIVMSG", _channel, "\t");
+	question_raw += _irc_client.create_reply("PRIVMSG", _channel, question.text);
+	
+	std::vector<std::string> choices;
+	choices.push_back(question.answer);
+	choices.insert(choices.end(), question.wrong_answers.begin(), question.wrong_answers.end());
+	std::random_shuffle(choices.begin(), choices.end());
 
-	// Sends a message with the question to users. Sending this chunk by chunk isn't necessary
-	/*
-		🎯 **Question 1/5** 🎯  
+	std::string alpha = "ABCDEFGHIJ";
+	for (size_t i = 0; i < choices.size() && i < alpha.size(); i++) {
+		_choices[alpha[i]] = choices[i];
+		question_raw += _irc_client.create_reply("PRIVMSG", _channel, format_choice(alpha[i], choices[i]));
+	}
 
-		In DC Comics, where does the Green Arrow (Oliver Queen) live?  
+	question_raw += _irc_client.create_reply("PRIVMSG", _channel, "\t");
+	std::string prompt = "⏳ You have " + format(to_string(_round_duration_sec) + " seconds! ", BOLD);
+	prompt += TriviaGame::pick_randomly(TriviaGame::question_prompts);
+	question_raw += _irc_client.create_reply("PRIVMSG", _channel, prompt);
+	question_raw += _irc_client.create_reply("PRIVMSG", _channel, "\t");
 
-		[A] Star City    	[C] Metropolis
-		[B] Gotham City  	[D] Central City   
-
-		⏳ You have **30 seconds**! So, what's your guess? 🤔
-	*/
-
-	// Here are a few alternative messages to "So what's your guess ? 🤔"
-	// Something cool would be that it selects one randomly each time, picking from a static list (should it be local or global?)
-	// => this means that emojies must be sent correctly!
-	/*
-		- Lock in your answer! 🏹
-		- Take your best shot! 🎯
-		- Think fast! What’s your pick? ⏳
-		- Make your choice, hero! 🦸
-		- Time’s ticking—what’s your answer? ⏰
-		- Go with your gut! What’ll it be? 🤔
-		- Choose wisely! 🧠✨
-		- What’s your final answer? 🔥
-		- Trust your instincts—what do you say? 🧐
-		- Don't overthink it! Pick one! 🚀
-	*/
-
-	// It starts the timer (simply store the time when the question was asked, 
-	// it will then be compared with the current time in the tick() function)
-	// --> the time needed to complete a round needs to be stored in a static variable, 
-	//     so we can change it later for a better experience
+	_irc_client.send_raw(question_raw, 500);
+	_asked_at = time(NULL);
+	_waiting_for_answers = true;
 }
 
 void TriviaGame::store_answer(const std::string &answer, const std::string &client_nickname)
@@ -224,9 +248,7 @@ void TriviaGame::show_final_results( void )
 
 bool TriviaGame::is_waiting_for_answers( void )
 {
-	// Simply returns the value of a private variable _is_waiting_for_answers,
-	// which is supposed to be true if a question was asked and that the trivia bot is waiting for the players to answer it
-	return false;
+	return _waiting_for_answers;
 }
 
 std::string TriviaGame::get_channel( void )

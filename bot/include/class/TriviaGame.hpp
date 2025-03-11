@@ -3,6 +3,8 @@
 
 #include "lib.hpp"
 
+#include <algorithm>
+#include <ctime>
 #include <cstdlib>
 #include <map>
 
@@ -12,6 +14,12 @@ class TriviaGame
 {
 public:
 	typedef	std::vector<std::string> phrases_t;
+	typedef	struct question_s {
+		std::string					text;
+		std::string					answer;
+		std::vector<std::string>	wrong_answers;
+	}	question_t;
+	typedef	std::vector<question_t> questions_t;
 
 	TriviaGame(IRC &irc_client, std::string channel_name, std::vector<std::string> players, bool verbose = true);
 	~TriviaGame();
@@ -51,18 +59,24 @@ public:
 
 private:
 	IRC					&_irc_client;
-	const std::string	_channel;
 	std::vector<std::string> _players;
 	int					_round_counter;
-
-	bool				_waiting_before_start;
+	questions_t			_questions;
+	std::map<char, std::string> _choices;
+	std::map<std::string, std::string> _players_answers;
+	std::time_t			_asked_at;
+	std::map<std::string, int> _players_scores;
 	std::map<std::string, bool> _ready_players;
+	bool				_waiting_before_start;
+	bool				_waiting_for_answers;
 
+	const std::string	_channel;
 	const bool			_verbose;
 
 	void	_start_game( void );
 
 	static const int	_nb_rounds = 5;
+	static const int	_round_duration_sec = 50;
 };
 
 #endif
