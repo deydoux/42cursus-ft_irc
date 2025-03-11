@@ -10,6 +10,8 @@ class IRC;
 class TriviaGame
 {
 public:
+	typedef	std::vector<std::string> phrases_t;
+
 	TriviaGame(IRC &irc_client, std::string channel_name, std::vector<std::string> players, bool verbose = true);
 	~TriviaGame();
 
@@ -30,7 +32,16 @@ public:
 
 	std::string get_channel( void);
 
-	static std::string	pick_randomly(const std::vector<std::string> phrases);
+	static void			initialize_phrases( void );
+	static std::string	pick_randomly(const phrases_t phrases);
+
+	static phrases_t	greetings;
+	static phrases_t	time_warnings;
+	static phrases_t	times_up_warnings;
+	static phrases_t	question_prompts;
+	static phrases_t	not_enough_players_warnings;
+	static phrases_t	room_warnings;
+	static phrases_t	farewells;
 
 private:
 	IRC					&_irc_client;

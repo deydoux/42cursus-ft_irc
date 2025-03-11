@@ -262,8 +262,10 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 			// TODO: Maybe put a limit of simultanious trivia game ?
 
 			std::vector<std::string> clients_on_channel = get_clients_on_channel(channel);
-			if (clients_on_channel.size() < 3)
-				return send_raw(create_reply("PRIVMSG", channel, "Trivia needs at least two players to begin!"), 500);
+			if (clients_on_channel.size() < 3) {
+				std::string reply = TriviaGame::pick_randomly(TriviaGame::not_enough_players_warnings);
+				return send_raw(create_reply("PRIVMSG", channel, reply), 500);
+			}
 
 			game = new TriviaGame(*this, channel, clients_on_channel);
 			_ongoing_trivia_games[channel] = game;

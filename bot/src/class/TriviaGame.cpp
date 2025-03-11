@@ -148,6 +148,7 @@ void TriviaGame::show_round_results( void )
 	// It stops waiting for answers, and show the results of the round in this format :
 	// (again, it can be nice to send this chunk by chunk with a small delay between each one of them)
 	/*
+		[Times up!] chunk 0
 		[🌟 Here are your answers! 🌟
 
 		- quteriss: Star City
@@ -185,8 +186,6 @@ void TriviaGame::show_final_results( void )
 		[💖 **1st Place**: mapale - **135**pts] chunk 3 ...
 
 		👏 Well done to everyone who played! It’s been a blast—whether you were a trivia genius or just here for the fun! 😸
-
-		Stay tuned for the next round of questions… and remember: there's always room for more heroes in the game! 🦸‍♀️✨
 	*/
 
 	// Then it calls the irc_client delete_trivia_game(this) function, that destroys the current TriviaGame instance
@@ -217,10 +216,12 @@ void TriviaGame::remove_player(const std::string &client_nickname)
 	// Removes the player from the player list
 	// --> preferably, this action should not remove the actual score of the quitting client
 	//	   so that, in the final scores, he still appears (even if he/she has a disadvantage)
-	// Check if there's still enough player to play, and if not, DO SOMETHING
+	// Check if there's still enough player to play, and if not:
+		// - send a room_warnings message (pick randomly)
+		// - show the final results
 }
 
-std::string	TriviaGame::pick_randomly(const std::vector<std::string> strings)
+std::string	TriviaGame::pick_randomly(const phrases_t strings)
 {
 	if (strings.empty())
 		return "";
