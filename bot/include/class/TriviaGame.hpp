@@ -29,10 +29,11 @@ public:
 	bool	is_waiting_for_answers( void );
 
 	void	send(const std::string &message, int send_delay = 0);
+	std::string create_reply(const std::string &message);
+	std::string create_empty_reply( void );
 	void	add_player(const std::string &client_nickname);
 	void	remove_player(const std::string &client_nickname);
 	void	greet_players( void );
-	void	init_round( void );
 	void	tick( void );
 	void	ask_trivia_question( void );
 	void	store_answer(const std::string &answer, const std::string &client_nickname);

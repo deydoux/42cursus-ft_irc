@@ -29,21 +29,33 @@ void TriviaGame::send(const std::string &message, int send_delay)
 	);
 }
 
+std::string TriviaGame::create_empty_reply( void )
+{
+	return _irc_client.create_reply("PRIVMSG", _channel, "\t");
+}
+
+std::string TriviaGame::create_reply(const std::string &message)
+{
+	return _irc_client.create_reply("PRIVMSG", _channel, message);
+}
+
 void TriviaGame::greet_players( void )
 {
-	send("\t", 500);
-	send(format(TriviaGame::pick_randomly(TriviaGame::greetings_part1), BOLD), 0);
+	std::string header = create_empty_reply();
+	header += create_reply(format(TriviaGame::pick_randomly(TriviaGame::greetings_part1), BOLD));
+	_irc_client.send_raw(header, 300);
 	
 	std::string rules;
 	std::vector<std::string> rules_parts = ft_split(TriviaGame::greetings_part2, '\n');
 	for (size_t i = 0; i < rules_parts.size(); i++) {
-		rules += _irc_client.create_reply("PRIVMSG", _channel, rules_parts[i]);
+		rules += create_reply(rules_parts[i]);
 	}
 	_irc_client.send_raw(rules, 1000);
-
 	send(TriviaGame::greetings_part3, 1000);
-	send("\t", 1000);
-	send(TriviaGame::greetings_part4, 0);
+	
+	std::string conclusion = create_empty_reply();
+	conclusion += create_reply(TriviaGame::greetings_part4);
+	_irc_client.send_raw(conclusion, 1000);
 
 	_waiting_before_start = true;
 	for (size_t i = 0; i < _players.size(); i++) {
@@ -73,7 +85,7 @@ void TriviaGame::_start_game( void )
 {
 	_round_counter = 0;
 
-	send("Great! Let's start right now ...");
+	send("Great! Let's start right now!");
 
 	// It musts fetch the questions using the Curl object and the Trivia Game API (https://opentdb.com/api_config.php),
 	// with a api url looking something like this: https://opentdb.com/api.php?amount=1
@@ -129,11 +141,11 @@ void TriviaGame::ask_trivia_question( void )
 {
 	question_t question = _questions[_round_counter];
 	std::string question_raw;
-
-	question_raw += _irc_client.create_reply("PRIVMSG", _channel, "\t");
-	question_raw += _irc_client.create_reply("PRIVMSG", _channel, format("--- 🎯 -- QUESTION 1/" + to_string(_nb_rounds) + " -- 🎯 ---", BOLD));
-	question_raw += _irc_client.create_reply("PRIVMSG", _channel, "\t");
-	question_raw += _irc_client.create_reply("PRIVMSG", _channel, question.text);
+	
+	question_raw += create_empty_reply();
+	question_raw += create_reply(format("--- 🎯 -- QUESTION 1/" + to_string(_nb_rounds) + " -- 🎯 ---", BOLD));
+	question_raw += create_empty_reply();
+	question_raw += create_reply(question.text);
 	
 	std::vector<std::string> choices;
 	choices.push_back(question.answer);
@@ -142,15 +154,15 @@ void TriviaGame::ask_trivia_question( void )
 
 	std::string alpha = "ABCDEFGHIJ";
 	for (size_t i = 0; i < choices.size() && i < alpha.size(); i++) {
+		question_raw += create_reply(format_choice(alpha[i], choices[i]));
 		_choices[alpha[i]] = choices[i];
-		question_raw += _irc_client.create_reply("PRIVMSG", _channel, format_choice(alpha[i], choices[i]));
 	}
 
-	question_raw += _irc_client.create_reply("PRIVMSG", _channel, "\t");
+	question_raw += create_empty_reply();
 	std::string prompt = "⏳ You have " + format(to_string(_round_duration_sec) + " seconds! ", BOLD);
 	prompt += TriviaGame::pick_randomly(TriviaGame::question_prompts);
-	question_raw += _irc_client.create_reply("PRIVMSG", _channel, prompt);
-	question_raw += _irc_client.create_reply("PRIVMSG", _channel, "\t");
+	question_raw += create_reply(prompt);
+	question_raw += create_empty_reply();
 
 	_irc_client.send_raw(question_raw, 500);
 	_asked_at = time(NULL);
