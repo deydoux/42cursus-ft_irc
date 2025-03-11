@@ -39,6 +39,7 @@ IRC::IRC(const std::string hostname, const port_t port, const std::string pass, 
 	_password(pass),
 	_verbose(verbose)
 {
+	srand(time(NULL));
 	TriviaGame::initialize_phrases();
 	this->log("Constructed", debug);
 }

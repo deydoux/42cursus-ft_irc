@@ -31,7 +31,7 @@ void TriviaGame::send(const std::string &message, int send_delay)
 
 void TriviaGame::greet_players( void )
 {
-	send(TriviaGame::pick_randomly(TriviaGame::greetings_part1), 500);
+	send(format(TriviaGame::pick_randomly(TriviaGame::greetings_part1), BOLD), 500);
 	
 	std::string rules;
 	std::vector<std::string> rules_parts = ft_split(TriviaGame::greetings_part2, '\n');
@@ -88,7 +88,6 @@ void TriviaGame::init_round( void )
 		// - the player answers
 		// - first player to answer
 		// - the player scores
-		// - the random seed (srand(time(NULL)))
 		// ...
 }
 

@@ -9,6 +9,7 @@ SRC = \
 	lib/log.cpp \
 	lib/ft_split.cpp \
 	lib/trivia_phrases.cpp \
+	lib/text_formatting.cpp \
 	main.cpp
 
 SRC_DIR = src

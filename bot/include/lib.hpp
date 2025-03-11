@@ -2,6 +2,7 @@
 #define LIB_HPP
 
 #include "to_string.tpp"
+#include "text_formatting.hpp"
 
 #include <iostream>
 #include <vector>
