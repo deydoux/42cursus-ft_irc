@@ -56,7 +56,7 @@ void TriviaGame::init_round( void )
 		// - the player answers
 		// - first player to answer
 		// - the player scores
-		// - the random seed
+		// - the random seed (srand(time(NULL)))
 		// ...
 }
 
@@ -218,4 +218,13 @@ void TriviaGame::remove_player(const std::string &client_nickname)
 	// --> preferably, this action should not remove the actual score of the quitting client
 	//	   so that, in the final scores, he still appears (even if he/she has a disadvantage)
 	// Check if there's still enough player to play, and if not, DO SOMETHING
+}
+
+std::string	TriviaGame::pick_randomly(const std::vector<std::string> strings)
+{
+	if (strings.empty())
+		return "";
+
+	size_t random_index = rand() % strings.size();
+	return strings[random_index];
 }

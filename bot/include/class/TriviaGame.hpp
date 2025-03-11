@@ -3,6 +3,8 @@
 
 #include "lib.hpp"
 
+#include <cstdlib>
+
 class IRC;
 
 class TriviaGame
@@ -27,6 +29,8 @@ public:
 	void	show_final_results( void );
 
 	std::string get_channel( void);
+
+	static std::string	pick_randomly(const std::vector<std::string> phrases);
 
 private:
 	IRC					&_irc_client;
