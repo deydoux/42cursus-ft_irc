@@ -11,9 +11,9 @@ TriviaGame::phrases_t TriviaGame::farewells;
 void TriviaGame::initialize_phrases()
 {
 	// Not Enough Players in Channel
-	TriviaGame::not_enough_players_warnings.push_back("Hmm, looks like we need more kitty fans to start the game! Anyone want to invite their friends? 🐱");
-	TriviaGame::not_enough_players_warnings.push_back("We need a few more players to make this trivia party purr-fect! Spread the word! 📣");
-	TriviaGame::not_enough_players_warnings.push_back("The trivia spotlight is warming up, but we need more contestants to join before we can begin! 🎭");
+	TriviaGame::not_enough_players_warnings.push_back("Hmm, looks like we need one more kitty fan to start the game! Anyone want to invite their friends? 🐱");
+	TriviaGame::not_enough_players_warnings.push_back("We need one more players to make this trivia party purr-fect! Spread the word! 📣");
+	TriviaGame::not_enough_players_warnings.push_back("The trivia spotlight is warming up, but we need one more contestant to join before we can begin! 🎭");
 
 	// Greetings
 	TriviaGame::greetings.push_back("Hello there, friends! 🎀 Welcome to the Hello Kitty Trivia Game on the KittIRC server!");

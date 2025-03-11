@@ -39,19 +39,23 @@ IRC::IRC(const std::string hostname, const port_t port, const std::string pass, 
 	_password(pass),
 	_verbose(verbose)
 {
+	TriviaGame::initialize_phrases();
 	this->log("Constructed", debug);
 }
 
 IRC::~IRC()
 {
-	send_raw(create_reply("QUIT", "", "Leaving"));
+	if (is_connected)
+		send_raw(create_reply("QUIT", "", "Leaving"));
 
 	for (trivias_t::iterator it = _ongoing_trivia_games.begin(); it != _ongoing_trivia_games.end(); it++) {
 		delete it->second;
 	}
 	
-	if (_socket_fd > 0)
+	if (_socket_fd > 0) {
 		close(_socket_fd);
+		this->log("Socket closed", debug);
+	}
 	this->log("Destroyed", debug);
 }
 
@@ -132,9 +136,12 @@ std::string IRC::receive( void )
 	if (bytes_received == 0)
 		throw std::runtime_error("Connection closed by server");
 	if (bytes_received < 0) {
-		if (errno == EAGAIN || errno == EWOULDBLOCK)
+		if (errno == EAGAIN || errno == EWOULDBLOCK) {
 			_update_games();
-		throw std::runtime_error("Error receiving data: " + ft_strerror());
+			return "";
+		} else {
+			throw std::runtime_error("Error receiving data: " + ft_strerror());
+		}
 	}
 
 	return std::string(buffer, bytes_received);
@@ -203,14 +210,6 @@ void IRC::_handle_message(std::string message)
 	_handle_command(args[1], args);
 }
 
-std::vector<std::string> IRC::get_clients_on_channel(const std::string &channel_name)
-{
-	(void)channel_name;
-	// Needs to call NAME command, and parse the clients inside the channel
-	std::vector<std::string> vec;
-	return vec;
-}
-
 bool IRC::is_playing(const std::string &channel_name)
 {
 	return _ongoing_trivia_games.find(channel_name) != _ongoing_trivia_games.end();
@@ -260,17 +259,8 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 
 		if (!playing && message.substr(0, 7) == "~TRIVIA") {
 			// TODO: Maybe put a limit of simultanious trivia game ?
-
-			std::vector<std::string> clients_on_channel = get_clients_on_channel(channel);
-			if (clients_on_channel.size() < 3) {
-				std::string reply = TriviaGame::pick_randomly(TriviaGame::not_enough_players_warnings);
-				return send_raw(create_reply("PRIVMSG", channel, reply), 500);
-			}
-
-			game = new TriviaGame(*this, channel, clients_on_channel);
-			_ongoing_trivia_games[channel] = game;
-
-			game->greet_players();
+			send_raw(create_reply("NAMES", channel));
+			_trivia_request_sent.push_back(channel);
 			return ;
 		} else if (!playing) {
 			return ;
@@ -295,6 +285,34 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 			game->remove_player(sender_nickname);
 			return ;
 		}
+	}
+	
+	int numeric = std::atoi(command.c_str());
+	if (numeric == 353)
+	{
+		if (args[2] != _default_nickname)
+			return ;
+
+		std::string channel = args[4];
+		if (std::find(_trivia_request_sent.begin(), _trivia_request_sent.end(), channel) == _trivia_request_sent.end())
+			return ;
+		_trivia_request_sent.erase(std::remove(_trivia_request_sent.begin(), _trivia_request_sent.end(), channel), _trivia_request_sent.end());
+
+		std::vector<std::string> clients_on_channel = ft_split(args[5], ' ');
+		for (size_t i = 0; i < clients_on_channel.size(); i++) {
+			if (clients_on_channel[i][0] == '@')
+				clients_on_channel[i].erase(0, 1);
+		}
+
+		if (clients_on_channel.size() < 3) {
+			std::string reply = TriviaGame::pick_randomly(TriviaGame::not_enough_players_warnings);
+			return send_raw(create_reply("PRIVMSG", channel, reply), 500);
+		}
+
+		TriviaGame *game = new TriviaGame(*this, channel, clients_on_channel);
+		_ongoing_trivia_games[channel] = game;
+
+		game->greet_players();
 	}
 }
 

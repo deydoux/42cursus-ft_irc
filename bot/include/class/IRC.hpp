@@ -31,7 +31,6 @@ class IRC
 		std::string	create_reply(const std::string &cmd, std::string args = "", std::string message = "");
 		std::string	receive( void );
 
-		std::vector<std::string> get_clients_on_channel(const std::string &channel_name);
 		bool	is_playing(const std::string &channel_name);
 		void	delete_trivia_game(TriviaGame *game);
 
@@ -47,6 +46,7 @@ class IRC
 
 		trivias_t			_ongoing_trivia_games;
 		std::string			_inviting_client;
+		std::vector<std::string> _trivia_request_sent;
 
 		int					_socket_fd;
 
