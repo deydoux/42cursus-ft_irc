@@ -7,11 +7,9 @@ static void join_handler(const args_t &args, Client &client, Server &server)
 {
 	size_t args_size = args.size();
 
-	if (args_size == 2 && args[1] == "0")
-	{
-	        std::string reason = client.get_nickname();
-	        client.close_all_channels(reason);
-		return ;
+	if (args_size == 2 && args[1] == "0") {
+		std::string reason = client.get_nickname();
+		return client.close_all_channels(reason);
 	}
 
 	std::vector<Channel *> channels_to_join;
