@@ -5,6 +5,7 @@
 
 #include <sstream>
 #include <typeinfo>
+#include "JSON.hpp"
 
 template <typename T>
 JSON::Value::Value(const T &value) : _str(JSON::stringify(value)) {}
@@ -32,6 +33,12 @@ template <typename T>
 T JSON::Value::parse() const
 {
 	return JSON::parse<T>(_str);
+}
+
+template <typename T>
+std::vector<T> JSON::Value::parse_vector() const
+{
+	return JSON::parse_vector<T>(_str);
 }
 
 template <typename T>
@@ -94,6 +101,19 @@ T JSON::parse(const std::string &str)
 {
 	size_t pos = 0;
 	return _parse<T>(str, pos);
+}
+
+template <typename T>
+std::vector<T> JSON::parse_vector(const std::string &str)
+{
+	std::vector<T> vec;
+
+	JSON::Array array = JSON::parse<JSON::Array>(str);
+
+	for (JSON::Array::const_iterator it = array.begin(); it != array.end(); ++it)
+		vec.push_back(it->parse<T>());
+
+	return vec;
 }
 
 template <typename T>

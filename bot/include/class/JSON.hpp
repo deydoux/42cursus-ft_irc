@@ -32,6 +32,9 @@ public:
 		template <typename T>
 		T	parse() const;
 
+		template <typename T>
+		std::vector<T> parse_vector() const;
+
 	private:
 		std::string _str;
 	};
@@ -65,6 +68,8 @@ public:
 	template <typename T>
 	static T	parse(const std::string &str);
 
+	template <typename T>
+	static std::vector<T>	parse_vector(const std::string &str);
 private:
 	static void	_skip_spaces(const std::string &str, size_t &pos);
 
