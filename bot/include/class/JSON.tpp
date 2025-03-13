@@ -17,6 +17,18 @@ JSON::Value &JSON::Value::operator=(const T &rhs)
 }
 
 template <typename T>
+bool JSON::Value::operator==(const T &rhs) const
+{
+	return *this == Value(rhs);
+}
+
+template <typename T>
+bool JSON::Value::operator!=(const T &rhs) const
+{
+	return !(*this == Value(rhs));
+}
+
+template <typename T>
 T JSON::Value::parse() const
 {
 	return JSON::parse<T>(_str);

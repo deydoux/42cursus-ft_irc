@@ -21,6 +21,12 @@ public:
 		template <typename T>
 		Value	&operator=(const T &rhs);
 
+		bool	operator==(const Value &rhs) const;
+		template <typename T>
+		bool	operator==(const T &rhs) const;
+		template <typename T>
+		bool	operator!=(const T &rhs) const;
+
 		std::string	stringify() const;
 
 		template <typename T>
