@@ -3,7 +3,7 @@
 #include "class/Command.hpp"
 #include "class/Server.hpp"
 
-static void handler(const args_t &args, Client &client, Server &server)
+static void part_handler(const args_t &args, Client &client, Server &server)
 {
 	std::vector<std::string> channels_name = ft_split(args[1], ',');
 	std::string reason = args.size() == 3 ? args[2] : "Leaving";
@@ -21,7 +21,7 @@ static void handler(const args_t &args, Client &client, Server &server)
 			);
 		}
 
-		if (new_channel->is_client_member(client))
+		if (!new_channel->is_client_member(client))
 			return client.reply(ERR_NOTONCHANNEL, channel_name, "You're not on that channel");
 
 		client.part_channel(*new_channel, reason);
@@ -29,7 +29,7 @@ static void handler(const args_t &args, Client &client, Server &server)
 }
 
 const Command::_command_t Command::_part = {
-	.handler = &handler,
+	.handler = &part_handler,
 	.min_args = 1,
 	.max_args = 2,
 	.register_mode = registered_only

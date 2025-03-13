@@ -3,7 +3,7 @@
 #include "class/Command.hpp"
 #include "class/Server.hpp"
 
-static void handler(const args_t &args, Client &client, Server &server)
+static void who_handler(const args_t &args, Client &client, Server &server)
 {
 	std::string mask = args.size() > 1 && args[1] != "0" ? args[1] : "*";
 	const bool operator_flag = args.size() > 2 && args[2] == "o";
@@ -12,11 +12,10 @@ static void handler(const args_t &args, Client &client, Server &server)
 
 	if (Channel::is_prefix(mask[0])) {
 		Channel *channel = server.get_channel(mask);
-
-		if (channel)
+		if (channel) {
 			clients = channel->get_members();
-
-		mask = channel->get_name();
+			mask = channel->get_name();
+		}
 	} else {
 		clients = server.get_clients(mask);
 	}
@@ -35,7 +34,7 @@ static void handler(const args_t &args, Client &client, Server &server)
 }
 
 const Command::_command_t Command::_who = {
-	.handler = &handler,
+	.handler = &who_handler,
 	.min_args = 0,
 	.max_args = 2,
 	.register_mode = registered_only

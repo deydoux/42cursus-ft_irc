@@ -3,7 +3,7 @@
 #include "class/Command.hpp"
 #include "class/Server.hpp"
 
-static void handler(const args_t &args, Client &client, Server &server)
+static void topic_handler(const args_t &args, Client &client, Server &server)
 {
 	std::string channel_name = args[1];
 	Channel *channel = server.get_channel(channel_name);
@@ -43,7 +43,7 @@ static void handler(const args_t &args, Client &client, Server &server)
 }
 
 const Command::_command_t Command::_topic = {
-	.handler = &handler,
+	.handler = &topic_handler,
 	.min_args = 1,
 	.max_args = 2,
 	.register_mode = registered_only

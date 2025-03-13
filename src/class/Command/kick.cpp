@@ -3,7 +3,7 @@
 #include "class/Command.hpp"
 #include "class/Server.hpp"
 
-static void handler(const args_t &args, Client &client, Server &server)
+static void kick_handler(const args_t &args, Client &client, Server &server)
 {
 	std::vector<std::string> channels_name = ft_split(args[1], ',');
 	std::vector<std::string> kicked_client = ft_split(args[2], ',');
@@ -27,7 +27,7 @@ static void handler(const args_t &args, Client &client, Server &server)
 }
 
 const Command::_command_t Command::_kick = {
-	.handler = &handler,
+	.handler = &kick_handler,
 	.min_args = 2,
 	.max_args = 3,
 	.register_mode = registered_only

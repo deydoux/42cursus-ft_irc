@@ -6,10 +6,11 @@ SRC = \
 	class/JSON.cpp \
 	class/Ollama.cpp \
 	class/TriviaGame.cpp \
-	lib/log.cpp \
 	lib/ft_split.cpp \
-	lib/trivia_phrases.cpp \
+	lib/html_decode.cpp \
+	lib/log.cpp \
 	lib/text_formatting.cpp \
+	lib/trivia_phrases.cpp \
 	main.cpp
 
 SRC_DIR = src
@@ -51,7 +52,7 @@ $(BUILD_DIR)/$(CURL_TARBALL):
 $(CURL_DIR) $(CURL_INC): $(BUILD_DIR)/$(CURL_TARBALL)
 	$(TAR) -xzf $< -C $(BUILD_DIR)
 
-$(CURL_DIR)/Makefile: | $(CURL_DIR)
+$(CURL_DIR)/Makefile: Makefile | $(CURL_DIR)
 	cd $(@D) && ./configure $(CURL_CONFIG)
 
 $(CURL_LIB): $(CURL_DIR)/Makefile

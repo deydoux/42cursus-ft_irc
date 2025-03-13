@@ -1,5 +1,9 @@
-#include "class/TriviaGame.hpp"
+#include "class/Curl.hpp"
 #include "class/IRC.hpp"
+#include "class/JSON.hpp"
+#include "class/TriviaGame.hpp"
+
+#include <unistd.h>
 
 TriviaGame::TriviaGame(IRC &irc_client, const std::string channel_name, std::vector<std::string> players, bool verbose) :
 	_irc_client(irc_client),
@@ -44,7 +48,7 @@ void TriviaGame::greet_players( void )
 	std::string header = create_empty_reply();
 	header += create_reply(format(TriviaGame::pick_randomly(TriviaGame::greetings_part1), BOLD));
 	_irc_client.send_raw(header, 300);
-	
+
 	std::string rules;
 	std::vector<std::string> rules_parts = ft_split(TriviaGame::greetings_part2, '\n');
 	for (size_t i = 0; i < rules_parts.size(); i++) {
@@ -52,7 +56,7 @@ void TriviaGame::greet_players( void )
 	}
 	_irc_client.send_raw(rules, 1000);
 	send(TriviaGame::greetings_part3, 1000);
-	
+
 	std::string conclusion = create_empty_reply();
 	conclusion += create_reply(TriviaGame::greetings_part4);
 	_irc_client.send_raw(conclusion, 1000);
@@ -66,7 +70,7 @@ void TriviaGame::greet_players( void )
 void TriviaGame::mark_user_as_ready(const std::string &client_nickname)
 {
 	_ready_players[client_nickname] = true;
-	
+
 	for (size_t i = 0; i < _players.size(); i++) {
 		if (!_ready_players[_players[i]])
 			return ;
@@ -81,46 +85,64 @@ bool TriviaGame::is_waiting_before_start( void )
 	return _waiting_before_start;
 }
 
+TriviaGame::questions_t TriviaGame::_fetch_questions()
+{
+	static const std::string url = "https://opentdb.com/api.php?amount=" + to_string(_nb_rounds);
+
+	questions_t questions;
+
+	std::string raw_res;
+	try {
+		raw_res = _curl.get(url);
+	} catch (Curl::Exception &e) {
+		log(std::string("Failed to fetch questions: ") + e.what(), error);
+		return questions;
+	}
+
+	try {
+		JSON::Object res = JSON::parse<JSON::Object>(raw_res);
+
+		if (res["response_code"] != 0) {
+			sleep(1);
+			return _fetch_questions();
+		}
+
+		JSON::Array questions_arr = res["results"].parse<JSON::Array>();
+		for (JSON::Array::const_iterator it = questions_arr.begin(); it != questions_arr.end(); ++it) {
+			question_t question;
+
+			JSON::Object question_obj = it->parse<JSON::Object>();
+
+			question.text = html_decode(question_obj["question"].parse<std::string>());
+			question.answer = html_decode(question_obj["correct_answer"].parse<std::string>());
+			question.wrong_answers = question_obj["incorrect_answers"].parse_vector<std::string>();
+			for (size_t i = 0; i < question.wrong_answers.size(); i++)
+				question.wrong_answers[i] = html_decode(question.wrong_answers[i]);
+			question.category = html_decode(question_obj["category"].parse<std::string>());
+			question.difficulty = html_decode(question_obj["difficulty"].parse<std::string>());
+
+			questions.push_back(question);
+		}
+
+	} catch (JSON::Exception &e) {
+		log(std::string("Failed to parse questions: ") + e.what(), error);
+	}
+
+	return questions;
+}
+
 void TriviaGame::_start_game( void )
 {
 	_round_counter = 0;
+	_questions = _fetch_questions();
+
+	if (_questions.empty()) {
+		send("Sorry, I couldn't fetch the questions. Let's try again later!");
+		return _irc_client.delete_trivia_game(this);
+		//TODO check
+	}
 
 	send("Great! Let's start right now!");
-
-	// It musts fetch the questions using the Curl object and the Trivia Game API (https://opentdb.com/api_config.php),
-	// with a api url looking something like this: https://opentdb.com/api.php?amount=1
-	// Then it parses the possible answers using the JSON object, and stores the answer
-	// (the users answers will not be checked in this function, so this is necessary)
-	
-	_questions.push_back((question_t) {
-		.text = "What is the capital of Australia?",
-		.answer = "Canberra",
-		.wrong_answers = std::vector<std::string>(3, "")
-	});
-	_questions.back().wrong_answers[0] = "Sydney";
-	_questions.back().wrong_answers[1] = "Melbourne";
-	_questions.back().wrong_answers[2] = "Brisbane";
-
-	_questions.push_back((question_t) {
-		.text = "Who wrote 'To Kill a Mockingbird'?",
-		.answer = "Harper Lee",
-		.wrong_answers = std::vector<std::string>(3, "")
-	});
-	_questions.back().wrong_answers[0] = "Mark Twain";
-	_questions.back().wrong_answers[1] = "J.D. Salinger";
-	_questions.back().wrong_answers[2] = "Ernest Hemingway";
-
-	_questions.push_back((question_t) {
-		.text = "Which element has the chemical symbol 'O'?",
-		.answer = "Oxygen",
-		.wrong_answers = std::vector<std::string>(3, "")
-	});
-	_questions.back().wrong_answers[0] = "Osmium";
-	_questions.back().wrong_answers[1] = "Gold";
-	_questions.back().wrong_answers[2] = "Silver";
-
-	std::random_shuffle(_questions.begin(), _questions.end());
-
 	ask_trivia_question();
 }
 
@@ -160,12 +182,12 @@ void TriviaGame::ask_trivia_question( void )
 {
 	question_t question = _questions[_round_counter];
 	std::string question_raw;
-	
+
 	question_raw += create_empty_reply();
 	question_raw += create_reply(format("--- 🎯 -- QUESTION 1/" + to_string(_nb_rounds) + " -- 🎯 ---", BOLD));
 	question_raw += create_empty_reply();
 	question_raw += create_reply(question.text);
-	
+
 	std::vector<std::string> choices;
 	choices.push_back(question.answer);
 	choices.insert(choices.end(), question.wrong_answers.begin(), question.wrong_answers.end());
@@ -177,7 +199,7 @@ void TriviaGame::ask_trivia_question( void )
 		_choices[alpha[i]] = choices[i];
 		if (i % 2 == 1) {
 			question_raw +=  create_reply(format_inline_choices(
-				format_choice(alpha[i - 1], choices[i - 1]), 
+				format_choice(alpha[i - 1], choices[i - 1]),
 				format_choice(alpha[i], choices[i]),
 				max_len + 4
 			));
@@ -244,7 +266,7 @@ void TriviaGame::tick( void )
 		- 5 seconds! Do you trust your gut, or is it full of doubt? 🤔
 	*/
 
-	// If the timer's out and the bot is still waiting for a player to answer, then it uses show_round_results() 
+	// If the timer's out and the bot is still waiting for a player to answer, then it uses show_round_results()
 	// (which should put an end to the round)
 }
 
@@ -257,15 +279,15 @@ void TriviaGame::show_round_results( void )
 		[🌟 Here are your answers! 🌟
 
 		- quteriss: Star City
-		- mapale: Metropolis  
+		- mapale: Metropolis
 		- deydoux: Star City] chunk 1
 
 		[And the correct answer was...] chunk 2
 		[**Star City!!!** 🏹✨] chunk 3
 
-		[👏 Well done, quteriss and deydoux!  
+		[👏 Well done, quteriss and deydoux!
 
-		Here’s the score for this round:  
+		Here’s the score for this round:
 		quteriss  ➝ **+15** (first bonus!) 🎖️
 		deydoux  ➝ **+10** 🎉
 		mapale  ➝ **+0** ] chunk 4
@@ -282,7 +304,7 @@ void TriviaGame::show_final_results( void )
 	// it must stop the waiting_for_answers
 	// Displays the final results of the game
 	/*
-		🎉 **And that’s a wrap!** 🎉  
+		🎉 **And that’s a wrap!** 🎉
 
 		The trivia showdown has ended, and here are your **final champions**:
 
@@ -332,3 +354,5 @@ std::string	TriviaGame::pick_randomly(const phrases_t strings)
 	size_t random_index = rand() % strings.size();
 	return strings[random_index];
 }
+
+Curl	TriviaGame::_curl;

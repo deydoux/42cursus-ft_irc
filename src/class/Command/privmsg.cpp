@@ -3,7 +3,7 @@
 #include "class/Command.hpp"
 #include "class/Server.hpp"
 
-static void handler(const args_t &args, Client &client, Server &server)
+static void privmsg_handler(const args_t &args, Client &client, Server &server)
 {
 	if (args.size() == 1)
 		return client.reply(ERR_NORECIPIENT, "", "No recipient given (" + args[0] + ")");
@@ -44,7 +44,7 @@ static void handler(const args_t &args, Client &client, Server &server)
 }
 
 const Command::_command_t Command::_privmsg = {
-	.handler = &handler,
+	.handler = &privmsg_handler,
 	.min_args = 0,
 	.max_args = 2,
 	.register_mode = registered_only

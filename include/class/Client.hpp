@@ -23,6 +23,7 @@ public:
 	bool	join_channel(Channel &channel, std::string passkey);
 	void	kick_channel(Channel &channel, const std::string &kicked_client, std::string &reason);
 	void	part_channel(Channel &channel, std::string &reason);
+	void close_all_channels(std::string &reason);
 	void	notify_quit();
 
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
@@ -85,8 +86,9 @@ private:
 	const std::string	_get_username(bool truncate = true) const;
 
 	static const size_t _max_channels = 50;
-	static const size_t	_max_message_size = 512;
+	static const size_t	_max_realname_len = 127;
 	static const size_t	_max_nickname_size = 9;
+	static const size_t	_max_message_size = 512;
 	static const size_t	_max_kick_message_len = 400;
 
 	static bool	_is_valid_nickname(const std::string &nickname);

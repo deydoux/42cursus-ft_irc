@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <fstream>
 
-static void handler(const args_t &args, Client &client, Server &server)
+static void hk_handler(const args_t &args, Client &client, Server &server)
 {
 	std::string message = args.size() == 2 ? args[1] : "You've been Hello Kitty-ed !";
 	std::ifstream aFile("hk.templates");
@@ -32,7 +32,7 @@ static void handler(const args_t &args, Client &client, Server &server)
 }
 
 const Command::_command_t Command::_hk = {
-	.handler = &handler,
+	.handler = &hk_handler,
 	.min_args = 0,
 	.max_args = 1,
 	.register_mode = none
