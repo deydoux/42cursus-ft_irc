@@ -8,7 +8,8 @@ std::string TriviaGame::greetings_part4;
 TriviaGame::phrases_t TriviaGame::time_warnings;
 TriviaGame::phrases_t TriviaGame::times_up_warnings;
 TriviaGame::phrases_t TriviaGame::question_prompts;
-TriviaGame::phrases_t TriviaGame::room_warnings;
+std::string TriviaGame::early_leaving_warning_part1;
+std::string TriviaGame::early_leaving_warning_part2;
 TriviaGame::phrases_t TriviaGame::farewells;
 
 void TriviaGame::initialize_phrases()
@@ -68,9 +69,8 @@ void TriviaGame::initialize_phrases()
 	TriviaGame::question_prompts.push_back("Don't overthink it! Pick one! 🚀");
 
 	// A player left -> not enough players left
-	TriviaGame::room_warnings.push_back("Game over! Someone left, and now there aren't enough players. 🚪❌");  
-	TriviaGame::room_warnings.push_back("Welp, not enough players left... Game's ending! 🎬💀");  
-	TriviaGame::room_warnings.push_back("A player vanished! That's game over, folks. 🎭🚶‍♂️");
+	TriviaGame::early_leaving_warning_part1 = "Why'd you leave? Now it's just me, ";
+	TriviaGame::early_leaving_warning_part2 = ", and a dead game 🎮💀";
 
 	// Farewells
 	TriviaGame::farewells.push_back("👏 Great game, everyone! Whether you won or just had fun, you're all champions! 🏆");  
