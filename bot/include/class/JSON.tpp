@@ -4,8 +4,6 @@
 #include "class/JSON.hpp"
 
 #include <sstream>
-#include <typeinfo>
-#include "JSON.hpp"
 
 template <typename T>
 JSON::Value::Value(const T &value) : _str(JSON::stringify(value)) {}
