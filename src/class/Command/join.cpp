@@ -7,10 +7,10 @@ static void join_handler(const args_t &args, Client &client, Server &server)
 {
 	size_t args_size = args.size();
 
-	// if the only argument to /join 0
-	if (args_size == 2 && args[1] == "0")
-		// TODO close_all_chanels() -> would be easier to implement when the /PART command will be
-		return ;
+	if (args_size == 2 && args[1] == "0") {
+		std::string reason = client.get_nickname();
+		return client.close_all_channels(reason);
+	}
 
 	std::vector<Channel *> channels_to_join;
 	std::vector<std::string> channels_name_to_join;
