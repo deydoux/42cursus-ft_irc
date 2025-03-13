@@ -195,22 +195,32 @@ void TriviaGame::ask_trivia_question( void )
 	_irc_client.send_raw(question_raw, 500);
 	_asked_at = time(NULL);
 	_waiting_for_answers = true;
+	_first_player_answered = false;
 }
 
 void TriviaGame::store_answer(const std::string &answer, const std::string &client_nickname)
 {
-	(void)answer;
-	(void)client_nickname;
-	// This function is called every time someones sends a privatemessage to the channel in which the game is going on
-	// AND that the game is waiting for an answer from the players.
+	char c_answer = (answer.size() == 1 && _choices.find(answer.c_str()[0]) != _choices.end()) ? toupper(answer.c_str()[0]) : ' ';
 
-	// If the player hasn't already answered the question, it stores his answer in the answers vector (does nothing otherwise)
-	// It also updates his score accordingly
-	// --> if the player is the first to answer the question and his answer is correct,
-	//	   then it adds 10 points (static const) to its original score
+	if (_players_answers.find(client_nickname) != _players_answers.end() || c_answer == ' ')
+		return ;
+	_players_answers[client_nickname] = _choices.find(c_answer)->second;
+	
+	if (_choices.find(c_answer)->second == _questions[_round_counter].answer)
+	{
+		_players_scores[client_nickname] += _points;
+		if (!_first_player_answered)
+		{
+			_first_player_answered = true;
+			_players_scores[client_nickname] += _bonus_points;
+		}
+	}
 
-	// If there's no more player to wait for in the channel, simply call show_round_results()
-	// (which should put an end to the round)
+	if (!_waiting_for_answers)
+	{
+		send(TriviaGame::pick_randomly(TriviaGame::teasers_before_results));
+		return show_round_results();
+	}
 }
 
 void TriviaGame::tick( void )

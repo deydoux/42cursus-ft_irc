@@ -78,4 +78,11 @@ void TriviaGame::initialize_phrases()
 	TriviaGame::farewells.push_back("🙌 Well played! Trivia is more fun with awesome players like you! 🎯");  
 	TriviaGame::farewells.push_back("🏅 Game over, but the fun never ends! See you next time! 😸");  
 	TriviaGame::farewells.push_back("👏 Thanks for playing! Win or lose, you made it exciting! 🎊");  
+
+	// Teasers Before Results
+	TriviaGame::teasers_before_results.push_back("Now, let's see who got it right ..."); 
+	TriviaGame::teasers_before_results.push_back("Alright, time to see who nailed it!");  
+	TriviaGame::teasers_before_results.push_back("Let's check who got it right!");  
+	TriviaGame::teasers_before_results.push_back("Moment of truth... Who got it?");   
+	TriviaGame::teasers_before_results.push_back("Drum roll, please... 🥁 Let's see who’s correct!");
 }

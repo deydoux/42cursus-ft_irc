@@ -55,6 +55,7 @@ public:
 	static phrases_t	times_up_warnings;
 	static phrases_t	question_prompts;
 	static phrases_t	not_enough_players_warnings;
+	static phrases_t	teasers_before_results;
 	static phrases_t	room_warnings;
 	static phrases_t	farewells;
 
@@ -70,6 +71,7 @@ private:
 	std::map<std::string, bool> _ready_players;
 	bool				_waiting_before_start;
 	bool				_waiting_for_answers;
+	bool				_first_player_answered;
 
 	const std::string	_channel;
 	const bool			_verbose;
@@ -78,6 +80,8 @@ private:
 
 	static const int	_nb_rounds = 5;
 	static const int	_round_duration_sec = 50;
+	static const int	_points = 10;
+	static const int	_bonus_points = 2;
 };
 
 #endif
