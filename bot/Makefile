@@ -6,10 +6,11 @@ SRC = \
 	class/JSON.cpp \
 	class/Ollama.cpp \
 	class/TriviaGame.cpp \
-	lib/log.cpp \
 	lib/ft_split.cpp \
-	lib/trivia_phrases.cpp \
+	lib/html_decode.cpp \
+	lib/log.cpp \
 	lib/text_formatting.cpp \
+	lib/trivia_phrases.cpp \
 	main.cpp
 
 SRC_DIR = src

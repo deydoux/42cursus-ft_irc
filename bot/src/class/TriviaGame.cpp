@@ -113,11 +113,13 @@ TriviaGame::questions_t TriviaGame::_fetch_questions()
 
 			JSON::Object question_obj = it->parse<JSON::Object>();
 
-			question.text = question_obj["question"].parse<std::string>();
-			question.answer = question_obj["correct_answer"].parse<std::string>();
+			question.text = html_decode(question_obj["question"].parse<std::string>());
+			question.answer = html_decode(question_obj["correct_answer"].parse<std::string>());
 			question.wrong_answers = question_obj["incorrect_answers"].parse_vector<std::string>();
-			question.category = question_obj["category"].parse<std::string>();
-			question.difficulty = question_obj["difficulty"].parse<std::string>();
+			for (size_t i = 0; i < question.wrong_answers.size(); i++)
+				question.wrong_answers[i] = html_decode(question.wrong_answers[i]);
+			question.category = html_decode(question_obj["category"].parse<std::string>());
+			question.difficulty = html_decode(question_obj["difficulty"].parse<std::string>());
 
 			questions.push_back(question);
 		}
