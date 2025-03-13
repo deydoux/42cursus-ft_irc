@@ -59,7 +59,8 @@ public:
 	static phrases_t	question_prompts;
 	static phrases_t	not_enough_players_warnings;
 	static phrases_t	teasers_before_results;
-	static phrases_t	room_warnings;
+	static std::string	early_leaving_warning_part1;
+	static std::string	early_leaving_warning_part2;
 	static phrases_t	farewells;
 
 private:

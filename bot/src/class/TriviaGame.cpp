@@ -330,20 +330,19 @@ std::string TriviaGame::get_channel( void )
 
 void TriviaGame::add_player(const std::string &client_nickname)
 {
-	(void)client_nickname;
-	// Adds a player to the player list
-	// --> this action should not interrupt the game
+	_players.push_back(client_nickname);
+	_players_scores[client_nickname] = 0;
 }
 
 void TriviaGame::remove_player(const std::string &client_nickname)
 {
-	(void)client_nickname;
-	// Removes the player from the player list
-	// --> preferably, this action should not remove the actual score of the quitting client
-	//	   so that, in the final scores, he still appears (even if he/she has a disadvantage)
-	// Check if there's still enough player to play, and if not:
-		// - send a room_warnings message (pick randomly)
-		// - show the final results
+	_players.erase(std::remove(_players.begin(), _players.end(), client_nickname), _players.end());
+	
+	if (_players.size() < 2) {
+		std::string alert_message = TriviaGame::early_leaving_warning_part1 + _players[0] + TriviaGame::early_leaving_warning_part2;
+		send(alert_message);
+		show_final_results();
+	}
 }
 
 std::string	TriviaGame::pick_randomly(const phrases_t strings)
