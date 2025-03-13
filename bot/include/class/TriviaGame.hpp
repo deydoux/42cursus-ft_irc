@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <map>
 
+class Curl;
 class IRC;
 
 class TriviaGame
@@ -18,6 +19,8 @@ public:
 		std::string					text;
 		std::string					answer;
 		std::vector<std::string>	wrong_answers;
+		std::string					category;
+		std::string					difficulty;
 	}	question_t;
 	typedef	std::vector<question_t> questions_t;
 
@@ -74,10 +77,13 @@ private:
 	const std::string	_channel;
 	const bool			_verbose;
 
-	void	_start_game( void );
+	questions_t	_fetch_questions();
+	void		_start_game( void );
 
 	static const int	_nb_rounds = 5;
 	static const int	_round_duration_sec = 50;
+
+	static Curl	_curl;
 };
 
 #endif
