@@ -12,6 +12,11 @@ JSON::Value &JSON::Value::operator=(const Value &rhs)
 	return *this;
 }
 
+bool JSON::Value::operator==(const Value &rhs) const
+{
+	return _str == rhs._str;
+}
+
 std::string JSON::Value::stringify() const
 {
 	return _str;
