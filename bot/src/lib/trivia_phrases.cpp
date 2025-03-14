@@ -21,7 +21,7 @@ void TriviaGame::initialize_phrases()
 	TriviaGame::not_enough_players_warnings.push_back("The trivia spotlight is warming up, but we need one more contestant to join before we can begin! 🎭");
 
 	// Greetings
-	TriviaGame::greetings_header = "🎀 Welcome to " + format("Hello Kitty Trivia", COL_PINK) + " on KittIRC! 🎀";
+	TriviaGame::greetings_header = format("🎀 Welcome to " + format("Hello Kitty Trivia", COL_PINK) + " on KittIRC! 🎀", BOLD);
 	TriviaGame::greetings_subheader.push_back("🩷 Test your knowledge in the cutest trivia game ever! 🩷");
 	TriviaGame::greetings_subheader.push_back("🐱 Think you know everything? Let's find out! 🐱");
 	TriviaGame::greetings_subheader.push_back("🌟 Get ready for a fun and purr-fectly adorable trivia game! 🌟");
@@ -29,12 +29,12 @@ void TriviaGame::initialize_phrases()
 	TriviaGame::greetings_subheader.push_back("🌸 A trivia game as sweet as a candy. Are you ready? 🌸");
 	TriviaGame::greetings_subheader.push_back("🏆 Only the biggest Hello Kitty fans will triumph—are you one of them? 🏆");
 
-	TriviaGame::game_rules = format("📖 HOW TO PLAY:\n", COL_CYAN);
+	TriviaGame::game_rules = format(format("📖 HOW TO PLAY:\n", COL_PINK), BOLD);
 	TriviaGame::game_rules += "1️⃣ Each round, I'll ask a multiple-choice question.\n";
-	TriviaGame::game_rules += "2️⃣ You have " + format("30 seconds", BOLD) + "to answer—just send the " + format("letter", BOLD) + "of your choice (A, B, C, or D).\n";
+	TriviaGame::game_rules += "2️⃣ You have " + format("30 seconds", BOLD) + " to answer—just send the " + format("letter", BOLD) + " of your choice (A, B, C, or D).\n";
 	TriviaGame::game_rules += "3️⃣ Only your " + format("first answer", BOLD) + " counts! No take-backsies! ⏳🐱\n\n";
 
-	TriviaGame::game_rules += format("🎉 WHAT HAPPENS NEXT?\n", COL_CYAN);
+	TriviaGame::game_rules += format(format("🎉 WHAT HAPPENS NEXT?\n", COL_PINK), BOLD);
 	TriviaGame::game_rules += "Once time's up, I'll reveal the correct answer and:\n";
 	TriviaGame::game_rules += "✨ Shower you with imaginary confetti if you're " + format("right", ITALIC) + "!\n";
 	TriviaGame::game_rules += "🤨 Silently judge your choices if you're " + format("wrong", ITALIC) + " (just kidding... maybe).\n\n";

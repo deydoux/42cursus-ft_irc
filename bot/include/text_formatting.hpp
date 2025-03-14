@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+#define NO_STYLE "\x0F"
 #define BOLD "\x02"
 #define ITALIC "\x1D"
 #define UNDERLINE "\x1F"

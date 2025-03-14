@@ -73,6 +73,8 @@ private:
 	bool				_waiting_before_start;
 	bool				_waiting_for_answers;
 
+	bool				_rang_timer;
+
 	const std::string	_channel;
 	const bool			_verbose;
 

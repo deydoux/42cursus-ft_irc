@@ -10,6 +10,11 @@ SRC = \
 	lib/ft_split.cpp \
 	lib/trivia_phrases.cpp \
 	lib/text_formatting.cpp \
+	lib/get_ordinal.cpp \
+	lib/calc_time_left.cpp \
+	lib/choice_formatting.cpp \
+	lib/get_max_len.cpp \
+	lib/join_strings.cpp \
 	main.cpp
 
 SRC_DIR = src

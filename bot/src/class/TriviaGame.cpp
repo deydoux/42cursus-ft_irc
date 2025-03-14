@@ -127,38 +127,6 @@ void TriviaGame::_start_game( void )
 	ask_trivia_question();
 }
 
-std::string format_choice(char letter, const std::string &choice)
-{
-	std::string result;
-	std::ostringstream oss;
-
-	oss << "[";
-	oss << letter;
-	oss << "]";
-
-	result = format(oss.str(), BOLD);
-	return result + " " + choice;
-}
-
-std::string format_inline_choices(const std::string &choice1, const std::string &choice2, int space_between)
-{
-	std::string result;
-
-	result = choice1 + std::string(std::max(space_between, 20) - choice1.size(), ' ');
-	return result + choice2;
-}
-
-int get_max_len(std::vector<std::string> arr)
-{
-	size_t max_len = 0;
-	for (size_t i = 0; i < arr.size(); ++i) {
-		if (arr[i].size() > max_len)
-			max_len = arr[i].size();
-	}
-
-	return max_len;
-}
-
 void TriviaGame::ask_trivia_question( void )
 {
 	question_t question = _questions[_round_counter];
@@ -198,6 +166,7 @@ void TriviaGame::ask_trivia_question( void )
 	_irc_client.send_raw(question_raw, 500);
 	_asked_at = time(NULL);
 	_waiting_for_answers = true;
+	_rang_timer = false;
 }
 
 void TriviaGame::store_answer(const std::string &answer, const std::string &client_nickname)
@@ -218,75 +187,116 @@ void TriviaGame::store_answer(const std::string &answer, const std::string &clie
 
 void TriviaGame::tick( void )
 {
-	// tick() is supposed to be a function called repeatedly in the main loop of the bot, for every ongoing trivia game.
-	// It must check first if the game is waiting for an answer of the players (so that a question was just asked)
-	// -> if not, then their's nothing to be done here (return)
+	if (!_waiting_for_answers)
+		return ;
+	
+	int time_left = calc_time_left(_asked_at, _round_duration_sec);
+	if (time_left <= 10 && !_rang_timer) {
+		send(TriviaGame::pick_randomly(TriviaGame::time_warnings));
+		_rang_timer = true;
+		return ;
+	}
 
-	// It checks the game's timer (game starting time) and sends a message if their's only 10 seconds left:
-	/*
-		5 seconds left! Panic! (Just kidding. Or am I?) ⏳😼
-		(Here are some alternative messages for this part, which also needs to be picked randomly)
-		- Tick-tock! Your brain better be in turbo mode now! 🏎️💨
-		- 5 seconds! Choose wisely, or forever hold your regret. 😼
-		- If you're still thinking, think FASTER! 🧠⚡
-		- HELLO?? Time is running out! Pick something! 🏃‍♀️💨
-		- 5 seconds left! Do you believe in miracles? 😹
-		- Quick! Eeny, meeny, miny... just PICK ONE! 🎲
-		- If you haven’t answered yet, now’s a good time to start screaming. 🔥
-		- Almost out of time! Make a choice before I start judging... 👀
-		- 5 seconds! Do you trust your gut, or is it full of doubt? 🤔
-	*/
-
-	// If the timer's out and the bot is still waiting for a player to answer, then it uses show_round_results() 
-	// (which should put an end to the round)
+	if (time_left <= 0) {
+		send(format("TIMES UP!", BOLD));
+		return show_round_results();
+	}
 }
 
 void TriviaGame::show_round_results( void )
 {
-	// It stops waiting for answers, and show the results of the round in this format :
-	// (again, it can be nice to send this chunk by chunk with a small delay between each one of them)
+	_waiting_for_answers = false;
+	
 	/*
-		[Times up!] chunk 0
-		[🌟 Here are your answers! 🌟
+	std::vector<std::string> victorious_players;
+	std::string players_answers;
+	std::string players_scores;
 
-		- quteriss: Star City
-		- mapale: Metropolis  
-		- deydoux: Star City] chunk 1
+	players_answers += create_reply("🌟 Here are your answers! 🌟");
+	for (size_t i = 0; i < _players.size(); i++)
+	{
+		player_t player = _players[i];
+		if (!player.is_in_channel)
+			continue ;
 
-		[And the correct answer was...] chunk 2
-		[**Star City!!!** 🏹✨] chunk 3
+		std::string answer = "\t" + player.nickname + ": ";
+		answer += it.round_answer.empty() ? format("no response", ITALIC) : it.round_answer;
+		players_answers += create_reply(answer);
 
-		[👏 Well done, quteriss and deydoux!  
+		std::string score = "\t" + player.nickname + "  ➝ +" + format(to_string(player.round_points), BOLD);
+		if (player.is_first_to_answer)
+			score += " (first bonus!) 🎖️";
+		else if (player.round_points > 0)
+			score += " 🎉";
+		players_scores += create_reply(score);
 
-		Here’s the score for this round:  
-		quteriss  ➝ **+15** (first bonus!) 🎖️
-		deydoux  ➝ **+10** 🎉
-		mapale  ➝ **+0** ] chunk 4
+		if (player.round_points > 0)
+			victorious_players.push_back(player.nickname);
+	}
+	players_answers += create_empty_reply();
+	_irc_client.send_raw(players_answers);
+
+	send("And the correct answer was...", 2000);
+	std::string correct_answer = format(_questions[_round_counter].answer, BOLD);
+	send(correct_answer + "!!!", 1000);
+
+	std::string well_done = create_empty_reply();
+	if (victorious_players.empty())
+		well_done += create_reply("Looks like that one was tricky — no winners this round!");
+	else
+		well_done += create_reply("👏 Well done, " + join_strings(victorious_players) + "!");
+	well_done += create_empty_reply();
+	_irc_client.send_raw(well_done, 1000);
+
+	std::string scores = send("Here’s the score for this round:", 1000);
+	players_scores += create_empty_reply();
+	_irc_client.send_raw(players_scores);
 	*/
 
-	// If the round counters is the max number of rounds for this Trivia Game,
-	// then it calls show_final_results() and returns immediatly
+	if (_questions.size() <= _round_counter + 1)
+		return show_final_results();
 
-	// Otherwise, it calls init_round(), and then ask_trivia_question();
+	ask_trivia_question();
 }
+
+//bool TriviaGame::compare_by_total_score(const player_t &p1, const player_t &p2)
+//{
+//	return p1.total_score < p2.total_score;
+//}
+
 
 void TriviaGame::show_final_results( void )
 {
-	// it must stop the waiting_for_answers
-	// Displays the final results of the game
+	_waiting_for_answers = false;
+
 	/*
-		🎉 **And that’s a wrap!** 🎉  
+	send(format("🎉 And that’s a wrap! 🎉", BOLD), 500);
+	send("The trivia showdown has ended, and here are your " + format("final champions:", BOLD), 1000);
+	
+	std::string player_podium;
+	int position = _players.size();
+	std::sort(_players.begin(), _players.end(), compare_by_total_score);
+	for (size_t i = 0; i < _players.size(); i++)
+	{
+		player_t player = _players[i];
+		player_podium = "";
 
-		The trivia showdown has ended, and here are your **final champions**:
+		if (position > 3) player_podium += " ";
+		else if (position == 3) player_podium += "🌸";
+		else if (position == 2) player_podium += "💖";
+		else if (position == 1) player_podium += "🏆";
 
-		[🌸 **3rd Place**: deydoux - **30**pts] chunk 1
-		[🎀 **2nd Place**: quteriss - **45**pts] chunk 2
-		[💖 **1st Place**: mapale - **135**pts] chunk 3 ...
+		player_podium += format(" " + get_ordinal(position) + " place: ", positon > 3 ? BOLD : NO_STYLE);
+		player_podium += player.nickname + " - " + player.total_score + "pts";
 
-		👏 Well done to everyone who played! It’s been a blast—whether you were a trivia genius or just here for the fun! 😸
+		send(player_podium, position > 3 ? 1000 : 500);
+
+		position--;
+	}
+
+	send(TriviaGame::pick_randomly(TriviaGame::farewells), 1000);
+	return ;
 	*/
-
-	// Then it calls the irc_client delete_trivia_game(this) function, that destroys the current TriviaGame instance
 }
 
 bool TriviaGame::is_waiting_for_answers( void )
