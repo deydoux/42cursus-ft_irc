@@ -47,10 +47,11 @@ public:
 	static void			initialize_phrases( void );
 	static std::string	pick_randomly(const phrases_t phrases);
 
-	static phrases_t	greetings_part1;
-	static std::string	greetings_part2;
-	static std::string	greetings_part3;
-	static std::string	greetings_part4;
+	static std::string	greetings_header;
+	static phrases_t	greetings_subheader;
+	static std::string	game_rules;
+	static std::string	ask_ready;
+
 	static phrases_t	time_warnings;
 	static phrases_t	times_up_warnings;
 	static phrases_t	question_prompts;

@@ -1,16 +1,17 @@
 #include "class/TriviaGame.hpp"
 
-TriviaGame::phrases_t TriviaGame::not_enough_players_warnings;
-TriviaGame::phrases_t TriviaGame::greetings_part1;
-std::string TriviaGame::greetings_part2;
-std::string TriviaGame::greetings_part3;
-std::string TriviaGame::greetings_part4;
-TriviaGame::phrases_t TriviaGame::time_warnings;
-TriviaGame::phrases_t TriviaGame::times_up_warnings;
-TriviaGame::phrases_t TriviaGame::question_prompts;
-std::string TriviaGame::early_leaving_warning_part1;
-std::string TriviaGame::early_leaving_warning_part2;
-TriviaGame::phrases_t TriviaGame::farewells;
+std::string				TriviaGame::greetings_header;
+TriviaGame::phrases_t	TriviaGame::greetings_subheader;
+std::string				TriviaGame::game_rules;
+std::string				TriviaGame::ask_ready;
+
+TriviaGame::phrases_t	TriviaGame::not_enough_players_warnings;
+TriviaGame::phrases_t	TriviaGame::time_warnings;
+TriviaGame::phrases_t	TriviaGame::times_up_warnings;
+TriviaGame::phrases_t	TriviaGame::question_prompts;
+std::string				TriviaGame::early_leaving_warning_part1;
+std::string				TriviaGame::early_leaving_warning_part2;
+TriviaGame::phrases_t	TriviaGame::farewells;
 
 void TriviaGame::initialize_phrases()
 {
@@ -20,17 +21,25 @@ void TriviaGame::initialize_phrases()
 	TriviaGame::not_enough_players_warnings.push_back("The trivia spotlight is warming up, but we need one more contestant to join before we can begin! 🎭");
 
 	// Greetings
-	TriviaGame::greetings_part1.push_back("✶⋆.˚ Hello there, friends! 🎀 Welcome to the Hello Kitty Trivia Game on the KittIRC server! ˚.⋆✶");
-	TriviaGame::greetings_part1.push_back("✶⋆.˚ Greetings, everyone! 🎀 Time for Hello Kitty Trivia on KittIRC! ˚.⋆✶");
-	TriviaGame::greetings_part1.push_back("✶⋆.˚ Hey kitty fans! 🎀 The Hello Kitty Trivia Game is now starting on KittIRC! ˚.⋆✶");
-	TriviaGame::greetings_part1.push_back("✶⋆.˚ Meow-velous to see you all! 🎀 Welcome to Hello Kitty Trivia on KittIRC! ˚.⋆✶");
-	TriviaGame::greetings_part1.push_back("✶⋆.˚ Paws what you're doing! 🎀 Hello Kitty Trivia is beginning on KittIRC! ˚.⋆✶");
-	TriviaGame::greetings_part1.push_back("✶⋆.˚ Purr-fect timing, everyone! 🎀 The Hello Kitty Trivia Game is starting on KittIRC! ˚.⋆✶");
-	TriviaGame::greetings_part1.push_back("✶⋆.˚ Hello wonderful friends! 🎀 Ready for some Hello Kitty Trivia on KittIRC? ˚.⋆✶");
-	TriviaGame::greetings_part1.push_back("✶⋆.˚ Ribbon-tastic hello to all! 🎀 It's Hello Kitty Trivia time on KittIRC! ˚.⋆✶");
-	TriviaGame::greetings_part2 = "Here's how it works: every round, I'll ask a question with " + format("multiple-choice answers", ITALIC) + ".\nYou have 30 seconds to pick the right one—" + format("just send the letter of your choice", BOLD) + " (A, B, C, or D). Easy, right? But be quick! Only your first answer will count. No take-backsies! ⏳🐱";
-	TriviaGame::greetings_part3 = "When time's up, I'll reveal the correct answer and either shower you with imaginary confetti or silently judge your choices (just kidding... maybe).";
-	TriviaGame::greetings_part4 = "Got it? Ready? " + format("Drop a message in the channel to confirm!", BOLD);
+	TriviaGame::greetings_header = "🎀 Welcome to " + format("Hello Kitty Trivia", COL_PINK) + " on KittIRC! 🎀";
+	TriviaGame::greetings_subheader.push_back("🩷 Test your knowledge in the cutest trivia game ever! 🩷");
+	TriviaGame::greetings_subheader.push_back("🐱 Think you know everything? Let's find out! 🐱");
+	TriviaGame::greetings_subheader.push_back("🌟 Get ready for a fun and purr-fectly adorable trivia game! 🌟");
+	TriviaGame::greetings_subheader.push_back("🎠 Get your bows ready—it's time for some trivia! 🎠");
+	TriviaGame::greetings_subheader.push_back("🌸 A trivia game as sweet as a candy. Are you ready? 🌸");
+	TriviaGame::greetings_subheader.push_back("🏆 Only the biggest Hello Kitty fans will triumph—are you one of them? 🏆");
+
+	TriviaGame::game_rules = format("📖 HOW TO PLAY:\n", COL_CYAN);
+	TriviaGame::game_rules += "1️⃣ Each round, I'll ask a multiple-choice question.\n";
+	TriviaGame::game_rules += "2️⃣ You have " + format("30 seconds", BOLD) + "to answer—just send the " + format("letter", BOLD) + "of your choice (A, B, C, or D).\n";
+	TriviaGame::game_rules += "3️⃣ Only your " + format("first answer", BOLD) + " counts! No take-backsies! ⏳🐱\n\n";
+
+	TriviaGame::game_rules += format("🎉 WHAT HAPPENS NEXT?\n", COL_CYAN);
+	TriviaGame::game_rules += "Once time's up, I'll reveal the correct answer and:\n";
+	TriviaGame::game_rules += "✨ Shower you with imaginary confetti if you're " + format("right", ITALIC) + "!\n";
+	TriviaGame::game_rules += "🤨 Silently judge your choices if you're " + format("wrong", ITALIC) + " (just kidding... maybe).\n\n";
+
+	TriviaGame::ask_ready = "💬 Got it? Ready? " + format("Drop a message in the channel to confirm!", BOLD);
 
 	// Time Warnings
 	TriviaGame::time_warnings.push_back("5 sec left! Panic! ⏳");

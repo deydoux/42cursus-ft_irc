@@ -42,20 +42,23 @@ std::string TriviaGame::create_reply(const std::string &message)
 void TriviaGame::greet_players( void )
 {
 	std::string header = create_empty_reply();
-	header += create_reply(format(TriviaGame::pick_randomly(TriviaGame::greetings_part1), BOLD));
+	header += create_reply(TriviaGame::greetings_header);
+	header += create_reply(TriviaGame::pick_randomly(TriviaGame::greetings_subheader));
+	header += create_empty_reply();
 	_irc_client.send_raw(header, 300);
 	
 	std::string rules;
-	std::vector<std::string> rules_parts = ft_split(TriviaGame::greetings_part2, '\n');
+	std::vector<std::string> rules_parts = ft_split(TriviaGame::game_rules, '\n');
 	for (size_t i = 0; i < rules_parts.size(); i++) {
-		rules += create_reply(rules_parts[i]);
+		if (rules_parts[i].empty())
+			rules += create_empty_reply();
+		else
+			rules += create_reply(rules_parts[i]);
 	}
 	_irc_client.send_raw(rules, 1000);
-	send(TriviaGame::greetings_part3, 1000);
-	
-	std::string conclusion = create_empty_reply();
-	conclusion += create_reply(TriviaGame::greetings_part4);
-	_irc_client.send_raw(conclusion, 1000);
+	std::string ready = create_reply(TriviaGame::ask_ready);
+	ready += create_empty_reply();
+	_irc_client.send_raw(ready, 1000);
 
 	_waiting_before_start = true;
 	for (size_t i = 0; i < _players.size(); i++) {
