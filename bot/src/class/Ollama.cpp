@@ -20,12 +20,7 @@ JSON::Object Ollama::generate(const std::string &prompt, context_t &context)
 	if (res.find("error") != res.end())
 		throw Ollama::Exception(res["error"].parse<std::string>());
 
-	context_t new_context;
-	const JSON::Array res_context = res["context"].parse<JSON::Array>();
-	for (JSON::Array::const_iterator it = res_context.begin(); it != res_context.end(); ++it)
-		new_context.push_back(it->parse<size_t>());
-
-	context = new_context;
+	context = res["context"].parse_vector<size_t>();
 	return res;
 }
 
