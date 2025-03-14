@@ -156,8 +156,12 @@ void TriviaGame::ask_trivia_question( void )
 	question_t question = _questions[_round_counter];
 	std::string question_raw;
 
+	std::string question_header = "--- 🎯 -- QUESTION ";
+	question_header += to_string(_round_counter + 1) + "/" + to_string(_nb_rounds);
+	question_header += " -- 🎯 ---";
+
 	question_raw += create_empty_reply();
-	question_raw += create_reply(format("--- 🎯 -- QUESTION 1/" + to_string(_nb_rounds) + " -- 🎯 ---", BOLD));
+	question_raw += create_reply(format(question_header, BOLD));
 	question_raw += create_empty_reply();
 	question_raw += create_reply(question.text);
 
@@ -190,9 +194,23 @@ void TriviaGame::ask_trivia_question( void )
 	_irc_client.send_raw(question_raw, 500);
 	_asked_at = time(NULL);
 
+	initialize_round();
+}
+
+void TriviaGame::initialize_round( void )
+{
 	_waiting_for_answers = true;
 	_first_player_answered = false;
 	_rang_timer = false;
+
+	player_t *player;
+	for (size_t i = 0; i < _players.size(); i++) {
+		player = &_players[i];
+
+		player->is_first_to_answer = false;
+		player->round_answer = "";
+		player->round_score = 0;
+	}
 }
 
 TriviaGame::player_t *TriviaGame::_get_player(const std::string &nick)
@@ -210,7 +228,7 @@ void TriviaGame::store_answer(const std::string &answer, const std::string &clie
 		return ;
 
 	char c_answer = toupper(answer[0]);
-	if (_choices.find(c_answer) != _choices.end())
+	if (_choices.find(c_answer) == _choices.end())
 		return ;
 
 	player_t *player = _get_player(client_nickname);
@@ -219,14 +237,18 @@ void TriviaGame::store_answer(const std::string &answer, const std::string &clie
 
 	player->round_answer = _choices.find(c_answer)->second;
 	
-	if (_choices.find(c_answer)->second == _questions[_round_counter].answer)
+	int score = 0;
+	if (player->round_answer == _questions[_round_counter].answer)
 	{
-		player->total_score += _points;
+		score += _points;
 		if (!_first_player_answered) {
-			player->total_score += _bonus_points;
+			score += _bonus_points;
+			player->is_first_to_answer = true;
 			_first_player_answered = true;
 		}
 	}
+	player->round_score = score;
+	player->total_score += score;
 
 	for (size_t i = 0; i < _players.size(); i++) {
 		if (_players[i].round_answer.empty())
@@ -251,6 +273,7 @@ void TriviaGame::tick( void )
 
 	if (time_left <= 0) {
 		send(format("TIMES UP!", BOLD));
+		_irc_client.send_raw(create_empty_reply());
 		return show_round_results();
 	}
 }
@@ -258,11 +281,10 @@ void TriviaGame::tick( void )
 void TriviaGame::show_round_results( void )
 {
 	_waiting_for_answers = false;
-	
-	/*
+
 	std::vector<std::string> victorious_players;
-	std::string players_answers;
-	std::string players_scores;
+	std::string players_answers = "";
+	std::string players_scores = "";
 
 	players_answers += create_reply("🌟 Here are your answers! 🌟");
 	for (size_t i = 0; i < _players.size(); i++)
@@ -272,17 +294,17 @@ void TriviaGame::show_round_results( void )
 			continue ;
 
 		std::string answer = "\t" + player.nickname + ": ";
-		answer += it.round_answer.empty() ? format("no response", ITALIC) : it.round_answer;
+		answer += player.round_answer.empty() ? format("No response", ITALIC) : player.round_answer;
 		players_answers += create_reply(answer);
 
-		std::string score = "\t" + player.nickname + "  ➝ +" + format(to_string(player.round_points), BOLD);
+		std::string score = "\t" + player.nickname + "  ➝ +" + format(to_string(player.round_score), BOLD);
 		if (player.is_first_to_answer)
 			score += " (first bonus!) 🎖️";
-		else if (player.round_points > 0)
+		else if (player.round_score > 0)
 			score += " 🎉";
 		players_scores += create_reply(score);
 
-		if (player.round_points > 0)
+		if (player.round_score > 0)
 			victorious_players.push_back(player.nickname);
 	}
 	players_answers += create_empty_reply();
@@ -293,41 +315,40 @@ void TriviaGame::show_round_results( void )
 	send(correct_answer + "!!!", 1000);
 
 	std::string well_done = create_empty_reply();
-	if (victorious_players.empty())
+	if (victorious_players.empty()) {
 		well_done += create_reply("Looks like that one was tricky — no winners this round!");
-	else
+	} else {
 		well_done += create_reply("👏 Well done, " + join_strings(victorious_players) + "!");
-	well_done += create_empty_reply();
-	_irc_client.send_raw(well_done, 1000);
+		well_done += create_empty_reply();
 
-	std::string scores = send("Here’s the score for this round:", 1000);
-	players_scores += create_empty_reply();
-	_irc_client.send_raw(players_scores);
-	*/
+		well_done += create_reply("Here's the score for this round:");
+		well_done += players_scores + create_empty_reply();
+	}
+	_irc_client.send_raw(well_done, 1000);
 
 	if (_questions.size() <= _round_counter + 1)
 		return show_final_results();
 
+	_round_counter++;
 	ask_trivia_question();
 }
 
-//bool TriviaGame::compare_by_total_score(const player_t &p1, const player_t &p2)
-//{
-//	return p1.total_score < p2.total_score;
-//}
-
+bool TriviaGame::compare_by_total_score(const player_t &p1, const player_t &p2)
+{
+	return p1.total_score < p2.total_score;
+}
 
 void TriviaGame::show_final_results( void )
 {
 	_waiting_for_answers = false;
 
-	/*
-	send(format("🎉 And that’s a wrap! 🎉", BOLD), 500);
+	send(format("🎉 And that's a wrap! 🎉", BOLD), 500);
+	send(create_empty_reply());
 	send("The trivia showdown has ended, and here are your " + format("final champions:", BOLD), 1000);
 	
 	std::string player_podium;
 	int position = _players.size();
-	std::sort(_players.begin(), _players.end(), compare_by_total_score);
+	std::sort(_players.begin(), _players.end(), TriviaGame::compare_by_total_score);
 	for (size_t i = 0; i < _players.size(); i++)
 	{
 		player_t player = _players[i];
@@ -338,17 +359,16 @@ void TriviaGame::show_final_results( void )
 		else if (position == 2) player_podium += "💖";
 		else if (position == 1) player_podium += "🏆";
 
-		player_podium += format(" " + get_ordinal(position) + " place: ", positon > 3 ? BOLD : NO_STYLE);
-		player_podium += player.nickname + " - " + player.total_score + "pts";
+		player_podium += format(" " + get_ordinal(position) + " place: ", position < 3 ? BOLD : NO_STYLE);
+		player_podium += player.nickname + " - " + to_string(player.total_score) + "pts";
 
-		send(player_podium, position > 3 ? 1000 : 500);
+		send(player_podium, position < 3 ? 2000 : 1000);
 
 		position--;
 	}
 
 	send(TriviaGame::pick_randomly(TriviaGame::farewells), 1000);
 	return ;
-	*/
 }
 
 bool TriviaGame::is_waiting_for_answers( void )
@@ -391,13 +411,14 @@ std::string	TriviaGame::pick_randomly(const phrases_t strings)
 
 TriviaGame::player_t TriviaGame::create_player(const std::string &nick)
 {
-	return (TriviaGame::player_t) {
-		.nickname = nick,
-		.is_in_channel = true,
-		.round_answer = "",
-		.total_score = 0,
-		.is_ready_to_start = false,
-	};
+	TriviaGame::player_t player;
+    player.nickname = nick;
+    player.is_in_channel = true;
+    player.round_answer = "";
+    player.total_score = 0;
+    player.is_ready_to_start = false;  
+    player.is_first_to_answer = false;
+    return player;
 }
 
 Curl	TriviaGame::_curl;

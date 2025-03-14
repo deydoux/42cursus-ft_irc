@@ -28,9 +28,11 @@ public:
 	typedef struct player_s {
 		std::string	nickname;
 		std::string	round_answer;
-		std::string	total_score;
+		int			round_score;
+		int			total_score;
 		bool		is_in_channel;
 		bool		is_ready_to_start;
+		bool		is_first_to_answer;
 	} player_t;
 	typedef	std::vector<player_t> players_t;
 
@@ -54,6 +56,8 @@ public:
 	void	show_final_results( void );
 	void	mark_user_as_ready(const std::string &client_nickname);
 	bool	is_waiting_before_start( void );
+
+	void	initialize_round( void );
 
 	std::string get_channel( void);
 
@@ -79,7 +83,7 @@ public:
 private:
 	IRC					&_irc_client;
 	players_t			_players;
-	int					_round_counter;
+	size_t				_round_counter;
 	questions_t			_questions;
 	std::map<char, std::string> _choices;
 	std::time_t			_asked_at;
@@ -96,8 +100,10 @@ private:
 	void		_start_game( void );
 	player_t	*_get_player(const std::string &nickname);
 
+	static bool	compare_by_total_score(const player_t &p1, const player_t &p2);
+
 	static const int	_nb_rounds = 5;
-	static const int	_round_duration_sec = 50;
+	static const int	_round_duration_sec = 30;
 	static const int	_points = 10;
 	static const int	_bonus_points = 2;
 
