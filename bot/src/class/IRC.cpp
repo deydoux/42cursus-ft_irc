@@ -52,7 +52,7 @@ IRC::~IRC()
 	for (trivias_t::iterator it = _ongoing_trivia_games.begin(); it != _ongoing_trivia_games.end(); it++) {
 		delete it->second;
 	}
-	
+
 	if (_socket_fd > 0) {
 		close(_socket_fd);
 		this->log("Socket closed", debug);
@@ -119,7 +119,7 @@ std::string IRC::create_reply(const std::string &cmd, std::string args, std::str
 void IRC::send_registration( void )
 {
 	std::string registration;
-	
+
 	if (!_password.empty())
 		registration += create_reply("PASS", _password);
 	registration += create_reply("NICK", _default_nickname);
@@ -172,16 +172,20 @@ void IRC::_loop( void )
 
 void IRC::_handle_messages(const std::string &messages)
 {
-	size_t pos;
 	std::string buffer = messages;
-	while ((pos = buffer.find('\n')) != std::string::npos)
-	{
-		_handle_message(buffer.substr(0, pos));
+
+	size_t pos;
+	std::string message;
+	while ((pos = buffer.find('\n')) != std::string::npos) {
+		_handle_message(message, false);
+		message = buffer.substr(0, pos);
 		buffer.erase(0, pos + 1);
 	}
+
+	_handle_message(message, true);
 }
 
-void IRC::_handle_message(std::string message)
+void IRC::_handle_message(std::string message, bool)
 {
 	if (message.empty())
 		return;
@@ -190,7 +194,7 @@ void IRC::_handle_message(std::string message)
 		message.erase(message.size() - 1);
 	if (message[0] == ':')
 		message.erase(0, 1);
-	
+
 	std::vector<std::string> args;
 	args = ft_split(message.substr(0, message.find(':')), ' ');
 	args.push_back(message.substr(message.find(':') + 1));
@@ -220,19 +224,19 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 {
 	std::string sender_nickname = extract_nickname(args[0]);
 
-	if (command == "INVITE") 
+	if (command == "INVITE")
 	{
 		if (args[2] != _default_nickname)
 			return ;
-		
+
 		std::string channel = args[3];
 		send_raw(create_reply("JOIN", channel));
 		_inviting_client = sender_nickname;
 	}
-	else if (command == "JOIN") 
+	else if (command == "JOIN")
 	{
 		std::string channel = args[2];
-		
+
 		if (_inviting_client.empty())
 			return ;
 
@@ -247,7 +251,7 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 
 		_inviting_client = "";
 	}
-	else if (command == "PRIVMSG") 
+	else if (command == "PRIVMSG")
 	{
 		if (std::string("&#").find(args[2][0]) == std::string::npos)
 			// TODO: maybe act in a specific way if a pm is sent to HelloKitty ?
@@ -268,7 +272,7 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 		}
 
 		game = _ongoing_trivia_games[channel];
-		
+
 		if (message.substr(0, 5) == "~STOP") {
 			game->show_final_results();
 			return ;
@@ -289,7 +293,7 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 			return ;
 		}
 	}
-	
+
 	int numeric = std::atoi(command.c_str());
 	if (numeric == 353)
 	{
@@ -333,7 +337,7 @@ IRC IRC::launch_irc_client(int argc, char **argv)
 	port_t port = _default_port;
 	std::string hostname = _default_hostname;
 	bool verbose = _default_verbose;
-	
+
 	bool is_hostname_set = false;
 	bool is_port_set = false;
 	bool is_pass_set = false;
@@ -346,7 +350,7 @@ IRC IRC::launch_irc_client(int argc, char **argv)
 			_print_usage(0);
 		else if (arg == "-v" || arg == "--verbose")
 			verbose = true;
-		
+
 		else if (arg == "-H" || arg == "--hostname") {
 			hostname = _get_next_arg(argc, argv, i);
 			is_hostname_set = true;
@@ -359,7 +363,7 @@ IRC IRC::launch_irc_client(int argc, char **argv)
 		} else if (arg[0] == '-') {
 			_print_usage();
 		}
-		
+
 		else if (!is_hostname_set) {
 			hostname = arg;
 			is_hostname_set = true;
@@ -383,7 +387,7 @@ IRC IRC::launch_irc_client(int argc, char **argv)
 		irc_client.log("Using default port: " + to_string(port), warning);
 	if (!is_pass_set)
 		irc_client.log("No password set", warning);
-	
+
 	irc_client._set_signal_handler();
 
 	irc_client.connect();
