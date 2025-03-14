@@ -163,6 +163,7 @@ void IRC::_loop( void )
 {
 	while (!stop)
 	{
+		usleep(5000);
 		std::string data = receive();
 		if (data.empty())
 			continue ;

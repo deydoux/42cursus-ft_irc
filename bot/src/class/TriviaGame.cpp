@@ -5,12 +5,14 @@
 
 #include <unistd.h>
 
-TriviaGame::TriviaGame(IRC &irc_client, const std::string channel_name, std::vector<std::string> players, bool verbose) :
+TriviaGame::TriviaGame(IRC &irc_client, const std::string channel_name, std::vector<std::string> players_nicks, bool verbose) :
 	_irc_client(irc_client),
-	_players(players),
 	_channel(channel_name),
 	_verbose(verbose)
 {
+	for (size_t i = 0; i < players_nicks.size(); i++) {
+		_players.push_back(create_player(players_nicks[i]));
+	}
 	log("Creation");
 }
 
@@ -46,33 +48,36 @@ std::string TriviaGame::create_reply(const std::string &message)
 void TriviaGame::greet_players( void )
 {
 	std::string header = create_empty_reply();
-	header += create_reply(format(TriviaGame::pick_randomly(TriviaGame::greetings_part1), BOLD));
+	header += create_reply(TriviaGame::greetings_header);
+	header += create_reply(TriviaGame::pick_randomly(TriviaGame::greetings_subheader));
+	header += create_empty_reply();
 	_irc_client.send_raw(header, 300);
 
 	std::string rules;
-	std::vector<std::string> rules_parts = ft_split(TriviaGame::greetings_part2, '\n');
+	std::vector<std::string> rules_parts = ft_split(TriviaGame::game_rules, '\n');
 	for (size_t i = 0; i < rules_parts.size(); i++) {
-		rules += create_reply(rules_parts[i]);
+		if (rules_parts[i].empty())
+			rules += create_empty_reply();
+		else
+			rules += create_reply(rules_parts[i]);
 	}
 	_irc_client.send_raw(rules, 1000);
-	send(TriviaGame::greetings_part3, 1000);
-
-	std::string conclusion = create_empty_reply();
-	conclusion += create_reply(TriviaGame::greetings_part4);
-	_irc_client.send_raw(conclusion, 1000);
+	std::string ready = create_reply(TriviaGame::ask_ready);
+	ready += create_empty_reply();
+	_irc_client.send_raw(ready, 1000);
 
 	_waiting_before_start = true;
-	for (size_t i = 0; i < _players.size(); i++) {
-		_ready_players[_players[i]] = false;
-	}
 }
 
 void TriviaGame::mark_user_as_ready(const std::string &client_nickname)
 {
-	_ready_players[client_nickname] = true;
+	player_t *player = _get_player(client_nickname);
+	if (!player)
+		return ;
+	player->is_ready_to_start = true;
 
 	for (size_t i = 0; i < _players.size(); i++) {
-		if (!_ready_players[_players[i]])
+		if (!_players[i].is_ready_to_start)
 			return ;
 	}
 
@@ -87,7 +92,7 @@ bool TriviaGame::is_waiting_before_start( void )
 
 TriviaGame::questions_t TriviaGame::_fetch_questions()
 {
-	static const std::string url = "https://opentdb.com/api.php?amount=" + to_string(_nb_rounds);
+	static const std::string url = "https://opentdb.com/api.php?difficulty=easy&amount=" + to_string(_nb_rounds);
 
 	questions_t questions;
 
@@ -146,45 +151,17 @@ void TriviaGame::_start_game( void )
 	ask_trivia_question();
 }
 
-std::string format_choice(char letter, const std::string &choice)
-{
-	std::string result;
-	std::ostringstream oss;
-
-	oss << "[";
-	oss << letter;
-	oss << "]";
-
-	result = format(oss.str(), BOLD);
-	return result + " " + choice;
-}
-
-std::string format_inline_choices(const std::string &choice1, const std::string &choice2, int space_between)
-{
-	std::string result;
-
-	result = choice1 + std::string(std::max(space_between, 20) - choice1.size(), ' ');
-	return result + choice2;
-}
-
-int get_max_len(std::vector<std::string> arr)
-{
-	size_t max_len = 0;
-	for (size_t i = 0; i < arr.size(); ++i) {
-		if (arr[i].size() > max_len)
-			max_len = arr[i].size();
-	}
-
-	return max_len;
-}
-
 void TriviaGame::ask_trivia_question( void )
 {
 	question_t question = _questions[_round_counter];
 	std::string question_raw;
 
+	std::string question_header = "--- 🎯 -- QUESTION ";
+	question_header += to_string(_round_counter + 1) + "/" + to_string(_nb_rounds);
+	question_header += " -- 🎯 ---";
+
 	question_raw += create_empty_reply();
-	question_raw += create_reply(format("--- 🎯 -- QUESTION 1/" + to_string(_nb_rounds) + " -- 🎯 ---", BOLD));
+	question_raw += create_reply(format(question_header, BOLD));
 	question_raw += create_empty_reply();
 	question_raw += create_reply(question.text);
 
@@ -214,98 +191,184 @@ void TriviaGame::ask_trivia_question( void )
 	question_raw += create_reply(prompt);
 	question_raw += create_empty_reply();
 
-	_irc_client.send_raw(question_raw, 500);
+	_irc_client.send_raw(question_raw, 2000);
 	_asked_at = time(NULL);
+
+	initialize_round();
+}
+
+void TriviaGame::initialize_round( void )
+{
 	_waiting_for_answers = true;
+	_first_player_answered = false;
+	_rang_timer = false;
+
+	player_t *player;
+	for (size_t i = 0; i < _players.size(); i++) {
+		player = &_players[i];
+
+		player->is_first_to_answer = false;
+		player->round_answer = "";
+		player->round_score = 0;
+	}
+}
+
+TriviaGame::player_t *TriviaGame::_get_player(const std::string &nick)
+{
+	for (size_t i = 0; i < _players.size(); i++) {
+		if (_players[i].nickname == nick)
+			return &_players[i];
+	}
+	return NULL;
 }
 
 void TriviaGame::store_answer(const std::string &answer, const std::string &client_nickname)
 {
-	(void)answer;
-	(void)client_nickname;
-	// This function is called every time someones sends a privatemessage to the channel in which the game is going on
-	// AND that the game is waiting for an answer from the players.
+	if (answer.size() != 1)
+		return ;
 
-	// If the player hasn't already answered the question, it stores his answer in the answers vector (does nothing otherwise)
-	// It also updates his score accordingly
-	// --> if the player is the first to answer the question and his answer is correct,
-	//	   then it adds 10 points (static const) to its original score
+	char c_answer = toupper(answer[0]);
+	if (_choices.find(c_answer) == _choices.end())
+		return ;
 
-	// If there's no more player to wait for in the channel, simply call show_round_results()
-	// (which should put an end to the round)
+	player_t *player = _get_player(client_nickname);
+	if (!player || !player->round_answer.empty())
+		return ;
+
+	player->round_answer = _choices.find(c_answer)->second;
+	
+	int score = 0;
+	if (player->round_answer == _questions[_round_counter].answer)
+	{
+		score += _points;
+		if (!_first_player_answered) {
+			score += _bonus_points;
+			player->is_first_to_answer = true;
+			_first_player_answered = true;
+		}
+	}
+	player->round_score = score;
+	player->total_score += score;
+
+	for (size_t i = 0; i < _players.size(); i++) {
+		if (_players[i].round_answer.empty())
+			return ;
+	}
+
+	send(TriviaGame::pick_randomly(TriviaGame::teasers_before_results));
+	return show_round_results();
 }
 
 void TriviaGame::tick( void )
 {
-	// tick() is supposed to be a function called repeatedly in the main loop of the bot, for every ongoing trivia game.
-	// It must check first if the game is waiting for an answer of the players (so that a question was just asked)
-	// -> if not, then their's nothing to be done here (return)
+	if (!_waiting_for_answers)
+		return ;
+	
+	int time_left = calc_time_left(_asked_at, _round_duration_sec);
+	if (time_left <= 10 && !_rang_timer) {
+		send(TriviaGame::pick_randomly(TriviaGame::time_warnings));
+		_rang_timer = true;
+		return ;
+	}
 
-	// It checks the game's timer (game starting time) and sends a message if their's only 10 seconds left:
-	/*
-		5 seconds left! Panic! (Just kidding. Or am I?) ⏳😼
-		(Here are some alternative messages for this part, which also needs to be picked randomly)
-		- Tick-tock! Your brain better be in turbo mode now! 🏎️💨
-		- 5 seconds! Choose wisely, or forever hold your regret. 😼
-		- If you're still thinking, think FASTER! 🧠⚡
-		- HELLO?? Time is running out! Pick something! 🏃‍♀️💨
-		- 5 seconds left! Do you believe in miracles? 😹
-		- Quick! Eeny, meeny, miny... just PICK ONE! 🎲
-		- If you haven’t answered yet, now’s a good time to start screaming. 🔥
-		- Almost out of time! Make a choice before I start judging... 👀
-		- 5 seconds! Do you trust your gut, or is it full of doubt? 🤔
-	*/
-
-	// If the timer's out and the bot is still waiting for a player to answer, then it uses show_round_results()
-	// (which should put an end to the round)
+	if (time_left <= 0) {
+		send(format("TIMES UP!", BOLD));
+		_irc_client.send_raw(create_empty_reply());
+		return show_round_results();
+	}
 }
 
 void TriviaGame::show_round_results( void )
 {
-	// It stops waiting for answers, and show the results of the round in this format :
-	// (again, it can be nice to send this chunk by chunk with a small delay between each one of them)
-	/*
-		[Times up!] chunk 0
-		[🌟 Here are your answers! 🌟
+	_waiting_for_answers = false;
 
-		- quteriss: Star City
-		- mapale: Metropolis
-		- deydoux: Star City] chunk 1
+	std::vector<std::string> victorious_players;
+	std::string players_answers = "";
+	std::string players_scores = "";
 
-		[And the correct answer was...] chunk 2
-		[**Star City!!!** 🏹✨] chunk 3
+	players_answers += create_reply("🌟 Here are your answers! 🌟");
+	for (size_t i = 0; i < _players.size(); i++)
+	{
+		player_t player = _players[i];
+		if (!player.is_in_channel)
+			continue ;
 
-		[👏 Well done, quteriss and deydoux!
+		std::string answer = "\t" + player.nickname + ": ";
+		answer += player.round_answer.empty() ? format("No response", ITALIC) : player.round_answer;
+		players_answers += create_reply(answer);
 
-		Here’s the score for this round:
-		quteriss  ➝ **+15** (first bonus!) 🎖️
-		deydoux  ➝ **+10** 🎉
-		mapale  ➝ **+0** ] chunk 4
-	*/
+		std::string score = "\t" + player.nickname + "  ➝ +" + format(to_string(player.round_score), BOLD);
+		if (player.is_first_to_answer)
+			score += " (first bonus!) 🎖️";
+		else if (player.round_score > 0)
+			score += " 🎉";
+		players_scores += create_reply(score);
 
-	// If the round counters is the max number of rounds for this Trivia Game,
-	// then it calls show_final_results() and returns immediatly
+		if (player.round_score > 0)
+			victorious_players.push_back(player.nickname);
+	}
+	players_answers += create_empty_reply();
+	_irc_client.send_raw(players_answers);
 
-	// Otherwise, it calls init_round(), and then ask_trivia_question();
+	send("And the correct answer was...", 2000);
+	std::string correct_answer = format(_questions[_round_counter].answer, BOLD);
+	send(correct_answer + "!!!", 1000);
+
+	std::string well_done = create_empty_reply();
+	if (victorious_players.empty()) {
+		well_done += create_reply("Looks like that one was tricky — no winners this round!");
+	} else {
+		well_done += create_reply("👏 Well done, " + join_strings(victorious_players) + "!");
+		well_done += create_empty_reply();
+
+		well_done += create_reply("Here's the score for this round:");
+		well_done += players_scores + create_empty_reply();
+	}
+	_irc_client.send_raw(well_done, 1000);
+
+	if (_questions.size() <= _round_counter + 1)
+		return show_final_results();
+
+	_round_counter++;
+	ask_trivia_question();
+}
+
+bool TriviaGame::compare_by_total_score(const player_t &p1, const player_t &p2)
+{
+	return p1.total_score < p2.total_score;
 }
 
 void TriviaGame::show_final_results( void )
 {
-	// it must stop the waiting_for_answers
-	// Displays the final results of the game
-	/*
-		🎉 **And that’s a wrap!** 🎉
+	_waiting_for_answers = false;
 
-		The trivia showdown has ended, and here are your **final champions**:
+	send(format("🎉 And that's a wrap! 🎉", BOLD), 500);
+	_irc_client.send_raw(create_empty_reply());
+	send("The trivia showdown has ended, and here are your " + format("final champions:", BOLD), 1000);
+	
+	std::string player_podium;
+	int position = _players.size();
+	std::sort(_players.begin(), _players.end(), TriviaGame::compare_by_total_score);
+	for (size_t i = 0; i < _players.size(); i++)
+	{
+		player_t player = _players[i];
+		player_podium = "";
 
-		[🌸 **3rd Place**: deydoux - **30**pts] chunk 1
-		[🎀 **2nd Place**: quteriss - **45**pts] chunk 2
-		[💖 **1st Place**: mapale - **135**pts] chunk 3 ...
+		if (position > 3) player_podium += " ";
+		else if (position == 3) player_podium += "🌸";
+		else if (position == 2) player_podium += "💖";
+		else if (position == 1) player_podium += "🏆";
 
-		👏 Well done to everyone who played! It’s been a blast—whether you were a trivia genius or just here for the fun! 😸
-	*/
+		player_podium += format(" " + get_ordinal(position) + " place: ", position <= 3 ? BOLD : NO_STYLE);
+		player_podium += player.nickname + " - " + to_string(player.total_score) + "pts";
 
-	// Then it calls the irc_client delete_trivia_game(this) function, that destroys the current TriviaGame instance
+		send(player_podium, position <= 3 ? 2000 : 1000);
+
+		position--;
+	}
+
+	send(TriviaGame::pick_randomly(TriviaGame::farewells), 1000);
+	return ;
 }
 
 bool TriviaGame::is_waiting_for_answers( void )
@@ -320,20 +383,21 @@ std::string TriviaGame::get_channel( void )
 
 void TriviaGame::add_player(const std::string &client_nickname)
 {
-	(void)client_nickname;
-	// Adds a player to the player list
-	// --> this action should not interrupt the game
+	_players.push_back(create_player(client_nickname));
 }
 
 void TriviaGame::remove_player(const std::string &client_nickname)
 {
-	(void)client_nickname;
-	// Removes the player from the player list
-	// --> preferably, this action should not remove the actual score of the quitting client
-	//	   so that, in the final scores, he still appears (even if he/she has a disadvantage)
-	// Check if there's still enough player to play, and if not:
-		// - send a room_warnings message (pick randomly)
-		// - show the final results
+	player_t *player = _get_player(client_nickname);
+	if (!player)
+		return ;
+	player->is_in_channel = false;
+	
+	if (_players.size() < 2) {
+		std::string alert_message = TriviaGame::early_leaving_warning_part1 + _players[0].nickname + TriviaGame::early_leaving_warning_part2;
+		send(alert_message);
+		show_final_results();
+	}
 }
 
 std::string	TriviaGame::pick_randomly(const phrases_t strings)
@@ -343,6 +407,18 @@ std::string	TriviaGame::pick_randomly(const phrases_t strings)
 
 	size_t random_index = rand() % strings.size();
 	return strings[random_index];
+}
+
+TriviaGame::player_t TriviaGame::create_player(const std::string &nick)
+{
+	TriviaGame::player_t player;
+    player.nickname = nick;
+    player.is_in_channel = true;
+    player.round_answer = "";
+    player.total_score = 0;
+    player.is_ready_to_start = false;  
+    player.is_first_to_answer = false;
+    return player;
 }
 
 Curl	TriviaGame::_curl;

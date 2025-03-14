@@ -15,6 +15,7 @@ class TriviaGame
 {
 public:
 	typedef	std::vector<std::string> phrases_t;
+	
 	typedef	struct question_s {
 		std::string					text;
 		std::string					answer;
@@ -23,6 +24,17 @@ public:
 		std::string					difficulty;
 	}	question_t;
 	typedef	std::vector<question_t> questions_t;
+
+	typedef struct player_s {
+		std::string	nickname;
+		std::string	round_answer;
+		int			round_score;
+		int			total_score;
+		bool		is_in_channel;
+		bool		is_ready_to_start;
+		bool		is_first_to_answer;
+	} player_t;
+	typedef	std::vector<player_t> players_t;
 
 	TriviaGame(IRC &irc_client, std::string channel_name, std::vector<std::string> players, bool verbose = true);
 	~TriviaGame();
@@ -45,43 +57,55 @@ public:
 	void	mark_user_as_ready(const std::string &client_nickname);
 	bool	is_waiting_before_start( void );
 
+	void	initialize_round( void );
+
 	std::string get_channel( void);
 
 	static void			initialize_phrases( void );
 	static std::string	pick_randomly(const phrases_t phrases);
 
-	static phrases_t	greetings_part1;
-	static std::string	greetings_part2;
-	static std::string	greetings_part3;
-	static std::string	greetings_part4;
+	player_t	create_player(const std::string &nick);
+
+	static std::string	greetings_header;
+	static phrases_t	greetings_subheader;
+	static std::string	game_rules;
+	static std::string	ask_ready;
+
 	static phrases_t	time_warnings;
 	static phrases_t	times_up_warnings;
 	static phrases_t	question_prompts;
 	static phrases_t	not_enough_players_warnings;
-	static phrases_t	room_warnings;
+	static phrases_t	teasers_before_results;
+	static std::string	early_leaving_warning_part1;
+	static std::string	early_leaving_warning_part2;
 	static phrases_t	farewells;
 
 private:
 	IRC					&_irc_client;
-	std::vector<std::string> _players;
-	int					_round_counter;
+	players_t			_players;
+	size_t				_round_counter;
 	questions_t			_questions;
 	std::map<char, std::string> _choices;
-	std::map<std::string, std::string> _players_answers;
 	std::time_t			_asked_at;
-	std::map<std::string, int> _players_scores;
-	std::map<std::string, bool> _ready_players;
 	bool				_waiting_before_start;
 	bool				_waiting_for_answers;
+	bool				_first_player_answered;
+
+	bool				_rang_timer;
 
 	const std::string	_channel;
 	const bool			_verbose;
 
 	questions_t	_fetch_questions();
 	void		_start_game( void );
+	player_t	*_get_player(const std::string &nickname);
 
-	static const int	_nb_rounds = 5;
-	static const int	_round_duration_sec = 50;
+	static bool	compare_by_total_score(const player_t &p1, const player_t &p2);
+
+	static const int	_nb_rounds = 10;
+	static const int	_round_duration_sec = 30;
+	static const int	_points = 10;
+	static const int	_bonus_points = 5;
 
 	static Curl	_curl;
 };
