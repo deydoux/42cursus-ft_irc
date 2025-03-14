@@ -11,6 +11,7 @@ TriviaGame::phrases_t	TriviaGame::times_up_warnings;
 TriviaGame::phrases_t	TriviaGame::question_prompts;
 std::string				TriviaGame::early_leaving_warning_part1;
 std::string				TriviaGame::early_leaving_warning_part2;
+TriviaGame::phrases_t	TriviaGame::teasers_before_results;
 TriviaGame::phrases_t	TriviaGame::farewells;
 
 void TriviaGame::initialize_phrases()
@@ -93,5 +94,5 @@ void TriviaGame::initialize_phrases()
 	TriviaGame::teasers_before_results.push_back("Alright, time to see who nailed it!");  
 	TriviaGame::teasers_before_results.push_back("Let's check who got it right!");  
 	TriviaGame::teasers_before_results.push_back("Moment of truth... Who got it?");   
-	TriviaGame::teasers_before_results.push_back("Drum roll, please... 🥁 Let's see who’s correct!");
+	TriviaGame::teasers_before_results.push_back("Drum roll, please... 🥁 Let's see who's correct!");
 }

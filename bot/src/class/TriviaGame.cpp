@@ -5,12 +5,14 @@
 
 #include <unistd.h>
 
-TriviaGame::TriviaGame(IRC &irc_client, const std::string channel_name, std::vector<std::string> players, bool verbose) :
+TriviaGame::TriviaGame(IRC &irc_client, const std::string channel_name, std::vector<std::string> players_nicks, bool verbose) :
 	_irc_client(irc_client),
-	_players(players),
 	_channel(channel_name),
 	_verbose(verbose)
 {
+	for (size_t i = 0; i < players_nicks.size(); i++) {
+		_players.push_back(create_player(players_nicks[i]));
+	}
 	log("Creation");
 }
 
@@ -65,17 +67,17 @@ void TriviaGame::greet_players( void )
 	_irc_client.send_raw(ready, 1000);
 
 	_waiting_before_start = true;
-	for (size_t i = 0; i < _players.size(); i++) {
-		_ready_players[_players[i]] = false;
-	}
 }
 
 void TriviaGame::mark_user_as_ready(const std::string &client_nickname)
 {
-	_ready_players[client_nickname] = true;
+	player_t *player = _get_player(client_nickname);
+	if (!player)
+		return ;
+	player->is_ready_to_start = true;
 
 	for (size_t i = 0; i < _players.size(); i++) {
-		if (!_ready_players[_players[i]])
+		if (!_players[i].is_ready_to_start)
 			return ;
 	}
 
@@ -193,29 +195,46 @@ void TriviaGame::ask_trivia_question( void )
 	_rang_timer = false;
 }
 
+TriviaGame::player_t *TriviaGame::_get_player(const std::string &nick)
+{
+	for (size_t i = 0; i < _players.size(); i++) {
+		if (_players[i].nickname == nick)
+			return &_players[i];
+	}
+	return NULL;
+}
+
 void TriviaGame::store_answer(const std::string &answer, const std::string &client_nickname)
 {
-	char c_answer = (answer.size() == 1 && _choices.find(answer.c_str()[0]) != _choices.end()) ? toupper(answer.c_str()[0]) : ' ';
-
-	if (_players_answers.find(client_nickname) != _players_answers.end() || c_answer == ' ')
+	if (answer.size() != 1)
 		return ;
-	_players_answers[client_nickname] = _choices.find(c_answer)->second;
+
+	char c_answer = toupper(answer[0]);
+	if (_choices.find(c_answer) != _choices.end())
+		return ;
+
+	player_t *player = _get_player(client_nickname);
+	if (!player || !player->round_answer.empty())
+		return ;
+
+	player->round_answer = _choices.find(c_answer)->second;
 	
 	if (_choices.find(c_answer)->second == _questions[_round_counter].answer)
 	{
-		_players_scores[client_nickname] += _points;
-		if (!_first_player_answered)
-		{
+		player->total_score += _points;
+		if (!_first_player_answered) {
+			player->total_score += _bonus_points;
 			_first_player_answered = true;
-			_players_scores[client_nickname] += _bonus_points;
 		}
 	}
 
-	if (!_waiting_for_answers)
-	{
-		send(TriviaGame::pick_randomly(TriviaGame::teasers_before_results));
-		return show_round_results();
+	for (size_t i = 0; i < _players.size(); i++) {
+		if (_players[i].round_answer.empty())
+			return ;
 	}
+
+	send(TriviaGame::pick_randomly(TriviaGame::teasers_before_results));
+	return show_round_results();
 }
 
 void TriviaGame::tick( void )
@@ -344,16 +363,18 @@ std::string TriviaGame::get_channel( void )
 
 void TriviaGame::add_player(const std::string &client_nickname)
 {
-	_players.push_back(client_nickname);
-	_players_scores[client_nickname] = 0;
+	_players.push_back(create_player(client_nickname));
 }
 
 void TriviaGame::remove_player(const std::string &client_nickname)
 {
-	_players.erase(std::remove(_players.begin(), _players.end(), client_nickname), _players.end());
+	player_t *player = _get_player(client_nickname);
+	if (!player)
+		return ;
+	player->is_in_channel = false;
 	
 	if (_players.size() < 2) {
-		std::string alert_message = TriviaGame::early_leaving_warning_part1 + _players[0] + TriviaGame::early_leaving_warning_part2;
+		std::string alert_message = TriviaGame::early_leaving_warning_part1 + _players[0].nickname + TriviaGame::early_leaving_warning_part2;
 		send(alert_message);
 		show_final_results();
 	}
@@ -366,6 +387,17 @@ std::string	TriviaGame::pick_randomly(const phrases_t strings)
 
 	size_t random_index = rand() % strings.size();
 	return strings[random_index];
+}
+
+TriviaGame::player_t TriviaGame::create_player(const std::string &nick)
+{
+	return (TriviaGame::player_t) {
+		.nickname = nick,
+		.is_in_channel = true,
+		.round_answer = "",
+		.total_score = 0,
+		.is_ready_to_start = false,
+	};
 }
 
 Curl	TriviaGame::_curl;
