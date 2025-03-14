@@ -102,10 +102,10 @@ private:
 
 	static bool	compare_by_total_score(const player_t &p1, const player_t &p2);
 
-	static const int	_nb_rounds = 5;
+	static const int	_nb_rounds = 10;
 	static const int	_round_duration_sec = 30;
 	static const int	_points = 10;
-	static const int	_bonus_points = 2;
+	static const int	_bonus_points = 5;
 
 	static Curl	_curl;
 };

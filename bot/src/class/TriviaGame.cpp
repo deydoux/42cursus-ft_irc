@@ -92,7 +92,7 @@ bool TriviaGame::is_waiting_before_start( void )
 
 TriviaGame::questions_t TriviaGame::_fetch_questions()
 {
-	static const std::string url = "https://opentdb.com/api.php?amount=" + to_string(_nb_rounds);
+	static const std::string url = "https://opentdb.com/api.php?difficulty=easy&amount=" + to_string(_nb_rounds);
 
 	questions_t questions;
 
@@ -191,7 +191,7 @@ void TriviaGame::ask_trivia_question( void )
 	question_raw += create_reply(prompt);
 	question_raw += create_empty_reply();
 
-	_irc_client.send_raw(question_raw, 500);
+	_irc_client.send_raw(question_raw, 2000);
 	_asked_at = time(NULL);
 
 	initialize_round();
@@ -343,7 +343,7 @@ void TriviaGame::show_final_results( void )
 	_waiting_for_answers = false;
 
 	send(format("🎉 And that's a wrap! 🎉", BOLD), 500);
-	send(create_empty_reply());
+	_irc_client.send_raw(create_empty_reply());
 	send("The trivia showdown has ended, and here are your " + format("final champions:", BOLD), 1000);
 	
 	std::string player_podium;
@@ -359,10 +359,10 @@ void TriviaGame::show_final_results( void )
 		else if (position == 2) player_podium += "💖";
 		else if (position == 1) player_podium += "🏆";
 
-		player_podium += format(" " + get_ordinal(position) + " place: ", position < 3 ? BOLD : NO_STYLE);
+		player_podium += format(" " + get_ordinal(position) + " place: ", position <= 3 ? BOLD : NO_STYLE);
 		player_podium += player.nickname + " - " + to_string(player.total_score) + "pts";
 
-		send(player_podium, position < 3 ? 2000 : 1000);
+		send(player_podium, position <= 3 ? 2000 : 1000);
 
 		position--;
 	}
