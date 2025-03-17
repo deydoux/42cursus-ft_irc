@@ -131,8 +131,8 @@ bool Client::is_channel_operator(std::string channel_name) const
 {
 	const std::string &lower_channel_name = to_lower(channel_name);
 
-	for (channels_t::const_iterator it = _active_channels.begin(); it != _active_channels.end(); ++it)
-		if (to_lower(it->first) == lower_channel_name)
+	for (std::vector<std::string>::const_iterator it = _channel_operator.begin(); it != _channel_operator.end(); ++it)
+		if (to_lower(*it) == lower_channel_name)
 			return true;
 
 	return false;
