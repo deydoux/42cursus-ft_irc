@@ -230,15 +230,19 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 
 	if (command == "INVITE")
 	{
-		if (args[2] != _default_nickname)
+		if (args.size() < 4 || args[2] != _default_nickname)
 			return ;
 
 		std::string channel = args[3];
 		send_raw(create_reply("JOIN", channel));
 		_inviting_client = sender_nickname;
 	}
+
 	else if (command == "JOIN")
 	{
+		if (args.size() < 3)
+			return ;
+
 		std::string channel = args[2];
 
 		if (_inviting_client.empty())
@@ -255,8 +259,12 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 
 		_inviting_client = "";
 	}
+
 	else if (command == "PRIVMSG")
 	{
+		if (args.size() < 4)
+			return ;
+
 		if (std::string("&#").find(args[2][0]) == std::string::npos) {
 			if (last)
 				// do ollama request
@@ -289,8 +297,12 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 		if (game->is_waiting_for_answers())
 			game->store_answer(message, sender_nickname);
 	}
+
 	else if (command == "PART")
 	{
+		if (args.size() < 3)
+			return ;
+
 		std::string channel = args[2];
 		if (is_playing(channel))
 		{
