@@ -1,4 +1,5 @@
 #include "class/IRC.hpp"
+#include "class/Ollama.hpp"
 #include "class/TriviaGame.hpp"
 
 #include <sstream>
@@ -9,12 +10,14 @@
 #include <cstring>
 #include <algorithm>
 
+bool IRC::stop = false;
+
 const std::string IRC::_default_hostname = "127.0.0.1";
 const std::string IRC::_default_nickname = "hkitty";
 const std::string IRC::_default_username = "hellokitty";
 const std::string IRC::_default_realname = "Hello Kitty";
 
-bool IRC::stop = false;
+Ollama IRC::_ollama("llama3.2:1b");
 
 std::string ft_strerror( void )
 {

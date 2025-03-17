@@ -10,6 +10,7 @@
 #include <iostream>
 #include <map>
 
+class Ollama;
 class TriviaGame;
 
 class IRC
@@ -64,6 +65,8 @@ class IRC
 		static const std::string	_default_nickname;
 		static const std::string	_default_username;
 		static const std::string	_default_realname;
+
+		static Ollama	_ollama;
 
 		static std::string	_get_next_arg(int argc, char *argv[], int &i);
 		static port_t		_parse_port(const std::string &port_str);
