@@ -1,6 +1,7 @@
 #ifndef IRC_HPP
 #define IRC_HPP
 
+#include "class/Ollama.hpp"
 #include "lib.hpp"
 
 #include <arpa/inet.h>
@@ -45,9 +46,9 @@ class IRC
 		const std::string	_password;
 		const bool			_verbose;
 
-		trivias_t			_ongoing_trivia_games;
-		std::string			_inviting_client;
-		std::vector<std::string> _trivia_request_sent;
+		trivias_t					_ongoing_trivia_games;
+		std::string					_inviting_client;
+		std::vector<std::string>	_trivia_request_sent;
 
 		int					_socket_fd;
 
@@ -57,6 +58,10 @@ class IRC
 		void	_set_signal_handler( void );
 		void	_update_games( void );
 		void	_loop( void );
+
+		std::map<std::string, Ollama::context_t>	_ollama_contexts;
+
+		void	_handle_ollama(const std::string &origin, const std::string &nickname, const std::string &message);
 
 		static const std::string	_default_hostname;
 		static const port_t			_default_port = 6697;

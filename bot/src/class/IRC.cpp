@@ -226,6 +226,9 @@ bool IRC::is_playing(const std::string &channel_name)
 
 void IRC::_handle_command(const std::string &command, const std::vector<std::string> &args, bool last)
 {
+	if (args.empty())
+		return;
+
 	std::string sender_nickname = extract_nickname(args[0]);
 
 	if (command == "INVITE")
@@ -267,7 +270,8 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 
 		if (std::string("&#").find(args[2][0]) == std::string::npos) {
 			if (last)
-				// do ollama request
+				_handle_ollama(args[0], sender_nickname, args[3]);
+
 			return ;
 		}
 
@@ -341,6 +345,30 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 
 		game->greet_players();
 	}
+}
+
+void	IRC::_handle_ollama(const std::string &origin, const std::string &nickname, const std::string &message)
+{
+	Ollama::context_t context = _ollama_contexts[origin];
+	std::string response;
+
+	try {
+		JSON::Object obj = _ollama.generate(message, context);
+		response = obj["response"].parse<std::string>();
+	} catch (const std::exception &e) {
+		this->log("Ollama error: " + std::string(e.what()), error);
+
+		const std::string &reply = create_reply("PRIVMSG", nickname, "Sorry, I can't do that right now");
+		return send_raw(reply);
+	}
+
+	std::vector<std::string> lines = ft_split(response, '\n');
+	for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); it++) {
+		const std::string &reply = create_reply("PRIVMSG", nickname, *it);
+		send_raw(reply);
+	}
+	// const std::string &reply = create_reply("PRIVMSG", nickname, response);
+	// send_raw(reply);
 }
 
 void IRC::delete_trivia_game(TriviaGame *game)

@@ -55,6 +55,8 @@ void Client::log(const std::string &message, const log_level level) const
 
 ssize_t Client::send(const std::string &message) const
 {
+	log("Sending message: " + message, debug);
+
 	ssize_t bytes_sent = ::send(_fd, message.c_str(), message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
 	if (bytes_sent == -1)
 		throw std::runtime_error("Failed to send message");
