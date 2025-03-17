@@ -52,7 +52,7 @@ class IRC
 
 		void	_handle_messages(const std::string &messages);
 		void	_handle_message(std::string message, bool last = false);
-		void	_handle_command(const std::string &command, const std::vector<std::string> &args);
+		void	_handle_command(const std::string &command, const std::vector<std::string> &args, bool last);
 		void	_set_signal_handler( void );
 		void	_update_games( void );
 		void	_loop( void );

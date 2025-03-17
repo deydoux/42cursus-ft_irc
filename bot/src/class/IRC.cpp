@@ -185,7 +185,7 @@ void IRC::_handle_messages(const std::string &messages)
 	_handle_message(message, true);
 }
 
-void IRC::_handle_message(std::string message, bool)
+void IRC::_handle_message(std::string message, bool last)
 {
 	if (message.empty())
 		return;
@@ -212,7 +212,7 @@ void IRC::_handle_message(std::string message, bool)
 	}
 
 	log("Parsed command: " + oss.str(), debug);
-	_handle_command(args[1], args);
+	_handle_command(args[1], args, last);
 }
 
 bool IRC::is_playing(const std::string &channel_name)
@@ -220,7 +220,7 @@ bool IRC::is_playing(const std::string &channel_name)
 	return _ongoing_trivia_games.find(channel_name) != _ongoing_trivia_games.end();
 }
 
-void IRC::_handle_command(const std::string &command, const std::vector<std::string> &args)
+void IRC::_handle_command(const std::string &command, const std::vector<std::string> &args, bool last)
 {
 	std::string sender_nickname = extract_nickname(args[0]);
 
@@ -253,9 +253,11 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 	}
 	else if (command == "PRIVMSG")
 	{
-		if (std::string("&#").find(args[2][0]) == std::string::npos)
-			// TODO: maybe act in a specific way if a pm is sent to HelloKitty ?
+		if (std::string("&#").find(args[2][0]) == std::string::npos) {
+			if (last)
+				// do ollama request
 			return ;
+		}
 
 		std::string channel = args[2];
 		std::string message = args[3];
