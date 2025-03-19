@@ -132,7 +132,7 @@ void TriviaGame::show_final_results( void )
 	}
 
 	_send(TriviaGame::pick_randomly(TriviaGame::farewells), 1000);
-	_irc_client.delete_trivia_game(this);
+	_irc_client.remove_trivia_game(this);
 	return ;
 }
 
@@ -261,7 +261,7 @@ void TriviaGame::_start_game( void )
 
 	if (_questions.empty()) {
 		_send("Sorry, I couldn't fetch the questions. Let's try again later!");
-		return _irc_client.delete_trivia_game(this);
+		return _irc_client.remove_trivia_game(this);
 		//TODO check
 	}
 

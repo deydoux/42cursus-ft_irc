@@ -16,6 +16,7 @@ SRC = \
 	lib/get_max_len.cpp \
 	lib/join_strings.cpp \
 	lib/trivia_phrases.cpp \
+	lib/ft_strerror.cpp \
 	main.cpp
 
 SRC_DIR = src

@@ -15,48 +15,59 @@ class TriviaGame;
 class IRC
 {
 	public:
+		// -- TYPES
 		typedef std::map<std::string, TriviaGame *> trivias_t; // channel_name: trivia ptr
 		typedef uint16_t	port_t;
 		
+		// -- PUBLIC ATTRIBUTES
 		bool	is_connected;
 
+		// -- CONSTRUCTOR + DESTRUCTOR
 		IRC(const std::string hostname, const port_t port, const std::string pass, bool verbose);
 		~IRC();
 
-		void	log(const std::string &message, const log_level level = info) const;
+		// -- GETTERS + SETTERS
+		void	remove_trivia_game(TriviaGame *game);
 		
-		void	connect( void );
-		void	send_registration( void );
-		void	send_raw(const std::string &message, int send_delay = 0);
+		// -- PUBLIC METHODS
 		std::string	create_reply(const std::string &cmd, std::string args = "", std::string message = "");
-		std::string	receive( void );
+		void	send_raw(const std::string &message, int send_delay = 0);
+		
+		void	log(const std::string &message, const log_level level = info) const;
 
-		bool	is_playing(const std::string &channel_name);
-		void	delete_trivia_game(TriviaGame *game);
-
+		// -- STATIC PUBLIC ATTRIBUTES
 		static bool	stop;
 
-		static IRC	launch_irc_client(int argc, char **argv);
+		// -- STATIC METHODS
+		static IRC			launch_irc_client(int argc, char **argv);
+		static std::string	extract_nickname(const std::string &client_mask);
 		
 	private:
-		const std::string	_hostname;
-		const port_t		_port;
-		const std::string	_password;
-		const bool			_verbose;
-
+		// -- PRIVATE ATTRIBUTES
 		trivias_t			_ongoing_trivia_games;
 		std::string			_inviting_client;
 		std::vector<std::string> _trivia_request_sent;
-
 		int					_socket_fd;
 
-		void	_handle_messages(const std::string &messages);
-		void	_handle_message(std::string message);
+		// -- PRIVATE CONSTANTS
+		const port_t		_port;
+		const std::string	_hostname;
+		const std::string	_password;
+		const bool			_verbose;
+
+		// -- PRIVATE METHODS
+		void	_connect_to_server( void );
+		void	_send_registration( void );
 		void	_handle_command(const std::string &command, const std::vector<std::string> &args);
+		void	_handle_message(std::string message);
+		void	_handle_messages(const std::string &messages);
+		std::string	_receive( void );
+		void	_loop( void );
 		void	_set_signal_handler( void );
 		void	_update_games( void );
-		void	_loop( void );
+		bool	_is_playing(const std::string &channel_name);
 
+		// -- PRIVATE STATIC CONSTANTS
 		static const std::string	_default_hostname;
 		static const port_t			_default_port = 6697;
 		static const bool			_default_verbose = true;
@@ -65,6 +76,7 @@ class IRC
 		static const std::string	_default_username;
 		static const std::string	_default_realname;
 		
+		// -- PRIVATE STATIC METHODS
 		static std::string	_get_next_arg(int argc, char *argv[], int &i);
 		static port_t		_parse_port(const std::string &port_str);
 		static void			_print_usage(int status = 1);
