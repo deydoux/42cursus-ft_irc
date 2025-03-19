@@ -144,7 +144,7 @@ IRC IRC::launch_irc_client(int argc, char **argv)
 	IRC irc_client = IRC(hostname, port, password, verbose);
 
 	if (!is_hostname_set)
-		irc_client.log("Using default port: " + hostname, warning);
+		irc_client.log("Using default hostname: " + hostname, warning);
 	if (!is_port_set)
 		irc_client.log("Using default port: " + to_string(port), warning);
 	if (!is_pass_set)
