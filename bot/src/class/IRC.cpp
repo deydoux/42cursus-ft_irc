@@ -28,6 +28,7 @@ IRC::IRC(const std::string hostname, const port_t port, const std::string pass, 
 	_verbose(verbose)
 {
 	srand(time(NULL));
+	_init_command_handlers();
 	TriviaGame::initialize_phrases();
 	this->log("Constructed", debug);
 }
@@ -204,111 +205,6 @@ void IRC::_send_registration( void )
 	send_raw(registration);
 }
 
-void IRC::_handle_command(const std::string &command, const std::vector<std::string> &args)
-{
-	std::string sender_nickname = extract_nickname(args[0]);
-
-	if (command == "INVITE") 
-	{
-		if (args[2] != _nickname)
-			return ;
-		
-		std::string channel = args[3];
-		send_raw(create_reply("JOIN", channel));
-		_inviting_client = sender_nickname;
-	}
-	else if (command == "JOIN") 
-	{
-		std::string channel = args[2];
-		
-		if (_inviting_client.empty())
-			return ;
-
-		if (sender_nickname != _nickname && _is_playing(channel)) {
-			TriviaGame *game = _ongoing_trivia_games[channel];
-			game->add_player(sender_nickname);
-			return ;
-		}
-
-		std::string greet_message = "Thanks for inviting me to this channel " + _inviting_client + "!";
-		send_raw(create_reply("PRIVMSG", channel, greet_message), 1000);
-
-		_inviting_client = "";
-	}
-	else if (command == "PRIVMSG") 
-	{
-		if (std::string("&#").find(args[2][0]) == std::string::npos)
-			// TODO: maybe act in a specific way if a pm is sent to HelloKitty ?
-			return ;
-
-		std::string channel = args[2];
-		std::string message = args[3];
-		bool playing = _is_playing(channel);
-		TriviaGame *game;
-
-		if (!playing && message.substr(0, 7) == "~TRIVIA") {
-			// TODO: Maybe put a limit of simultanious trivia game ?
-			send_raw(create_reply("NAMES", channel));
-			_trivia_request_sent.push_back(channel);
-			return ;
-		} else if (!playing) {
-			return ;
-		}
-
-		game = _ongoing_trivia_games[channel];
-		
-		if (message.substr(0, 5) == "~STOP") {
-			game->show_final_results();
-			return ;
-		}
-
-		if (game->is_waiting_before_start())
-			game->mark_user_as_ready(sender_nickname);
-		if (game->is_waiting_for_answers())
-			game->store_answer(message, sender_nickname);
-	}
-	else if (command == "PART")
-	{
-		std::string channel = args[2];
-		if (_is_playing(channel))
-		{
-			TriviaGame *game = _ongoing_trivia_games[channel];
-			game->remove_player(sender_nickname);
-			return ;
-		}
-	}
-	
-	int numeric = std::atoi(command.c_str());
-	if (numeric == 353)
-	{
-		if (args[2] != _nickname)
-			return ;
-
-		std::string channel = args[4];
-		if (std::find(_trivia_request_sent.begin(), _trivia_request_sent.end(), channel) == _trivia_request_sent.end())
-			return ;
-		_trivia_request_sent.erase(std::remove(_trivia_request_sent.begin(), _trivia_request_sent.end(), channel), _trivia_request_sent.end());
-
-		std::vector<std::string> clients_on_channel = ft_split(args[5], ' ');
-		for (size_t i = 0; i < clients_on_channel.size(); i++) {
-			if (clients_on_channel[i][0] == '@')
-				clients_on_channel[i].erase(0, 1);
-		}
-
-		if (clients_on_channel.size() < 3) {
-			std::string reply = TriviaGame::pick_randomly(TriviaGame::not_enough_players_warnings);
-			return send_raw(create_reply("PRIVMSG", channel, reply), 500);
-		}
-
-		clients_on_channel.erase(std::remove(clients_on_channel.begin(), clients_on_channel.end(), _nickname), clients_on_channel.end());
-
-		TriviaGame *game = new TriviaGame(*this, channel, clients_on_channel);
-		_ongoing_trivia_games[channel] = game;
-
-		game->greet_players();
-	}
-}
-
 void IRC::_handle_message(std::string message)
 {
 	if (message.empty())
@@ -336,7 +232,15 @@ void IRC::_handle_message(std::string message)
 	}
 
 	log("Parsed command: " + oss.str(), debug);
-	_handle_command(args[1], args);
+	command_handlers_t::iterator it = _command_handlers.find(args[1]);
+        
+	if (it != _command_handlers.end()) {
+		std::string sender_nickname = extract_nickname(args[0]);
+		(this->*(it->second))(sender_nickname, args);
+	} else {
+		int numeric = std::atoi(args[1].c_str());
+		_handle_numerics(numeric, args);
+	}
 }
 
 void IRC::_handle_messages(const std::string &messages)
@@ -399,6 +303,139 @@ void IRC::_update_games( void )
 bool IRC::_is_playing(const std::string &channel_name)
 {
 	return _ongoing_trivia_games.find(channel_name) != _ongoing_trivia_games.end();
+}
+
+// Commands Handling
+
+void IRC::_init_command_handlers( void )
+{
+	_command_handlers["INVITE"] = &IRC::_handle_invite_command;
+	_command_handlers["JOIN"] = &IRC::_handle_join_command;
+	_command_handlers["KICK"] = &IRC::_handle_kick_command;
+	_command_handlers["PART"] = &IRC::_handle_part_command;
+	_command_handlers["PRIVMSG"] = &IRC::_handle_privmsg_command;
+}
+
+void IRC::_handle_invite_command(const std::string sender_nickname, const std::vector<std::string> &args) 
+{
+	std::string target = args[2];
+	std::string channel_name = args[3];
+
+	if (target != _nickname)
+			return ;
+	
+	send_raw(create_reply("JOIN", channel_name));
+	_inviting_client = sender_nickname;
+}
+
+void IRC::_handle_join_command(const std::string sender_nickname, const std::vector<std::string> &args)
+{
+	std::string channel_name = args[2];
+		
+	if (_inviting_client.empty())
+		return ;
+
+	if (sender_nickname != _nickname && _is_playing(channel_name)) {
+		TriviaGame *game = _ongoing_trivia_games[channel_name];
+		game->add_player(sender_nickname);
+		return ;
+	}
+
+	std::string greet_message = "Thanks for inviting me to this channel " + _inviting_client + "!";
+	send_raw(create_reply("PRIVMSG", channel_name, greet_message), 1000);
+
+	_inviting_client = "";
+}
+
+void IRC::_handle_kick_command(const std::string, const std::vector<std::string> &args)
+{
+	std::string channel_name = args[2];
+	std::string kicked_client_nickname = args[3];
+
+	if (_is_playing(channel_name)) {
+		TriviaGame *game = _ongoing_trivia_games[channel_name];
+		game->remove_player(kicked_client_nickname);
+	}
+}
+
+void IRC::_handle_part_command(const std::string sender_nickname, const std::vector<std::string> &args)
+{
+	std::string channel_name = args[2];
+
+	if (_is_playing(channel_name)) {
+		TriviaGame *game = _ongoing_trivia_games[channel_name];
+		game->remove_player(sender_nickname);
+	}
+}
+
+void IRC::_handle_privmsg_command(const std::string sender_nickname, const std::vector<std::string> &args)
+{
+	std::string channel_name = args[2];
+	std::string message = args[3];
+	TriviaGame *game;
+
+	if (std::string("&#").find(channel_name[0]) == std::string::npos)
+		// TODO: maybe act in a specific way if a pm is sent to HelloKitty ?
+		return ;
+
+	bool playing = _is_playing(channel_name);
+	if (!playing && message.substr(0, 7) == "~TRIVIA") {
+		if (_ongoing_trivia_games.size() >= 3) {
+			std::string warning_message = "There's currently too many trivia game being played at the same time on this server. Just wait a few minutes and try again!";
+			send_raw(create_reply("PRIVMSG", channel_name, warning_message), 1000);
+			return ;
+		}
+
+		send_raw(create_reply("NAMES", channel_name));
+		_trivia_request_sent.push_back(channel_name);
+		return ;
+	} else if (!playing) {
+		return ;
+	}
+
+	game = _ongoing_trivia_games[channel_name];
+	
+	if (message.substr(0, 5) == "~STOP")
+		return game->show_final_results();
+
+	if (game->is_waiting_before_start())
+		game->mark_user_as_ready(sender_nickname);
+	if (game->is_waiting_for_answers())
+		game->store_answer(message, sender_nickname);
+}
+
+void IRC::_handle_numerics(int numeric, const std::vector<std::string> &args)
+{
+	if (numeric != RPL_NAMREPLY)
+		return ;
+
+	std::string sender_nickname = args[2];
+	std::string channel_name = args[4];
+
+	if (sender_nickname != _nickname)
+		return ;
+
+	if (std::find(_trivia_request_sent.begin(), _trivia_request_sent.end(), channel_name) == _trivia_request_sent.end())
+		return ;
+	_trivia_request_sent.erase(std::remove(_trivia_request_sent.begin(), _trivia_request_sent.end(), channel_name), _trivia_request_sent.end());
+
+	std::vector<std::string> clients_on_channel = ft_split(args[5], ' ');
+	for (size_t i = 0; i < clients_on_channel.size(); i++) {
+		if (clients_on_channel[i][0] == '@')
+			clients_on_channel[i].erase(0, 1);
+	}
+
+	if (clients_on_channel.size() < 3) {
+		std::string reply = TriviaGame::pick_randomly(TriviaGame::not_enough_players_warnings);
+		return send_raw(create_reply("PRIVMSG", channel_name, reply), 500);
+	}
+
+	clients_on_channel.erase(std::remove(clients_on_channel.begin(), clients_on_channel.end(), _nickname), clients_on_channel.end());
+
+	TriviaGame *game = new TriviaGame(*this, channel_name, clients_on_channel);
+	_ongoing_trivia_games[channel_name] = game;
+
+	game->greet_players();
 }
 
 // -- PRIVATE STATIC METHODS

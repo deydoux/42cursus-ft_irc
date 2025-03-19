@@ -257,15 +257,15 @@ TriviaGame::questions_t TriviaGame::_fetch_questions()
 void TriviaGame::_start_game( void )
 {
 	_round_counter = 0;
+	_send("Great! Let me just gather my questions quickly ...");
 	_questions = _fetch_questions();
 
 	if (_questions.empty()) {
 		_send("Sorry, I couldn't fetch the questions. Let's try again later!");
 		return _irc_client.remove_trivia_game(this);
-		//TODO check
 	}
 
-	_send("Great! Let's start right now!");
+	_send("Done! Let's not wait another second!");
 	_ask_trivia_question();
 }
 

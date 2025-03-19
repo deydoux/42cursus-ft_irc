@@ -86,7 +86,6 @@ void TriviaGame::initialize_phrases()
 	TriviaGame::farewells.push_back("👏 Great game, everyone! Whether you won or just had fun, you're all champions! 🏆");  
 	TriviaGame::farewells.push_back("🎉 That's a wrap! Thanks for playing—hope you had a blast! 🚀");  
 	TriviaGame::farewells.push_back("🙌 Well played! Trivia is more fun with awesome players like you! 🎯");  
-	TriviaGame::farewells.push_back("🏅 Game over, but the fun never ends! See you next time! 😸");  
 	TriviaGame::farewells.push_back("👏 Thanks for playing! Win or lose, you made it exciting! 🎊");  
 
 	// Teasers Before Results

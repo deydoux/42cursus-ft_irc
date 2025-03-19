@@ -10,12 +10,16 @@
 #include <iostream>
 #include <map>
 
+#define RPL_NAMREPLY 353
+
 class TriviaGame;
 
 class IRC
 {
 	public:
 		// -- TYPES
+		typedef void (IRC::*command_handler_t)(const std::string, const std::vector<std::string> &);
+		typedef std::map<std::string, command_handler_t> command_handlers_t;
 		typedef std::map<std::string, TriviaGame *> trivias_t; // channel_name: trivia ptr
 		typedef uint16_t	port_t;
 		
@@ -55,11 +59,11 @@ class IRC
 		const std::string	_server_password;
 		const std::string	_nickname;
 		const bool			_verbose;
+		command_handlers_t	_command_handlers;
 
 		// -- PRIVATE METHODS
 		void	_connect_to_server( void );
 		void	_send_registration( void );
-		void	_handle_command(const std::string &command, const std::vector<std::string> &args);
 		void	_handle_message(std::string message);
 		void	_handle_messages(const std::string &messages);
 		std::string	_receive( void );
@@ -68,14 +72,22 @@ class IRC
 		void	_update_games( void );
 		bool	_is_playing(const std::string &channel_name);
 
-		// -- PRIVATE STATIC CONSTANTS
+		void	_handle_invite_command(const std::string sender_nickname, const std::vector<std::string> &args);
+		void	_handle_join_command(const std::string sender_nickname, const std::vector<std::string> &args);
+		void	_handle_kick_command(const std::string sender_nickname, const std::vector<std::string> &args);
+		void	_handle_part_command(const std::string sender_nickname, const std::vector<std::string> &args);
+		void	_handle_privmsg_command(const std::string sender_nickname, const std::vector<std::string> &args);
+		void	_handle_numerics(int numeric, const std::vector<std::string> &args);
+		void	_init_command_handlers( void );
+
+		// -- PRIVATE STATIC CONSTANTS + ATTRIBUTES
 		static const std::string	_default_hostname;
 		static const port_t			_default_port = 6697;
 		static const bool			_default_verbose = true;
-
 		static const std::string	_default_nickname;
 		static const std::string	_default_username;
 		static const std::string	_default_realname;
+
 		
 		// -- PRIVATE STATIC METHODS
 		static std::string	_get_next_arg(int argc, char *argv[], int &i);
