@@ -21,9 +21,10 @@ bool IRC::stop = false;
 
 IRC::IRC(const std::string hostname, const port_t port, const std::string pass, bool verbose) :
 	is_connected(false),
-	_port(port),
-	_hostname(hostname),
-	_password(pass),
+	_server_port(port),
+	_server_hostname(hostname),
+	_server_password(pass),
+	_nickname(_default_nickname),
 	_verbose(verbose)
 {
 	srand(time(NULL));
@@ -170,7 +171,7 @@ std::string IRC::extract_nickname(const std::string& client_mask) {
 
 void IRC::_connect_to_server( void )
 {
-	this->log("Trying to connect to " + _hostname + " from port " + to_string(_port) + " ...");
+	this->log("Trying to connect to " + _server_hostname + " from port " + to_string(_server_port) + " ...");
 
 	// Creating socket
 	_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -180,9 +181,9 @@ void IRC::_connect_to_server( void )
 	this->log("Socket created", debug);
 
 	// Set up server address struct
-	struct sockaddr_in server_addr = _init_address(_port);
+	struct sockaddr_in server_addr = _init_address(_server_port);
 
-	if (inet_pton(AF_INET, _hostname.c_str(), &server_addr.sin_addr) <= 0)
+	if (inet_pton(AF_INET, _server_hostname.c_str(), &server_addr.sin_addr) <= 0)
 		throw std::runtime_error("Invalid address");
 
 	// Connect to server
@@ -196,9 +197,9 @@ void IRC::_send_registration( void )
 {
 	std::string registration;
 	
-	if (!_password.empty())
-		registration += create_reply("PASS", _password);
-	registration += create_reply("NICK", _default_nickname);
+	if (!_server_password.empty())
+		registration += create_reply("PASS", _server_password);
+	registration += create_reply("NICK", _nickname);
 	registration += create_reply("USER", _default_username + " 0 *", _default_realname);
 	send_raw(registration);
 }
@@ -209,7 +210,7 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 
 	if (command == "INVITE") 
 	{
-		if (args[2] != _default_nickname)
+		if (args[2] != _nickname)
 			return ;
 		
 		std::string channel = args[3];
@@ -223,7 +224,7 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 		if (_inviting_client.empty())
 			return ;
 
-		if (sender_nickname != _default_nickname && _is_playing(channel)) {
+		if (sender_nickname != _nickname && _is_playing(channel)) {
 			TriviaGame *game = _ongoing_trivia_games[channel];
 			game->add_player(sender_nickname);
 			return ;
@@ -280,7 +281,7 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 	int numeric = std::atoi(command.c_str());
 	if (numeric == 353)
 	{
-		if (args[2] != _default_nickname)
+		if (args[2] != _nickname)
 			return ;
 
 		std::string channel = args[4];
@@ -299,7 +300,7 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 			return send_raw(create_reply("PRIVMSG", channel, reply), 500);
 		}
 
-		clients_on_channel.erase(std::remove(clients_on_channel.begin(), clients_on_channel.end(), _default_nickname), clients_on_channel.end());
+		clients_on_channel.erase(std::remove(clients_on_channel.begin(), clients_on_channel.end(), _nickname), clients_on_channel.end());
 
 		TriviaGame *game = new TriviaGame(*this, channel, clients_on_channel);
 		_ongoing_trivia_games[channel] = game;

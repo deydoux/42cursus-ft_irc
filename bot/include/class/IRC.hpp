@@ -50,9 +50,10 @@ class IRC
 		int					_socket_fd;
 
 		// -- PRIVATE CONSTANTS
-		const port_t		_port;
-		const std::string	_hostname;
-		const std::string	_password;
+		const port_t		_server_port;
+		const std::string	_server_hostname;
+		const std::string	_server_password;
+		const std::string	_nickname;
 		const bool			_verbose;
 
 		// -- PRIVATE METHODS
