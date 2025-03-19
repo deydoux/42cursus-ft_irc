@@ -269,7 +269,7 @@ void TriviaGame::_start_game( void )
 	_ask_trivia_question();
 }
 
-TriviaGame::player_t TriviaGame::_create_player(const std::string &nick)
+TriviaGame::player_t TriviaGame::_create_player(const std::string nick)
 {
 	TriviaGame::player_t player;
     player.nickname = nick;

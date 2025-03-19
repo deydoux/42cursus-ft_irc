@@ -99,7 +99,7 @@ private:
 	// -- PRIVATE METHODS
 	questions_t	_fetch_questions();
 	void		_start_game( void );
-	player_t	_create_player(const std::string &nick);
+	player_t	_create_player(const std::string nick);
 	player_t	*_get_player(const std::string &nickname);
 	std::string	_create_reply(const std::string &message);
 	std::string	_create_empty_reply( void );
@@ -112,7 +112,7 @@ private:
 	static bool	_compare_by_total_score(const player_t &p1, const player_t &p2);
 
 	// -- PRIVATE STATIC CONSTANTS + ATTRIBUTES
-	static const int	_nb_rounds = 10;
+	static const int	_nb_rounds = 3;
 	static const int	_round_duration_sec = 30;
 	static const int	_points = 10;
 	static const int	_bonus_points = 5;

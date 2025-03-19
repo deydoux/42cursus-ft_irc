@@ -331,15 +331,15 @@ void IRC::_handle_invite_command(const std::string sender_nickname, const std::v
 void IRC::_handle_join_command(const std::string sender_nickname, const std::vector<std::string> &args)
 {
 	std::string channel_name = args[2];
-		
-	if (_inviting_client.empty())
-		return ;
 
 	if (sender_nickname != _nickname && _is_playing(channel_name)) {
 		TriviaGame *game = _ongoing_trivia_games[channel_name];
 		game->add_player(sender_nickname);
 		return ;
 	}
+		
+	if (_inviting_client.empty())
+		return ;
 
 	std::string greet_message = "Thanks for inviting me to this channel " + _inviting_client + "!";
 	send_raw(create_reply("PRIVMSG", channel_name, greet_message), 1000);
@@ -354,7 +354,11 @@ void IRC::_handle_kick_command(const std::string, const std::vector<std::string>
 
 	if (_is_playing(channel_name)) {
 		TriviaGame *game = _ongoing_trivia_games[channel_name];
-		game->remove_player(kicked_client_nickname);
+
+		if (kicked_client_nickname == _nickname)
+			remove_trivia_game(game);
+		else
+			game->remove_player(kicked_client_nickname);
 	}
 }
 
