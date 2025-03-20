@@ -13,10 +13,10 @@
 Client::Client(const int fd, const std::string ip, Server &server):
 	_fd(fd),
 	_ip(ip),
-	_server(server),
-	_disconnect_request(false),
 	_registered(false),
-	_quit_reason("Client closed connection")
+	_disconnect_request(false),
+	_quit_reason("Client closed connection"),
+	_server(server)
 {
 	log("Accepted connection from " + std::string(_ip));
 }
