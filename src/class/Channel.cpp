@@ -23,7 +23,7 @@ Channel::~Channel()
 	log("Destroyed", debug);
 }
 
-const std::string	&Channel::get_name( void )
+const std::string	&Channel::get_name() const
 {
 	return _name;
 }
@@ -88,7 +88,7 @@ void Channel::remove_client(Client &client)
 	client.remove_channel_operator(_name);
 }
 
-const clients_t &Channel::get_members()
+const clients_t &Channel::get_members() const
 {
 	return _members;
 }
@@ -107,7 +107,7 @@ const std::string Channel::list_members( void )
 	return result;
 }
 
-bool Channel::is_full(void)
+bool Channel::is_full() const
 {
 	return _limit_members && _max_members <= _members.size();
 }
@@ -117,12 +117,12 @@ void	Channel::set_passkey(std::string &passkey)
 	_passkey = passkey;
 }
 
-bool	Channel::check_passkey(std::string &passkey)
+bool	Channel::check_passkey(std::string &passkey) const
 {
 	return _passkey == "" || _passkey == passkey;
 }
 
-bool Channel::is_invite_only(void)
+bool Channel::is_invite_only() const
 {
 	return _is_invite_only;
 }
@@ -154,9 +154,9 @@ bool Channel::is_client_invited(Client &client)
 	return true;
 }
 
-void Channel::send_broadcast(const std::string &message, int exclude_fd)
+void Channel::send_broadcast(const std::string &message, int exclude_fd) const
 {
-	for (clients_t::iterator member = _members.begin(); member != _members.end(); member++)
+	for (clients_t::const_iterator member = _members.begin(); member != _members.end(); member++)
 		if (member->first != exclude_fd)
 			member->second->send(message);
 }
@@ -166,7 +166,7 @@ std::string Channel::get_modes(bool get_modes_values)
 	return stringify_modes(&_modes, get_modes_values);
 }
 
-const std::string	Channel::get_creation_timestamp( void ) const
+const std::string Channel::get_creation_timestamp() const
 {
 	return _creation_timestamp;
 }
@@ -176,7 +176,7 @@ void Channel::set_is_topic_protected(bool is_topic_protected)
 	_is_topic_protected = is_topic_protected;
 }
 
-bool Channel::is_topic_protected( void )
+bool Channel::is_topic_protected() const
 {
 	return _is_topic_protected;
 }

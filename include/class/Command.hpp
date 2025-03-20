@@ -40,6 +40,7 @@ private:
 	static const _command_t	_topic;
 	static const _command_t	_user;
 	static const _command_t	_who;
+
 	static _commands_t	_commands;
 
 public:
