@@ -43,7 +43,7 @@ public:
 	// Server
 	Server	&get_server() const;
 	// Channel
-	Channel		*get_channel(const std::string &name);
+	Channel		*get_channel(const std::string &name) const;
 	channels_t	&get_active_channels();
 	size_t		get_channels_count() const;
 	// Client

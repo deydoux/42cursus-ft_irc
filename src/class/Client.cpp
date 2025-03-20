@@ -384,7 +384,7 @@ std::string Client::get_mask(void) const
 	return std::string(_nickname + "!~" + _username + "@" + _ip);
 }
 
-channels_t &Client::get_active_channels( void )
+channels_t &Client::get_active_channels()
 {
 	return _active_channels;
 }
@@ -394,9 +394,9 @@ size_t Client::get_channels_count(void) const
 	return _active_channels.size();
 }
 
-Channel *Client::get_channel(const std::string &name)
+Channel *Client::get_channel(const std::string &name) const
 {
-	channels_t::iterator it = _active_channels.find(name);
+	channels_t::const_iterator it = _active_channels.find(name);
 	if (it == _active_channels.end())
 		return NULL;
 
