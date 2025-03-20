@@ -218,11 +218,6 @@ void Client::set_quit_reason(const std::string &reason)
 	_quit_reason = reason;
 }
 
-bool Client::operator==(const Client &other) const
-{
-	return get_mask() == other.get_mask();
-}
-
 const std::string Client::create_cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg, const std::string &message)
 {
 	std::ostringstream oss;

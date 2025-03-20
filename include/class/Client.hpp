@@ -70,8 +70,6 @@ public:
 	void	set_realname(const std::string &realname);
 	void	set_username(const std::string &username);
 
-	bool	operator==(const Client &other) const;
-
 private:
 // Static functions
 	static bool			_is_valid_nickname(const std::string &nickname);
