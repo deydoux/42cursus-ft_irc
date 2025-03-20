@@ -32,6 +32,9 @@ void Command::init()
 
 void Command::execute(const args_t &args, Client &client, Server &server)
 {
+	if (args.empty())
+		return;
+
 	_commands_t::iterator command_it = _commands.find(to_lower(args[0]));
 
 	if (command_it == _commands.end()) {
