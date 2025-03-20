@@ -480,7 +480,7 @@ void	Client::close_all_channels(std::string &reason)
 		this->part_channel(*it->second, reason);
 }
 
-void Client::notify_quit()
+void Client::notify_quit() const
 {
 	broadcast(create_cmd_reply(get_mask(), "QUIT", "", _quit_reason));
 }

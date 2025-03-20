@@ -35,7 +35,7 @@ public:
 	void				cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg = "", const std::string &message = "") const;
 	void				handle_messages(std::string messages);
 	void				log(const std::string &message, const log_level level = info) const;
-	void				notify_quit();
+	void				notify_quit() const;
 	void				reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	void				send_error(const std::string &message);
 
@@ -69,7 +69,6 @@ public:
 	void	set_password(const std::string &password);
 	void	set_realname(const std::string &realname);
 	void	set_username(const std::string &username);
-
 
 	bool	operator==(const Client &other) const;
 
