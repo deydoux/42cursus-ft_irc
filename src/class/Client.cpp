@@ -107,14 +107,14 @@ void Client::broadcast(const std::string &message) const
 
 const std::string Client::create_motd_reply() const
 {
-	std::vector<std::string> motd_lines = _server.get_motd_lines();
+	const std::vector<std::string> &motd_lines = _server.get_motd_lines();
 
 	if (motd_lines.empty())
 		return create_reply(ERR_NOMOTD, "", "MOTD File is missing");
 
 	std::string reply = create_reply(RPL_MOTDSTART, "", "- " + _server.get_name() + " message of the day");
 
-	for (std::vector<std::string>::iterator it = motd_lines.begin(); it != motd_lines.end(); ++it)
+	for (std::vector<std::string>::const_iterator it = motd_lines.begin(); it != motd_lines.end(); ++it)
 		reply += create_reply(RPL_MOTD, "", "- " + *it);
 
 	reply += create_reply(RPL_ENDOFMOTD, "", "End of MOTD command");

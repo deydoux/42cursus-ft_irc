@@ -40,7 +40,7 @@ public:
 // Getters
 	// Server
 	bool							check_password(const std::string &password) const;
-	const bool						&is_verbose() const;
+	bool							is_verbose() const;
 	const std::string				&get_name() const;
 	const std::string				&get_start_time() const;
 	const std::vector<std::string>	&get_motd_lines() const;
