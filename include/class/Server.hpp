@@ -50,17 +50,17 @@ public:
 	size_t	get_connections() const;
 	size_t	get_max_clients() const;
 	size_t	get_max_connections() const;
-	// Channels
+	// Channel
 	Channel		*get_channel(const std::string &channel_name) const;
 	channels_t	get_channels() const;
-	// Clients
+	// Client
 	Client		*get_client(const std::string &nickname) const;
 	clients_t	get_clients(const std::string &mask) const;
 
 // Setters
 	// Stats
 	void	register_client();
-	// Channels
+	// Channel
 	void	add_channel(Channel &new_channel);
 	void	delete_channel(const std::string &name);
 
