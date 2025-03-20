@@ -98,7 +98,7 @@ const std::string Channel::list_members( void )
 	std::string result;
 
 	bool is_chan_op;
-	for (clients_t::iterator it = this->_members.begin(); it != this->_members.end(); it++) {
+	for (clients_t::iterator it = this->_members.begin(); it != this->_members.end(); ++it) {
 		is_chan_op = it->second->is_channel_operator(this->_name);
 		if (!result.empty()) result += " ";
 		result += std::string(is_chan_op ? "@" : "") + it->second->get_nickname();

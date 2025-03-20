@@ -10,13 +10,13 @@ static void names_handler(const args_t &args, Client &client, Server &server)
 	if (args.size() == 1) {
 		channels_t channels = server.get_channels();
 
-		for (channels_t::iterator it = channels.begin(); it != channels.end(); it++)
+		for (channels_t::iterator it = channels.begin(); it != channels.end(); ++it)
 			reply += client.create_reply(RPL_NAMREPLY, "= " + it->first, it->second->list_members());
 
 		std::string lost_clients_nicknames;
 		clients_t clients = server.get_clients("*");
 
-		for (clients_t::iterator it = clients.begin(); it != clients.end(); it++) {
+		for (clients_t::iterator it = clients.begin(); it != clients.end(); ++it) {
 			if (it->second->get_channels_count() == 0) {
 				if (!lost_clients_nicknames.empty()) lost_clients_nicknames += " ";
 				lost_clients_nicknames += it->second->get_nickname();

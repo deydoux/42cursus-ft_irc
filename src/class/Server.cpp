@@ -107,7 +107,7 @@ clients_t Server::get_clients(const std::string &mask) const
 		return _clients;
 
 	bool has_wildcards = mask.find_first_of("*?") != std::string::npos;
-	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); it++) {
+	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
 		Client *client = it->second;
 
 		if ((!has_wildcards && client->get_nickname() == mask)

@@ -14,7 +14,7 @@ static void privmsg_handler(const args_t &args, Client &client, Server &server)
 	std::vector<std::string> recipients = ft_split(args[1], ',');
 	const std::string &message = args[2];
 
-	for (std::vector<std::string>::iterator it = recipients.begin(); it != recipients.end(); it++) {
+	for (std::vector<std::string>::iterator it = recipients.begin(); it != recipients.end(); ++it) {
 		const std::string &recipient = *it;
 
 		if (Channel::is_prefix(recipient[0])) {
