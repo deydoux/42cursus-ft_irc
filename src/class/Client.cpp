@@ -11,12 +11,12 @@
 #include <algorithm>
 
 Client::Client(const int fd, const std::string ip, Server &server):
+	_registered(false),
 	_fd(fd),
 	_ip(ip),
-	_registered(false),
 	_disconnect_request(false),
-	_quit_reason("Client closed connection"),
-	_server(server)
+	_server(server),
+	_quit_reason("Client closed connection")
 {
 	log("Accepted connection from " + std::string(_ip));
 }
@@ -89,7 +89,7 @@ void Client::broadcast(const std::string &message) const
 {
 	clients_t clients_to_notify;
 
-	for (channels_t::const_iterator it = _active_channels.begin(); it != _active_channels.end(); ++it) {
+	for (channels_t::const_iterator it = _channels.begin(); it != _channels.end(); ++it) {
 		Channel *channel = it->second;
 
 		clients_t members = channel->get_members();
@@ -379,20 +379,20 @@ std::string Client::get_mask(void) const
 	return std::string(_nickname + "!~" + _username + "@" + _ip);
 }
 
-channels_t &Client::get_active_channels()
+channels_t &Client::get_channels()
 {
-	return _active_channels;
+	return _channels;
 }
 
 size_t Client::get_channels_count(void) const
 {
-	return _active_channels.size();
+	return _channels.size();
 }
 
 Channel *Client::get_channel(const std::string &name) const
 {
-	channels_t::const_iterator it = _active_channels.find(name);
-	if (it == _active_channels.end())
+	channels_t::const_iterator it = _channels.find(name);
+	if (it == _channels.end())
 		return NULL;
 
 	return it->second;
@@ -422,7 +422,7 @@ bool	Client::join_channel(Channel &channel, std::string passkey)
 	else
 	{
 		channel.add_client(*this);
-		_active_channels[channel.get_name()] = &channel;
+		_channels[channel.get_name()] = &channel;
 
 		return (true);
 	}
@@ -451,7 +451,7 @@ void	Client::kick_channel(Channel &channel, const std::string &kicked_client, st
 			this->get_mask(), "KICK", channel.get_name() + ' ' + kicked_client, reason
 		));
 		channel.remove_client(*client_to_be_kicked);
-		client_to_be_kicked->get_active_channels().erase(channel.get_name());
+		client_to_be_kicked->get_channels().erase(channel.get_name());
 	}
 }
 
@@ -461,7 +461,7 @@ void	Client::part_channel(Channel &channel, std::string &reason)
 		this->get_mask(), "PART", channel.get_name() , reason
 	));
 	channel.remove_client(*this);
-	_active_channels.erase(channel.get_name());
+	_channels.erase(channel.get_name());
 	remove_channel_operator(channel.get_name());
 
 	if (channel.get_members().empty())
@@ -470,8 +470,7 @@ void	Client::part_channel(Channel &channel, std::string &reason)
 
 void	Client::close_all_channels(std::string &reason)
 {
-	channels_t to_part = this->get_active_channels();
-	for (std::map<std::string, Channel *>::iterator it = to_part.begin(); it != to_part.end(); ++it)
+	for (std::map<std::string, Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it)
 		this->part_channel(*it->second, reason);
 }
 

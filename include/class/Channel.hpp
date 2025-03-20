@@ -65,21 +65,20 @@ public:
 	void				add_modes(modes_t *modes);
 
 private:
+// Variables
 	const std::string	_name;
-	clients_t			_members;
 	const std::string	_creation_timestamp;
-	clients_t			_invited_clients;
 
+	bool			_is_invite_only;
+	bool			_is_topic_protected;
+	bool			_limit_members;
+	clients_t		_invited_clients;
+	clients_t		_members;
+	size_t			_max_members;
 	std::string		_passkey;
-
-	std::string		_topic;
 	std::string		_topic_last_edited_at; // unix timestamp
 	std::string		_topic_last_edited_by; // client nickname
-	bool			_is_topic_protected;
-
-	bool			_limit_members;
-	size_t			_max_members;
-	bool			_is_invite_only;
+	std::string		_topic;
 
 	std::vector<std::string>	_banned_user_masks; // eg: nick!*@* , *!*@192.168.1.* ...
 

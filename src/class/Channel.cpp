@@ -7,11 +7,11 @@
 Channel::Channel(Client &creator, std::string &name, const bool verbose):
 	_name(name),
 	_creation_timestamp(unix_timestamp()),
-	_passkey(),
-	_topic(),
+	_is_invite_only(false),
 	_is_topic_protected(false),
 	_limit_members(false),
-	_is_invite_only(false),
+	_passkey(),
+	_topic(),
 	_verbose(verbose)
 {
 	log("Created", debug);

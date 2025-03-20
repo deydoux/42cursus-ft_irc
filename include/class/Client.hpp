@@ -44,7 +44,7 @@ public:
 	Server	&get_server() const;
 	// Channel
 	Channel		*get_channel(const std::string &name) const;
-	channels_t	&get_active_channels();
+	channels_t	&get_channels();
 	size_t		get_channels_count() const;
 	// Client
 	bool				is_channel_operator(std::string channel_name) const;
@@ -77,23 +77,23 @@ private:
 	static std::string	_create_line(const std::string &content);
 
 // Variables
-	const int			_fd;
-	const std::string	_ip;
-
+	// Client
 	bool		_registered;
 	std::string	_buffer;
-	// Server
-	bool		_disconnect_request;
-	std::string	_quit_reason;
-	Server		&_server;
-	// Channel
-	channels_t					_active_channels;
-	std::vector<std::string>	_channel_operator;
-	// Client
 	std::string	_nickname;
 	std::string	_password;
 	std::string	_realname;
 	std::string	_username;
+	// Server
+	const int			_fd;
+	const std::string	_ip;
+	bool				_disconnect_request;
+	Server				&_server;
+	std::string			_quit_reason;
+	// Channel
+	channels_t					_channels;
+	std::vector<std::string>	_channel_operator;
+
 
 // Member functions
 	void	_check_registration();
