@@ -130,7 +130,7 @@ bool Channel::is_invite_only() const
 	return _is_invite_only;
 }
 
-bool Channel::is_client_banned(Client &client)
+bool Channel::is_client_banned(Client &client) const
 {
 	std::string	client_mask = client.get_mask();
 
@@ -138,10 +138,11 @@ bool Channel::is_client_banned(Client &client)
 		if (match_mask(_banned_user_masks[i], client_mask))
 			return true;
 	}
+
 	return false;
 }
 
-bool Channel::is_client_member(Client &client)
+bool Channel::is_client_member(Client &client) const
 {
 	return _members.find(client.get_fd()) != _members.end();
 }

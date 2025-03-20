@@ -36,9 +36,9 @@ public:
 	const std::string	get_topic_last_edited_by() const;
 	const std::string	get_topic() const;
 	// Client
-	bool			is_client_banned(Client &client);
+	bool			is_client_banned(Client &client) const;
 	bool			is_client_invited(Client &client);
-	bool			is_client_member(Client &client);
+	bool			is_client_member(Client &client) const;
 	const clients_t	&get_members() const;
 
 // Setters
