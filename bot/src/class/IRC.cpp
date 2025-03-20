@@ -230,8 +230,12 @@ void IRC::_handle_message(std::string message)
 		std::string sender_nickname = extract_nickname(args[0]);
 		(this->*(it->second))(sender_nickname, args);
 	} else {
-		int numeric = std::atoi(args[1].c_str());
-		_handle_numerics(numeric, args);
+		std::istringstream iss(args[1]);
+		int numeric;
+
+		iss >> numeric;
+		if (iss.eof() && !iss.fail())
+			_handle_numerics(numeric, args);
 	}
 }
 
