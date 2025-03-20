@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <ctime>
 
+Command::_commands_t Command::_commands;
+
 void Command::init()
 {
 	_commands["hk"] = _hk;
@@ -60,5 +62,3 @@ void Command::execute(const args_t &args, Client &client, Server &server)
 
 	command.handler(args, client, server);
 }
-
-Command::_commands_t Command::_commands;

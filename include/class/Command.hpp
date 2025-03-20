@@ -7,29 +7,23 @@ class Client;
 
 class Command
 {
-public:
-	static void init();
-	static void execute(const args_t &args, Client &client, Server &server);
 private:
+// Types
 	typedef void	(*_command_handler_t)(const args_t &, Client &, Server &);
-
 	typedef enum {
 		none,
 		unregistered_only,
 		registered_only
 	}	_register_mode_t;
-
 	typedef struct {
 		_command_handler_t	handler;
 		size_t				min_args;
 		size_t				max_args;
 		_register_mode_t	register_mode;
 	}	_command_t;
-
 	typedef std::map<std::string, _command_t>	_commands_t;
 
-	static _commands_t	_commands;
-
+// Static variables
 	static const _command_t	_hk;
 	static const _command_t	_invite;
 	static const _command_t	_join;
@@ -46,6 +40,12 @@ private:
 	static const _command_t	_topic;
 	static const _command_t	_user;
 	static const _command_t	_who;
+	static _commands_t	_commands;
+
+public:
+// Static functions
+	static void init();
+	static void execute(const args_t &args, Client &client, Server &server);
 };
 
 #endif // COMMAND_HPP
