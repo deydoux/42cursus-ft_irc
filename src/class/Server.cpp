@@ -12,13 +12,13 @@
 #include <sstream>
 
 Server::Server(const std::string &name, port_t port, const std::string &password, const std::string &motd, const std::string &motd_file, bool verbose):
-	_name(name),
-	_port(port),
-	_password(password),
-	_motd(motd),
-	_motd_file(motd_file),
 	_verbose(verbose),
+	_port(port),
 	_address(_init_address(_port)),
+	_motd_file(motd_file),
+	_motd(motd),
+	_name(name),
+	_password(password),
 	_connections(0),
 	_max_connections(0),
 	_max_registered_clients(0),
@@ -99,7 +99,7 @@ Client *Server::get_client(const std::string &nickname) const
 	return NULL;
 }
 
-clients_t Server::get_clients(const std::string &mask)
+clients_t Server::get_clients(const std::string &mask) const
 {
 	clients_t clients;
 
@@ -107,8 +107,7 @@ clients_t Server::get_clients(const std::string &mask)
 		return _clients;
 
 	bool has_wildcards = mask.find_first_of("*?") != std::string::npos;
-	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); it++)
-	{
+	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); it++) {
 		Client *client = it->second;
 
 		if ((!has_wildcards && client->get_nickname() == mask)
@@ -428,18 +427,18 @@ void Server::_signal_handler(int)
 	stop = true;
 }
 
-Channel	*Server::get_channel(const std::string &channel_name)
+Channel	*Server::get_channel(const std::string &channel_name) const
 {
 	const std::string &lower_channel_name = to_lower(channel_name);
 
-	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); it++)
+	for (channels_t::const_iterator it = _channels.begin(); it != _channels.end(); ++it)
 		if (to_lower(it->first) == lower_channel_name)
 			return it->second;
 
 	return NULL;
 }
 
-channels_t	Server::get_channels( void )
+channels_t	Server::get_channels() const
 {
 	return _channels;
 }
@@ -449,7 +448,7 @@ void	Server::add_channel(Channel &new_channel)
 	_channels[new_channel.get_name()] = &new_channel;
 }
 
-void	Server::delete_channel(std::string channel_name)
+void	Server::delete_channel(const std::string &channel_name)
 {
 	Channel *channel = get_channel(channel_name);
 
