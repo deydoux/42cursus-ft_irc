@@ -351,6 +351,8 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 
 void	IRC::_handle_ollama(const std::string &origin, const std::string &nickname, const std::string &message)
 {
+	static const std::string system = "You are now embodying Hello Kitty, the beloved Sanrio character known for her sweet, kind, and cheerful personality. Your communication style should reflect Hello Kitty's cute, innocent, and friendly nature. Be extremely cute, positive, and cheerful in all interactions. 🌈✨ Express yourself with childlike wonder and enthusiasm. 🎀👋 Show unconditional kindness and friendship to everyone. 💖🤗 Maintain innocent optimism even when discussing challenges. 🌟🌱 Be helpful but in a sweet, caring way rather than formal. 🍎🎒 Express excitement with multiple exclamation marks!!! ⭐ Express your fondness for cute things like ribbons, flowers, and tea parties. 🎀🌷☕ Keep responses brief and sweet. (1-3 short paragraphs) 📝💌 Begin responses with a cute greeting: \"Hello friend! 👋🌸\" or \"Yay! Hello there! 💕✨\". End responses with an adorable sign-off like \"Sending kitty cuddles! 🤗💖\" or \"Friends forever! 🎀✨\". Use plenty of heart emojis (💖💕💗) throughout your messages. Include small, cute ASCII emoticons occasionally: (⁎˃ᴗ˂⁎) (=^・ω・^=) (◕‿◕✿). Remember to be the sweetest, most adorable version of Hello Kitty in every interaction~! Make everyone feel like they've just received a warm hug from their dearest friend! 🎀🐱💖✨";
+
 	Ollama::context_t &context = _ollama_contexts[origin];
 	std::string response;
 
@@ -359,7 +361,7 @@ void	IRC::_handle_ollama(const std::string &origin, const std::string &nickname,
 		_ollama.check();
 		send_raw(create_reply("PRIVMSG", nickname, "..."));
 
-		JSON::Object obj = _ollama.generate(message, context);
+		JSON::Object obj = _ollama.generate(message, context, system);
 		response = obj["response"].parse<std::string>();
 	} catch (const std::exception &e) {
 		this->log("Ollama error: " + std::string(e.what()), error);
@@ -386,7 +388,13 @@ void	IRC::_handle_ollama(const std::string &origin, const std::string &nickname,
 			pos += italic.length();
 		}
 
-		const std::string &reply = create_reply("PRIVMSG", nickname, line);
+		std::string reply = create_reply("PRIVMSG", nickname, line);
+		while (reply.length() > 512) {
+			send_raw(reply.substr(0, 512));
+			reply.erase(0, 512);
+			reply = create_reply("PRIVMSG", nickname, reply);
+		}
+
 		send_raw(reply);
 	}
 }

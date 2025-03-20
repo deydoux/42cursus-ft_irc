@@ -10,15 +10,17 @@ void Ollama::check()
 	_curl.get(endpoint);
 }
 
-JSON::Object Ollama::generate(const std::string &prompt, context_t &context)
+JSON::Object Ollama::generate(const std::string &prompt, context_t &context, const std::string system)
 {
-	static const std::string endpoint = _base_uri + "/api/generate";
+	static const std::string endpoint = _base_uri + "/api/generate";\
 
 	JSON::Object data;
 	data["model"] = _model;
 	data["prompt"] = prompt;
 	data["context"] = context;
 	data["stream"] = false;
+	if (!system.empty())
+		data["system"] = system;
 
 	const std::string raw_res = _curl.post(endpoint, data.stringify());
 	JSON::Object res = JSON::parse<JSON::Object>(raw_res);

@@ -26,7 +26,7 @@ public:
 
 	void	check();
 
-	JSON::Object	generate(const std::string &prompt, context_t &context);
+	JSON::Object	generate(const std::string &prompt, context_t &context, const std::string system = "");
 
 private:
 	const std::string	_model;
