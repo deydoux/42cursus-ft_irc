@@ -24,6 +24,8 @@ public:
 		Exception(const std::string &message);
 	};
 
+	void	check();
+
 	JSON::Object	generate(const std::string &prompt, context_t &context);
 
 private:

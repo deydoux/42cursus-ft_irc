@@ -271,6 +271,8 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 		if (std::string("&#").find(args[2][0]) == std::string::npos) {
 			if (last)
 				_handle_ollama(args[0], sender_nickname, args[3]);
+			else
+				send_raw(create_reply("PRIVMSG", sender_nickname, "I'm currently busy, please wait a moment."));
 
 			return ;
 		}
@@ -349,26 +351,44 @@ void IRC::_handle_command(const std::string &command, const std::vector<std::str
 
 void	IRC::_handle_ollama(const std::string &origin, const std::string &nickname, const std::string &message)
 {
-	Ollama::context_t context = _ollama_contexts[origin];
+	Ollama::context_t &context = _ollama_contexts[origin];
 	std::string response;
 
+
 	try {
+		_ollama.check();
+		send_raw(create_reply("PRIVMSG", nickname, "..."));
+
 		JSON::Object obj = _ollama.generate(message, context);
 		response = obj["response"].parse<std::string>();
 	} catch (const std::exception &e) {
 		this->log("Ollama error: " + std::string(e.what()), error);
 
-		const std::string &reply = create_reply("PRIVMSG", nickname, "Sorry, I can't do that right now");
+		const std::string &reply = create_reply("PRIVMSG", nickname, format(e.what(), COL_RED));
 		return send_raw(reply);
 	}
 
 	std::vector<std::string> lines = ft_split(response, '\n');
 	for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); it++) {
-		const std::string &reply = create_reply("PRIVMSG", nickname, *it);
+		std::string line = it->empty() ? "\t" : *it;
+
+		const std::string bold = BOLD;
+		size_t pos = 0;
+		while ((pos = line.find("**", pos)) != std::string::npos) {
+			line.replace(pos, 2, bold);
+			pos += bold.length();
+		}
+
+		const std::string italic = ITALIC;
+		pos = 0;
+		while ((pos = line.find("*", pos)) != std::string::npos) {
+			line.replace(pos, 1, italic);
+			pos += italic.length();
+		}
+
+		const std::string &reply = create_reply("PRIVMSG", nickname, line);
 		send_raw(reply);
 	}
-	// const std::string &reply = create_reply("PRIVMSG", nickname, response);
-	// send_raw(reply);
 }
 
 void IRC::delete_trivia_game(TriviaGame *game)

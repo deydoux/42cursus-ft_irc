@@ -4,6 +4,12 @@ Ollama::Ollama(const std::string &model) : _model(model) {}
 
 Ollama::Exception::Exception(const std::string &message) : std::runtime_error(message) {}
 
+void Ollama::check()
+{
+	static const std::string endpoint = _base_uri;
+	_curl.get(endpoint);
+}
+
 JSON::Object Ollama::generate(const std::string &prompt, context_t &context)
 {
 	static const std::string endpoint = _base_uri + "/api/generate";

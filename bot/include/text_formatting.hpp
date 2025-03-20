@@ -26,6 +26,6 @@
 #define COL_GREY "\x03""14"
 #define COL_LIGHTGREY "\x03""15"
 
-std::string	format(const std::string &, const std::string &);
+std::string	format(const std::string &str, const std::string &control_chars);
 
 #endif
