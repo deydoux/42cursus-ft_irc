@@ -44,10 +44,12 @@ public:
 	~TriviaGame();
 
 	// -- GETTERS + SETTERS
+	bool		has_ended( void );
 	bool		is_waiting_for_answers( void );
 	bool		is_waiting_before_start( void );
 	std::string	get_channel( void );
-
+	
+	void		set_has_ended(bool has_ended);
 	void		add_player(const std::string &client_nickname);
 	void		remove_player(const std::string &client_nickname);
 
@@ -91,6 +93,7 @@ private:
 	bool				_waiting_for_answers;
 	bool				_first_player_answered;
 	bool				_rang_timer;
+	bool				_has_ended;
 
 	// -- PRIVATE CONSTANTS
 	const std::string	_channel;
@@ -112,7 +115,7 @@ private:
 	static bool	_compare_by_total_score(const player_t &p1, const player_t &p2);
 
 	// -- PRIVATE STATIC CONSTANTS + ATTRIBUTES
-	static const int	_nb_rounds = 3;
+	static const int	_nb_rounds = 5;
 	static const int	_round_duration_sec = 30;
 	static const int	_points = 10;
 	static const int	_bonus_points = 5;

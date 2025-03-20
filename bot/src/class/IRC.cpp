@@ -49,14 +49,6 @@ IRC::~IRC()
 	this->log("Destroyed", debug);
 }
 
-// -- GETTERS + SETTERS
-
-void IRC::remove_trivia_game(TriviaGame *game)
-{
-	_ongoing_trivia_games.erase(game->get_channel());
-	delete game;
-}
-
 // -- PUBLIC METHODS
 
 std::string IRC::create_reply(const std::string &cmd, std::string args, std::string message)
@@ -296,8 +288,18 @@ void IRC::_set_signal_handler()
 
 void IRC::_update_games( void )
 {
-	for (trivias_t::iterator it = _ongoing_trivia_games.begin(); it != _ongoing_trivia_games.end(); it++)
-		it->second->tick();
+	trivias_t::iterator it = _ongoing_trivia_games.begin();
+	while (it != _ongoing_trivia_games.end()) {
+		if (it->second->has_ended()) {
+			TriviaGame *game_to_erase = it->second;
+			++it;
+			_ongoing_trivia_games.erase(game_to_erase->get_channel());
+			delete game_to_erase;
+		} else {
+			it->second->tick();
+			++it;
+		}
+	}
 }
 
 bool IRC::_is_playing(const std::string &channel_name)
@@ -356,7 +358,7 @@ void IRC::_handle_kick_command(const std::string, const std::vector<std::string>
 		TriviaGame *game = _ongoing_trivia_games[channel_name];
 
 		if (kicked_client_nickname == _nickname)
-			remove_trivia_game(game);
+			game->set_has_ended(true);
 		else
 			game->remove_player(kicked_client_nickname);
 	}

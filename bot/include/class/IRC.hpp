@@ -29,9 +29,6 @@ class IRC
 		// -- CONSTRUCTOR + DESTRUCTOR
 		IRC(const std::string hostname, const port_t port, const std::string pass, bool verbose);
 		~IRC();
-
-		// -- GETTERS + SETTERS
-		void	remove_trivia_game(TriviaGame *game);
 		
 		// -- PUBLIC METHODS
 		std::string	create_reply(const std::string &cmd, std::string args = "", std::string message = "");

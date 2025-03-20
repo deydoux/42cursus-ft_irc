@@ -7,6 +7,8 @@
 
 TriviaGame::TriviaGame(IRC &irc_client, const std::string channel_name, std::vector<std::string> players_nicks, bool verbose) :
 	_irc_client(irc_client),
+	_waiting_for_answers(false),
+	_has_ended(false),
 	_channel(channel_name),
 	_verbose(verbose)
 {
@@ -23,6 +25,11 @@ TriviaGame::~TriviaGame()
 
 // -- GETTERS + SETTERS
 
+bool TriviaGame::has_ended( void )
+{
+	return _has_ended;
+}
+
 bool TriviaGame::is_waiting_for_answers( void )
 {
 	return _waiting_for_answers;
@@ -36,6 +43,11 @@ bool TriviaGame::is_waiting_before_start( void )
 std::string TriviaGame::get_channel( void )
 {
 	return _channel;
+}
+
+void TriviaGame::set_has_ended(bool has_ended)
+{
+	_has_ended = has_ended;
 }
 
 void TriviaGame::add_player(const std::string &client_nickname)
@@ -132,7 +144,7 @@ void TriviaGame::show_final_results( void )
 	}
 
 	_send(TriviaGame::pick_randomly(TriviaGame::farewells), 1000);
-	_irc_client.remove_trivia_game(this);
+	_has_ended = true;
 	return ;
 }
 
@@ -262,7 +274,8 @@ void TriviaGame::_start_game( void )
 
 	if (_questions.empty()) {
 		_send("Sorry, I couldn't fetch the questions. Let's try again later!");
-		return _irc_client.remove_trivia_game(this);
+		_has_ended = true;
+		return ;
 	}
 
 	_send("Done! Let's not wait another second!");
