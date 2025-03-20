@@ -6,7 +6,6 @@
 #endif
 
 #include "reply_code.hpp"
-#include "to_string.tpp"
 
 #include <map>
 #include <string>
@@ -33,5 +32,7 @@ std::vector<std::string>	ft_split(const std::string &str, char separator);
 void						log(const std::string &context, const std::string &message, const log_level level = info);
 template <typename T>
 std::string					to_string(T n);
+
+#include "to_string.tpp"
 
 #endif // LIB_HPP
