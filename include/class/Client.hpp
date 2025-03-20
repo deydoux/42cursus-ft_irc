@@ -12,11 +12,11 @@ class Client
 {
 private:
 // Static variables
-	static const size_t _max_channels = 50;
-	static const size_t	_max_realname_len = 127;
-	static const size_t	_max_nickname_size = 9;
-	static const size_t	_max_message_size = 512;
 	static const size_t	_max_kick_message_len = 400;
+	static const size_t	_max_message_size = 512;
+	static const size_t	_max_nickname_size = 9;
+	static const size_t	_max_realname_len = 127;
+	static const size_t _max_channels = 50;
 
 public:
 // Static functions
@@ -38,7 +38,6 @@ public:
 	void				notify_quit();
 	void				reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	void				send_error(const std::string &message);
-
 
 // Getters
 	// Server
