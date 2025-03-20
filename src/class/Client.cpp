@@ -29,14 +29,7 @@ Client::~Client()
 
 void Client::handle_messages(std::string messages)
 {
-	std::string debug_messages = messages;
-	for (size_t pos = 0; (pos = debug_messages.find('\t', pos)) != std::string::npos; pos += 2)
-		debug_messages.replace(pos, 1, "\\t");
-	for (size_t pos = 0; (pos = debug_messages.find('\n', pos)) != std::string::npos; pos += 2)
-		debug_messages.replace(pos, 1, "\\n");
-	for (size_t pos = 0; (pos = debug_messages.find('\r', pos)) != std::string::npos; pos += 2)
-		debug_messages.replace(pos, 1, "\\r");
-	log("Received messages:\n" + debug_messages, debug);
+	log("Received messages:\n" + messages, debug);
 
 	_buffer += messages;
 	size_t pos;
