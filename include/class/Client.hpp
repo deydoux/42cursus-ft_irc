@@ -86,7 +86,7 @@ private:
 	std::string	_realname;
 	std::string	_username;
 	// Channel
-	channels_t					_channels;
+	channels_t	_channels;
 	std::vector<std::string>	_channel_operator;
 	// Server
 	const int			_fd;
