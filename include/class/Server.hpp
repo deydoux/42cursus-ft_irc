@@ -46,7 +46,7 @@ public:
 	const std::string	&get_name() const;
 	const std::string	&get_start_time() const;
 	const std::vector<std::string>	&get_motd_lines() const;
-	// Stats
+	// Server stats
 	size_t	get_channels_count() const;
 	size_t	get_clients_count() const;
 	size_t	get_connections() const;
@@ -60,7 +60,7 @@ public:
 	clients_t	get_clients(const std::string &mask) const;
 
 // Setters
-	// Stats
+	// Server stats
 	void	register_client();
 	// Channel
 	void	add_channel(Channel &new_channel);
@@ -83,12 +83,11 @@ private:
 	const std::string	_motd;
 	const std::string	_name;
 	const std::string	_password;
-
 	_pollfds_t	_pollfds;
 	int			_socket;
 	std::string	_start_time;
 	std::vector<std::string>	_motd_lines;
-	// Stats
+	// Server stats
 	size_t	_connections;
 	size_t	_max_connections;
 	size_t	_max_registered_clients;
