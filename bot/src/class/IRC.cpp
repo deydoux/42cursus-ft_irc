@@ -228,7 +228,13 @@ void IRC::_handle_message(std::string message)
         
 	if (it != _command_handlers.end()) {
 		std::string sender_nickname = extract_nickname(args[0]);
-		(this->*(it->second))(sender_nickname, args);
+		command_t command = it->second;
+
+		if (args.size() != command.nb_args) {
+			return log("Invalid command arguments", warning);
+		}
+
+		(this->*(command.handler))(sender_nickname, args);
 	} else {
 		std::istringstream iss(args[1]);
 		int numeric;
@@ -315,11 +321,11 @@ bool IRC::_is_playing(const std::string &channel_name)
 
 void IRC::_init_command_handlers( void )
 {
-	_command_handlers["INVITE"] = &IRC::_handle_invite_command;
-	_command_handlers["JOIN"] = &IRC::_handle_join_command;
-	_command_handlers["KICK"] = &IRC::_handle_kick_command;
-	_command_handlers["PART"] = &IRC::_handle_part_command;
-	_command_handlers["PRIVMSG"] = &IRC::_handle_privmsg_command;
+	_command_handlers["INVITE"] = (command_t) { .handler = &IRC::_handle_invite_command, .nb_args = 4 };
+	_command_handlers["JOIN"] = (command_t) { .handler = &IRC::_handle_join_command, .nb_args = 3 };
+	_command_handlers["KICK"] = (command_t) { .handler = &IRC::_handle_kick_command, .nb_args = 5 };
+	_command_handlers["PART"] = (command_t) { .handler = &IRC::_handle_part_command, .nb_args = 4 };
+	_command_handlers["PRIVMSG"] = (command_t) { .handler = &IRC::_handle_privmsg_command, .nb_args = 4 };
 }
 
 void IRC::_handle_invite_command(const std::string sender_nickname, const std::vector<std::string> &args) 
@@ -418,6 +424,9 @@ void IRC::_handle_numerics(int numeric, const std::vector<std::string> &args)
 {
 	if (numeric != RPL_NAMREPLY)
 		return ;
+
+	if (args.size() != 6)
+		return log("Invalid numeric arguments", warning);
 
 	std::string sender_nickname = args[2];
 	std::string channel_name = args[4];
