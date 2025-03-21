@@ -17,7 +17,7 @@ static void mode_handler(const args_t &args, Client &client, Server &server)
 
 	if (args.size() == 2) {
 		client.reply(RPL_CHANNELMODEIS, channel_name, channel->get_modes(channel->is_client_member(client)));
-		client.reply(RPL_CREATIONTIME, channel_name, channel->get_creation_timestamp());
+		client.reply(RPL_CREATIONTIME, channel_name, channel->get_creation_time());
 		return ;
 	}
 

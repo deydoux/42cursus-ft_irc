@@ -24,6 +24,8 @@ private:
 // Static variables
 	static const bool	_default_verbose = false;
 	static const port_t	_default_port = 6697;
+	static const std::string _default_motd_file;
+	static const std::string _default_name;
 
 public:
 // Static functions

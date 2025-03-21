@@ -11,6 +11,9 @@
 #include <iostream>
 #include <sstream>
 
+const std::string Server::_default_motd_file = "kittirc.motd";
+const std::string Server::_default_name = "kittirc";
+
 Server::Server(const std::string &name, port_t port, const std::string &password, const std::string &motd, const std::string &motd_file, bool verbose):
 	_verbose(verbose),
 	_port(port),
@@ -145,12 +148,12 @@ size_t Server::get_channels_count() const
 
 Server Server::parse_args(int argc, char *argv[])
 {
-	std::string name = "kittirc";
+	std::string name = _default_name;
 	Server::port_t port = _default_port;
 	bool verbose = _default_verbose;
 	std::string password;
 	std::string motd;
-	std::string motd_file = "kittirc.motd";
+	std::string motd_file = _default_motd_file;
 
 	bool port_set = false;
 	bool password_set = false;

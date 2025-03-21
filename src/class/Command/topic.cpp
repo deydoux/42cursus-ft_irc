@@ -23,7 +23,7 @@ static void topic_handler(const args_t &args, Client &client, Server &server)
 			return client.reply(RPL_NOTOPIC, channel_name, "No topic is set");
 
 		std::string reply = client.create_reply(RPL_TOPIC, channel_name, channel_topic);
-		reply += client.create_reply(RPL_TOPICWHOTIME, channel_name + " " + channel->get_topic_last_edited_by(), channel->get_topic_last_edited_at());
+		reply += client.create_reply(RPL_TOPICWHOTIME, channel_name + " " + channel->get_topic_author(), channel->get_topic_edit_time());
 
 		client.send(reply);
 		return;
