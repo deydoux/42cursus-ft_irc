@@ -12,11 +12,12 @@ class Client
 {
 private:
 // Static variables
+	static const size_t	_max_channels = 50;
 	static const size_t	_max_kick_message_len = 400;
 	static const size_t	_max_message_size = 512;
 	static const size_t	_max_nickname_size = 9;
 	static const size_t	_max_realname_len = 127;
-	static const size_t _max_channels = 50;
+	static const size_t	_max_username_len = 18;
 
 public:
 // Static functions
@@ -40,12 +41,6 @@ public:
 	void				send_error(const std::string &message);
 
 // Getters
-	// Server
-	Server	&get_server() const;
-	// Channel
-	Channel		*get_channel(const std::string &name) const;
-	channels_t	&get_channels();
-	size_t		get_channels_count() const;
 	// Client
 	bool				is_channel_operator(std::string channel_name) const;
 	const bool			&has_disconnect_request() const;
@@ -54,8 +49,19 @@ public:
 	const std::string	&get_nickname(bool allow_empty = true) const;
 	std::string			get_mask() const;
 	std::string			get_realname() const;
+	// Channel
+	Channel		*get_channel(const std::string &name) const;
+	channels_t	&get_channels();
+	size_t		get_channels_count() const;
+	// Server
+	Server	&get_server() const;
 
 // Setters
+	// Client
+	void	set_nickname(const std::string &nickname);
+	void	set_password(const std::string &password);
+	void	set_realname(const std::string &realname);
+	void	set_username(const std::string &username);
 	// Channel
 	bool	join_channel(Channel &channel, std::string passkey);
 	void	close_all_channels(std::string &reason);
@@ -64,11 +70,6 @@ public:
 	void	remove_channel_operator(std::string channel_name);
 	void	set_channel_operator(std::string channel_name);
 	void	set_quit_reason(const std::string &reason);
-	// Client
-	void	set_nickname(const std::string &nickname);
-	void	set_password(const std::string &password);
-	void	set_realname(const std::string &realname);
-	void	set_username(const std::string &username);
 
 private:
 // Static functions
@@ -84,16 +85,15 @@ private:
 	std::string	_password;
 	std::string	_realname;
 	std::string	_username;
+	// Channel
+	channels_t					_channels;
+	std::vector<std::string>	_channel_operator;
 	// Server
 	const int			_fd;
 	const std::string	_ip;
 	bool				_disconnect_request;
 	Server				&_server;
 	std::string			_quit_reason;
-	// Channel
-	channels_t					_channels;
-	std::vector<std::string>	_channel_operator;
-
 
 // Member functions
 	void	_check_registration();
@@ -101,7 +101,7 @@ private:
 	void	_handle_message(std::string message);
 
 // Getters
-	const std::string	_get_username(bool truncate = true) const;
+	const std::string	_get_username() const;
 };
 
 #endif // CLIENT_HPP

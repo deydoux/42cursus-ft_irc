@@ -197,6 +197,9 @@ void Client::set_username(const std::string &username)
 
 	_username = username;
 
+	if (_username.size() > _max_username_len)
+		_username.resize(_max_username_len);
+
 	_check_registration();
 }
 
@@ -331,16 +334,9 @@ void Client::_greet() const
 	send(reply);
 }
 
-const std::string Client::_get_username(bool truncate) const
+const std::string Client::_get_username() const
 {
-	std::string username = "~";
-
-	if (truncate)
-		username += _username.substr(0, 18);
-	else
-		username += _username;
-
-	return username;
+	return '~' + _username;
 }
 
 bool Client::_is_valid_nickname(const std::string &nickname)
