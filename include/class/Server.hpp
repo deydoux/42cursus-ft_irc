@@ -22,8 +22,8 @@ private:
 	typedef std::vector<struct pollfd>	_pollfds_t;
 
 // Static variables
+	static const bool	_default_verbose = false;
 	static const port_t	_default_port = 6697;
-	static const bool	_default_verbose = true;
 
 public:
 // Static functions

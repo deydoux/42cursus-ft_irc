@@ -393,7 +393,7 @@ void Server::_print_usage(int status)
 			  << "  -h, --help                         Show this help message" << std::endl
 			  << "  -n, --name <name>                  Name of the server (default: kittirc)" << std::endl
 			  << "  -P, --pass, --password <password>  Password required to connect (default: None)" << std::endl
-			  << "  -p, --port <port>                  Port to listen on (default: 6697)" << std::endl
+			  << "  -p, --port <port>                  Port to listen on (default: " << _default_port << ")" << std::endl
 			  << "  -m, --motd <message>               Message of the Day" << std::endl
 			  << "  -M, --motd-file <file>             MOTD file (default: kittirc.motd)" << std::endl
 			  << "  -v, --verbose                      Enable verbose output" << std::endl;
