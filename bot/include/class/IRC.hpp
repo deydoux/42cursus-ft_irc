@@ -19,7 +19,11 @@ class IRC
 	public:
 		// -- TYPES
 		typedef void (IRC::*command_handler_t)(const std::string, const std::vector<std::string> &);
-		typedef std::map<std::string, command_handler_t> command_handlers_t;
+		typedef struct command_s {
+			command_handler_t	handler;
+			size_t				nb_args;
+		} command_t;
+		typedef std::map<std::string, command_t> command_handlers_t;
 		typedef std::map<std::string, TriviaGame *> trivias_t; // channel_name: trivia ptr
 		typedef uint16_t	port_t;
 		
