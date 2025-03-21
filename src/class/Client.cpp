@@ -401,19 +401,19 @@ bool	Client::join_channel(Channel &channel, std::string passkey)
 		return (true);
 
 	if (!channel.is_client_invited(*this) && channel.is_invite_only())
-		this->reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
+		reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
 
 	else if (channel.is_full())
-		this->reply(ERR_CHANNELISFULL, channel.get_name(), "Cannot join channel (+l)");
+		reply(ERR_CHANNELISFULL, channel.get_name(), "Cannot join channel (+l)");
 
 	else if (!channel.check_passkey(passkey))
-		this->reply(ERR_BADCHANNELKEY, channel.get_name(), "Cannot join channel (+k) - bad key");
+		reply(ERR_BADCHANNELKEY, channel.get_name(), "Cannot join channel (+k) - bad key");
 
 	else if (channel.is_client_banned(*this))
-		this->reply(ERR_BANNEDFROMCHAN, channel.get_name(), "Cannot join channel (+b)");
+		reply(ERR_BANNEDFROMCHAN, channel.get_name(), "Cannot join channel (+b)");
 
-	else if (this->get_channels_count() >= Client::_max_channels)
-		this->reply(ERR_TOOMANYCHANNELS, channel.get_name(), "You have joined too many channels");
+	else if (get_channels_count() >= Client::_max_channels)
+		reply(ERR_TOOMANYCHANNELS, channel.get_name(), "You have joined too many channels");
 
 	else
 	{
@@ -428,23 +428,23 @@ bool	Client::join_channel(Channel &channel, std::string passkey)
 
 void	Client::kick_channel(Channel &channel, const std::string &kicked_client, std::string &reason)
 {
-	Server &server = this->get_server();
+	Server &server = get_server();
 	Client *client_to_be_kicked = server.get_client(kicked_client);
 
 	if (reason.size() > _max_kick_message_len)
 		reason.resize(_max_kick_message_len);
 
 	if (!channel.is_client_member(*this))
-		this->reply(ERR_NOTONCHANNEL, channel.get_name(), "You're not on that channel");
-	else if (!this->is_channel_operator(channel.get_name()))
-		this->reply(ERR_CHANOPRIVSNEEDED, channel.get_name(), "You're not channel operator");
+		reply(ERR_NOTONCHANNEL, channel.get_name(), "You're not on that channel");
+	else if (!is_channel_operator(channel.get_name()))
+		reply(ERR_CHANOPRIVSNEEDED, channel.get_name(), "You're not channel operator");
 	else if (!client_to_be_kicked)
-		this->reply(ERR_NOSUCHNICK, channel.get_name(), "No such nick/channel");
+		reply(ERR_NOSUCHNICK, channel.get_name(), "No such nick/channel");
 	else if (!channel.is_client_member(*client_to_be_kicked))
-		this->reply(ERR_USERNOTINCHANNEL, channel.get_name(), "They aren't on that channel");
+		reply(ERR_USERNOTINCHANNEL, channel.get_name(), "They aren't on that channel");
 	else {
-		channel.send_broadcast(this->create_cmd_reply(
-			this->get_mask(), "KICK", channel.get_name() + ' ' + kicked_client, reason
+		channel.send_broadcast(create_cmd_reply(
+			get_mask(), "KICK", channel.get_name() + ' ' + kicked_client, reason
 		));
 		channel.remove_client(*client_to_be_kicked);
 		client_to_be_kicked->get_channels().erase(channel.get_name());
@@ -453,8 +453,8 @@ void	Client::kick_channel(Channel &channel, const std::string &kicked_client, st
 
 void	Client::part_channel(Channel &channel, std::string &reason)
 {
-	channel.send_broadcast(this->create_cmd_reply(
-		this->get_mask(), "PART", channel.get_name() , reason
+	channel.send_broadcast(create_cmd_reply(
+		get_mask(), "PART", channel.get_name() , reason
 	));
 	channel.remove_client(*this);
 	_channels.erase(channel.get_name());
@@ -467,7 +467,7 @@ void	Client::part_channel(Channel &channel, std::string &reason)
 void	Client::close_all_channels(std::string &reason)
 {
 	for (std::map<std::string, Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it)
-		this->part_channel(*it->second, reason);
+		part_channel(*it->second, reason);
 }
 
 void Client::notify_quit() const

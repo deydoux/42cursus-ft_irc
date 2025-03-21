@@ -97,9 +97,9 @@ const std::string Channel::list_members()
 {
 	std::string result;
 
-	for (clients_t::iterator it = this->_members.begin(); it != this->_members.end(); ++it) {
+	for (clients_t::iterator it = _members.begin(); it != _members.end(); ++it) {
 		Client &member = *it->second;
-		bool is_op = member.is_channel_operator(this->_name);
+		bool is_op = member.is_channel_operator(_name);
 
 		if (!result.empty())
 			result += " ";
