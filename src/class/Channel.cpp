@@ -170,7 +170,7 @@ std::string Channel::get_modes(bool get_modes_values)
 	return stringify_modes(&_modes, get_modes_values);
 }
 
-const std::string Channel::get_creation_timestamp() const
+const std::string Channel::get_creation_time() const
 {
 	return _creation_timestamp;
 }
@@ -249,16 +249,16 @@ const std::string Channel::get_topic( void ) const
 void Channel::set_topic(Client &editor, const std::string topic)
 {
 	_topic = topic;
-	_topic_last_edited_by = editor.get_nickname();
-	_topic_last_edited_at = unix_timestamp();
+	_topic_author = editor.get_nickname();
+	_topic_edit_time = unix_timestamp();
 }
 
-const std::string Channel::get_topic_last_edited_at( void ) const
+const std::string Channel::get_topic_edit_time() const
 {
-	return _topic_last_edited_at;
+	return _topic_edit_time;
 }
 
-const std::string Channel::get_topic_last_edited_by( void ) const
+const std::string Channel::get_topic_author() const
 {
-	return _topic_last_edited_by;
+	return _topic_author;
 }

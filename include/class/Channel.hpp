@@ -8,8 +8,8 @@ class Channel
 public:
 // Types
 	typedef struct modes_s {
-		std::vector<std::string>	flags; // eg: ["+k", "+l", "-i"]
-		std::map<char, std::string>	values; // eg: {'k': "pass", 'l': "10"}
+		std::vector<std::string>	flags; // e.g. ["+k", "+l", "-i"]
+		std::map<char, std::string>	values; // e.g. {'k': "pass", 'l': "10"}
 	} modes_t;
 
 // Static variables
@@ -31,9 +31,9 @@ public:
 	bool				is_invite_only() const;
 	bool				is_topic_protected() const;
 	const std::string	&get_name() const;
-	const std::string	get_creation_timestamp() const;
-	const std::string	get_topic_last_edited_at() const;
-	const std::string	get_topic_last_edited_by() const;
+	const std::string	get_creation_time() const;
+	const std::string	get_topic_author() const;
+	const std::string	get_topic_edit_time() const;
 	const std::string	get_topic() const;
 	// Client
 	bool			is_client_banned(Client &client) const;
@@ -69,16 +69,16 @@ private:
 	const std::string	_name;
 	const std::string	_creation_timestamp;
 
-	bool			_is_invite_only;
-	bool			_is_topic_protected;
-	bool			_limit_members;
-	clients_t		_invited_clients;
-	clients_t		_members;
-	size_t			_max_members;
-	std::string		_passkey;
-	std::string		_topic_last_edited_at; // unix timestamp
-	std::string		_topic_last_edited_by; // client nickname
-	std::string		_topic;
+	bool		_is_invite_only;
+	bool		_is_topic_protected;
+	bool		_limit_members;
+	clients_t	_invited_clients;
+	clients_t	_members;
+	size_t		_max_members;
+	std::string	_passkey;
+	std::string	_topic_author; // client nickname
+	std::string	_topic_edit_time; // unix timestamp
+	std::string	_topic;
 
 	std::vector<std::string>	_banned_user_masks; // eg: nick!*@* , *!*@192.168.1.* ...
 
