@@ -101,7 +101,7 @@ private:
 	void	_handle_message(std::string message);
 
 // Getters
-	const std::string	_get_username() const;
+	std::string	_get_username() const;
 };
 
 #endif // CLIENT_HPP

@@ -334,7 +334,7 @@ void Client::_greet() const
 	send(reply);
 }
 
-const std::string Client::_get_username() const
+std::string Client::_get_username() const
 {
 	return '~' + _username;
 }
@@ -372,7 +372,7 @@ const int &Client::get_fd( void )
 
 std::string Client::get_mask(void) const
 {
-	return std::string(_nickname + "!~" + _username + "@" + _ip);
+	return std::string(_nickname + "!" + _get_username() + "@" + _ip);
 }
 
 channels_t &Client::get_channels()
@@ -501,12 +501,5 @@ std::string Client::generate_who_reply(const std::string &context) const
 	if (context != "*" && std::find(_channel_operator.begin(), _channel_operator.end(), context) != _channel_operator.end())
 		status_flags += "@";
 
-	oss << context
-		<< " ~" << _username
-		<< " " << _ip
-		<< " " << _server.get_name()
-		<< " " << _nickname
-		<< " " << status_flags;
-
-	return oss.str();
+	return context + ' ' + _get_username() + ' ' + _ip + ' ' + _server.get_name() + ' ' + _nickname + ' ' + status_flags;
 }
