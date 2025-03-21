@@ -14,14 +14,14 @@ public:
 // Types
 	typedef uint16_t	port_t;
 
-// Static variables
+// Static attributes
 	static bool	stop;
 
 private:
 // Types
 	typedef std::vector<struct pollfd>	_pollfds_t;
 
-// Static variables
+// Static attributes
 	static const bool	_default_verbose = false;
 	static const port_t	_default_port = 6697;
 	static const std::string _default_motd_file;
@@ -35,7 +35,7 @@ public:
 	Server(const std::string &name, port_t port, const std::string &password, const std::string &motd, const std::string &motd_file, bool verbose);
 	~Server();
 
-// Member functions
+// Methods
 	void	log(const std::string &message, const log_level level = info) const;
 	void	start();
 
@@ -75,7 +75,7 @@ private:
 	static void				_print_usage(int status = 1);
 	static void				_signal_handler(int sig);
 
-// Variables
+// Attributes
 	const bool			_verbose;
 	const port_t		_port;
 	const sockaddr_in	_address;
@@ -97,7 +97,7 @@ private:
 	// Clients
 	clients_t	_clients;
 
-// Member functions
+// Methods
 	void	_accept();
 	void	_bind();
 	void	_down();

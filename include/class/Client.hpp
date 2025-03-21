@@ -42,11 +42,11 @@ public:
 
 // Getters
 	// Client
-	bool				is_channel_operator(std::string channel_name) const;
 	const bool			&has_disconnect_request() const;
 	const bool			&is_registered() const;
 	const int			&get_fd();
 	const std::string	&get_nickname(bool allow_empty = true) const;
+	bool				is_channel_operator(std::string channel_name) const;
 	std::string			get_mask() const;
 	std::string			get_realname() const;
 	// Channel
@@ -91,9 +91,9 @@ private:
 	// Server
 	const int			_fd;
 	const std::string	_ip;
-	bool				_disconnect_request;
-	Server				&_server;
-	std::string			_quit_reason;
+	bool		_disconnect_request;
+	Server		&_server;
+	std::string	_quit_reason;
 
 // Member functions
 	void	_check_registration();
