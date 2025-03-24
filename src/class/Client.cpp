@@ -477,7 +477,7 @@ void Client::delete_channel(const std::string &channel_name)
 		_channels.erase(channel->get_name());
 }
 
-void Client::notify_quit() const
+void Client::broadcast_quit() const
 {
 	broadcast(create_cmd_reply(get_mask(), "QUIT", "", _quit_reason));
 }

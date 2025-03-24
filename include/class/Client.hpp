@@ -31,11 +31,11 @@ public:
 	// Client
 	const std::string	create_motd_reply() const;
 	ssize_t	send(const std::string &message) const;
+	void	broadcast_quit() const;
 	void	broadcast(const std::string &message) const;
 	void	cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg = "", const std::string &message = "") const;
 	void	handle_messages(const std::string &messages);
 	void	log(const std::string &message, const log_level level = info) const;
-	void	notify_quit() const;
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	void	send_error(const std::string &message);
 	std::string	create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;

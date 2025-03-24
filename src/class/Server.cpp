@@ -354,7 +354,7 @@ void Server::_disconnect_client(int fd)
 		_registered_clients_count--;
 
 	if (!stop)
-		client->notify_quit();
+		client->broadcast_quit();
 
 	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it)
 		it->second->remove_client(*client);
