@@ -93,11 +93,11 @@ const clients_t &Channel::get_members() const
 	return _members;
 }
 
-const std::string Channel::list_members()
+const std::string Channel::get_names() const
 {
 	std::string result;
 
-	for (clients_t::iterator it = _members.begin(); it != _members.end(); ++it) {
+	for (clients_t::const_iterator it = _members.begin(); it != _members.end(); ++it) {
 		Client &member = *it->second;
 		bool is_op = member.is_channel_operator(_name);
 

@@ -43,6 +43,7 @@ public:
 	bool	is_topic_protected() const;
 	// Client
 	const clients_t	&get_members() const;
+	const std::string	get_names() const;
 	bool	is_client_banned(Client &client) const;
 	bool	is_client_invited(Client &client);
 	bool	is_client_member(Client &client) const;
@@ -60,9 +61,6 @@ public:
 	void	invite_client(Client &client);
 	void	add_client(Client &client);
 	void	remove_client(Client &client);
-
-
-	const std::string list_members();
 
 private:
 // Attributes

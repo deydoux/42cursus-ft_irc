@@ -11,7 +11,7 @@ static void names_handler(const args_t &args, Client &client, Server &server)
 		channels_t channels = server.get_channels();
 
 		for (channels_t::iterator it = channels.begin(); it != channels.end(); ++it)
-			reply += client.create_reply(RPL_NAMREPLY, "= " + it->first, it->second->list_members());
+			reply += client.create_reply(RPL_NAMREPLY, "= " + it->first, it->second->get_names());
 
 		std::string lost_clients_nicknames;
 		clients_t clients = server.get_clients("*");
@@ -33,7 +33,7 @@ static void names_handler(const args_t &args, Client &client, Server &server)
 
 			if (channel) {
 				channel_name = channel->get_name();
-				reply += client.create_reply(RPL_NAMREPLY, "= " + channel_name, channel->list_members());
+				reply += client.create_reply(RPL_NAMREPLY, "= " + channel_name, channel->get_names());
 			}
 
 			reply += client.create_reply(RPL_ENDOFNAMES, channel_name, "End of NAMES list");
