@@ -68,9 +68,19 @@ static void mode_handler(const args_t &args, Client &client, Server &server)
 		}
 
 		else if (mode == 'l' && add_mode) {
-			// TODO check atoi return value, should use std::istringstream
-			if (add_mode) channel->set_max_members(std::atoi(value.c_str()));
-			else channel->unset_members_limit();
+			std::istringstream iss(value);
+			int limit;
+
+			iss >> limit;
+			if (!iss.eof() || iss.fail() || limit == 0) {
+				client.reply(ERR_INVALIDMODEPARAM, channel_name + " l *", "Invalid mode parameter");
+				continue;
+			}
+
+			channel->set_max_members(limit);
+			modes_values[mode] = value;
+		} else if (mode == 'l' && !add_mode) {
+			channel->unset_members_limit();
 			modes_values[mode] = value;
 		}
 

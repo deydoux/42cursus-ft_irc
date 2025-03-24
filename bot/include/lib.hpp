@@ -18,6 +18,7 @@ std::string					format_choice(char letter, const std::string &choice);
 std::string					get_ordinal(int n);
 std::string					join_strings(const std::vector<std::string>& strings);
 std::string					html_decode(const std::string &str);
+std::string					ft_strerror( void );
 std::vector<std::string>	ft_split(const std::string &str, char separator);
 
 template <typename T>

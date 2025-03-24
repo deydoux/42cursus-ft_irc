@@ -9,6 +9,8 @@ int main(int ac, char *av[])
 	} catch (std::exception &e) {
 		log("IRC Client", e.what(), error);
 		return 1;
+	} catch (int error_status) {
+		return error_status;
 	}
 
 	return 0;
