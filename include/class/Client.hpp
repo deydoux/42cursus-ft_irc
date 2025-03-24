@@ -28,6 +28,7 @@ public:
 	~Client();
 
 // Member functions
+	// Client
 	const std::string	create_motd_reply() const;
 	ssize_t	send(const std::string &message) const;
 	void	broadcast(const std::string &message) const;
@@ -39,6 +40,10 @@ public:
 	void	send_error(const std::string &message);
 	std::string	create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	std::string	generate_who_reply(const std::string &context) const;
+	// Command
+	bool	join(Channel &channel, std::string passkey);
+	void	kick(Channel &channel, const std::string &kicked_client, std::string &reason);
+	void	part(Channel &channel, std::string &reason);
 
 // Getters
 	// Client
@@ -63,11 +68,8 @@ public:
 	void	set_realname(const std::string &realname);
 	void	set_username(const std::string &username);
 	// Channel
-	bool	join_channel(Channel &channel, std::string passkey);
 	void	close_all_channels(std::string &reason);
 	void	delete_channel(const std::string &channel_name);
-	void	kick_channel(Channel &channel, const std::string &kicked_client, std::string &reason);
-	void	part_channel(Channel &channel, std::string &reason);
 	void	remove_channel_operator(std::string channel_name);
 	void	set_channel_operator(std::string channel_name);
 	// Server

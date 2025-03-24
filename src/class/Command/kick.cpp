@@ -23,7 +23,7 @@ static void kick_handler(const args_t &args, Client &client, Server &server)
 
 	for (size_t i = 0; i < kicked_client.size(); i++)
 		for (size_t j = 0; j < channels_to_kick_from.size(); j++)
-			client.kick_channel(*channels_to_kick_from[j], kicked_client[i], reason);
+			client.kick(*channels_to_kick_from[j], kicked_client[i], reason);
 }
 
 const Command::_command_t Command::_kick = {

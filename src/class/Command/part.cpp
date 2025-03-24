@@ -24,7 +24,7 @@ static void part_handler(const args_t &args, Client &client, Server &server)
 		if (!new_channel->is_client_member(client))
 			return client.reply(ERR_NOTONCHANNEL, channel_name, "You're not on that channel");
 
-		client.part_channel(*new_channel, reason);
+		client.part(*new_channel, reason);
 	}
 }
 

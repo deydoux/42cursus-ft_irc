@@ -395,7 +395,7 @@ Channel *Client::get_channel(const std::string &name) const
 }
 
 
-bool	Client::join_channel(Channel &channel, std::string passkey)
+bool	Client::join(Channel &channel, std::string passkey)
 {
 	if (channel.is_client_member(*this))
 		return (true);
@@ -426,7 +426,7 @@ bool	Client::join_channel(Channel &channel, std::string passkey)
 	return (false);
 }
 
-void	Client::kick_channel(Channel &channel, const std::string &kicked_client, std::string &reason)
+void	Client::kick(Channel &channel, const std::string &kicked_client, std::string &reason)
 {
 	Server &server = get_server();
 	Client *client_to_be_kicked = server.get_client(kicked_client);
@@ -451,7 +451,7 @@ void	Client::kick_channel(Channel &channel, const std::string &kicked_client, st
 	}
 }
 
-void	Client::part_channel(Channel &channel, std::string &reason)
+void	Client::part(Channel &channel, std::string &reason)
 {
 	channel.send_broadcast(create_cmd_reply(
 		get_mask(), "PART", channel.get_name() , reason
@@ -467,7 +467,7 @@ void	Client::part_channel(Channel &channel, std::string &reason)
 void	Client::close_all_channels(std::string &reason)
 {
 	for (std::map<std::string, Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it)
-		part_channel(*it->second, reason);
+		part(*it->second, reason);
 }
 
 void Client::delete_channel(const std::string &channel_name)
