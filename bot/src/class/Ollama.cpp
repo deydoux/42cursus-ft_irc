@@ -1,6 +1,6 @@
 #include "class/Ollama.hpp"
 
-Ollama::Ollama(const std::string &model) : _model(model) {}
+Ollama::Ollama(const std::string model, const std::string server_uri) : _model(model), _base_uri(server_uri) {}
 
 Ollama::Exception::Exception(const std::string &message) : std::runtime_error(message) {}
 
@@ -12,7 +12,7 @@ void Ollama::check()
 
 JSON::Object Ollama::generate(const std::string &prompt, context_t &context, const std::string system)
 {
-	static const std::string endpoint = _base_uri + "/api/generate";\
+	static const std::string endpoint = _base_uri + "/api/generate";
 
 	JSON::Object data;
 	data["model"] = _model;
@@ -33,4 +33,3 @@ JSON::Object Ollama::generate(const std::string &prompt, context_t &context, con
 }
 
 Curl Ollama::_curl;
-const std::string Ollama::_base_uri = OLLAMA_BASE_URI;
