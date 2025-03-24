@@ -104,10 +104,10 @@ Client *Server::get_client(const std::string &nickname) const
 
 clients_t Server::get_clients(const std::string &mask) const
 {
-	clients_t clients;
-
 	if (mask == "*")
 		return _clients;
+
+	clients_t clients;
 
 	bool has_wildcards = mask.find_first_of("*?") != std::string::npos;
 	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
