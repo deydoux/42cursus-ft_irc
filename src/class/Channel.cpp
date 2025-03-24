@@ -236,7 +236,7 @@ void Channel::add_modes(const modes_t &new_modes)
 	}
 
 	for (std::map<char, std::string>::const_iterator it = new_modes.values.begin(); it != new_modes.values.end(); ++it) {
-		if (it->first == 'o') continue ;
+		if (it->first == 'o') continue;
 		_modes.values[it->first] = it->second;
 	}
 }

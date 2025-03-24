@@ -32,32 +32,32 @@ static void mode_handler(const args_t &args, Client &client, Server &server)
 		mode = args[2][i];
 		if (mode == '-' || mode == '+') {
 			sign = mode;
-			continue ;
+			continue;
 		}
 
 		if (std::string("itokl").find(mode) == std::string::npos) {
 			client.reply(ERR_UNKNOWNMODE, std::string(1, mode), "is unknown mode char for " + channel_name);
-			continue ;
+			continue;
 		}
 		else if ((mode == 'k' || mode == 'l') && sign == '+' && args.size() < argument_index + 1) {
 			client.reply(ERR_NEEDMOREPARAMS, args[0], "Syntax error");
-			continue ;
+			continue;
 		}
 		else if (!client.is_channel_operator(channel_name)) {
 			client.reply(ERR_CHANOPRIVSNEEDED, channel_name, "You are not channel operator");
-			continue ;
+			continue;
 		}
 
 		std::string value = args.size() > argument_index ? args[argument_index] : "";
 		bool add_mode = sign == '+';
 
 		if (mode == 'i') {
-			if (channel->is_invite_only() == add_mode) continue ;
+			if (channel->is_invite_only() == add_mode) continue;
 			channel->set_invite_only(add_mode);
 		}
 
 		else if (mode == 't') {
-			if (channel->is_topic_protected() == add_mode) continue ;
+			if (channel->is_topic_protected() == add_mode) continue;
 			channel->set_topic_protection(add_mode);
 		}
 
@@ -85,17 +85,17 @@ static void mode_handler(const args_t &args, Client &client, Server &server)
 		}
 
 		else if (mode == 'o') {
-			if (value.empty()) continue ;
+			if (value.empty()) continue;
 
 			Client *new_op = server.get_client(value);
 			if (!new_op) {
 				client.reply(ERR_NOSUCHNICK, value, "No such nick or channel name");
-				continue ;
+				continue;
 			}
 
 			if (!channel->is_client_member(*new_op)) {
 				client.reply(ERR_USERNOTINCHANNEL, value + " " + channel_name, "They aren't on that channel");
-				continue ;
+				continue;
 			}
 
 			if (add_mode)
