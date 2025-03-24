@@ -19,7 +19,7 @@ public:
 // Static functions
 	static bool			is_prefix(const char &c);
 	static bool			is_valid_name(const std::string &name);
-	static std::string	stringify_modes(const modes_t &modes, bool add_modes_values = true);
+	static std::string	stringify_modes(const modes_t &modes, bool values = true);
 
 // Constructors/destructors
 	Channel(Client &creator, std::string &name, const bool verbose = false);

@@ -191,7 +191,7 @@ void Channel::log(const std::string &message, const log_level level) const
 		::log("Channel " + _name, message, level);
 }
 
-std::string Channel::stringify_modes(const modes_t &modes, bool add_modes_values)
+std::string Channel::stringify_modes(const modes_t &modes, bool values)
 {
 	if (modes.flags.empty())
 		return "+";
@@ -213,7 +213,7 @@ std::string Channel::stringify_modes(const modes_t &modes, bool add_modes_values
 			str_values += modes.values.find(mode[1])->second;
 	}
 
-	return str_flags + (add_modes_values ? " " + str_values : "");
+	return str_flags + (values ? " " + str_values : "");
 }
 
 void Channel::add_modes(modes_t *modes)
