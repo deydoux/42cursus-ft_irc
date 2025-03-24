@@ -27,7 +27,6 @@ typedef std::vector<std::string>			args_t;
 
 bool						match_mask(const std::string& mask, const std::string& user_string);
 std::string					to_lower(const std::string &str);
-std::string					unix_timestamp();
 std::vector<std::string>	ft_split(const std::string &str, char separator);
 void						log(const std::string &context, const std::string &message, const log_level level = info);
 template <typename T>

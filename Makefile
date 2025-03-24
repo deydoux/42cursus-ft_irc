@@ -26,7 +26,6 @@ SRC = \
 	lib/match_mask.cpp \
 	lib/split.cpp \
 	lib/to_lower.cpp \
-	lib/unix_timestamp.cpp \
 	main.cpp
 
 SRC_DIR = src

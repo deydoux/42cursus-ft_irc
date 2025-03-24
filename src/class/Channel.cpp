@@ -6,7 +6,7 @@
 
 Channel::Channel(Client &creator, std::string &name, const bool verbose):
 	_verbose(verbose),
-	_creation_timestamp(unix_timestamp()),
+	_creation_timestamp(to_string(time(NULL))),
 	_name(name),
 	_invite_only(false),
 	_limit_members(false),
@@ -250,7 +250,7 @@ void Channel::set_topic(Client &editor, const std::string topic)
 {
 	_topic = topic;
 	_topic_author = editor.get_nickname();
-	_topic_edit_time = unix_timestamp();
+	_topic_edit_time = to_string(time(NULL));
 }
 
 const std::string Channel::get_topic_edit_time() const
