@@ -133,12 +133,10 @@ bool Client::is_channel_operator(std::string channel_name) const
 	return false;
 }
 
-const std::string &Client::get_nickname(bool allow_empty) const
+const std::string Client::get_nickname(bool allow_empty) const
 {
-	static const std::string empty_nick = "*";
-
 	if (!allow_empty && _nickname.empty())
-		return empty_nick;
+		return "*";
 
 	return _nickname;
 }
