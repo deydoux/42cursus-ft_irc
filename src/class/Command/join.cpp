@@ -46,20 +46,9 @@ static void join_handler(const args_t &args, Client &client, Server &server)
 	{
 		Channel *channel = channels_to_join[i];
 		std::string &channel_name = channels_name_to_join[i];
-
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
 
-		if (client.join(*channel, passkey)) {
-			channel->broadcast(
-				Client::create_cmd_reply(client_mask, "JOIN", "", channel_name)
-			);
-
-			args_t names_args;
-			names_args.push_back("NAMES");
-			names_args.push_back(channel_name);
-
-			Command::execute(names_args, client, server);
-		}
+		client.join(channel_name, *channel, passkey);
 	}
 }
 

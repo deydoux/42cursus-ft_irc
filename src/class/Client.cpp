@@ -390,10 +390,10 @@ Channel *Client::get_channel(const std::string &name) const
 }
 
 
-bool	Client::join(Channel &channel, const std::string &passkey)
+void Client::join(const std::string &original_channel_name, Channel &channel, const std::string &passkey)
 {
 	if (channel.is_client_member(*this))
-		return (true);
+		return;
 
 	if (!channel.is_client_invited(*this) && channel.is_invite_only())
 		reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
@@ -410,15 +410,16 @@ bool	Client::join(Channel &channel, const std::string &passkey)
 	else if (get_channels_count() >= Client::_max_channels)
 		reply(ERR_TOOMANYCHANNELS, channel.get_name(), "You have joined too many channels");
 
-	else
-	{
+	else {
 		channel.add_client(*this);
-		_channels[channel.get_name()] = &channel;
 
-		return (true);
+		const std::string &channel_name = channel.get_name();
+		_channels[channel_name] = &channel;
+
+		const std::string &reply = create_cmd_reply(get_mask(), "JOIN", "", original_channel_name);
+		channel.broadcast(reply);
+		names(channel_name);
 	}
-
-	return (false);
 }
 
 void	Client::kick(const std::string &nick_to_kick, Channel &channel, const std::string &reason)
@@ -441,6 +442,14 @@ void	Client::kick(const std::string &nick_to_kick, Channel &channel, const std::
 		channel.remove_client(*client_to_kick);
 		client_to_kick->delete_channel(channel.get_name());
 	}
+}
+
+void Client::names(const std::string &channel_name)
+{
+	args_t args;
+	args.push_back("NAMES");
+	args.push_back(channel_name);
+	Command::execute(args, *this, _server);
 }
 
 void Client::part(Channel &channel, const std::string &reason)
