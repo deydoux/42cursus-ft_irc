@@ -71,7 +71,6 @@ public:
 	void	set_realname(const std::string &realname);
 	void	set_username(const std::string &username);
 	// Channel
-	void	close_all_channels(std::string &reason);
 	void	delete_channel(const std::string &channel_name);
 	void	remove_channel_operator(std::string channel_name);
 	void	set_channel_operator(std::string channel_name);

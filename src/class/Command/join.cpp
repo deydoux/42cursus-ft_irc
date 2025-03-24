@@ -9,7 +9,11 @@ static void join_handler(const args_t &args, Client &client, Server &server)
 
 	if (args_size == 2 && args[1] == "0") {
 		std::string reason = client.get_nickname();
-		return client.close_all_channels(reason);
+
+		for (channels_t::const_iterator it = client.get_channels().begin(); it != client.get_channels().end(); ++it)
+			client.part(*it->second, reason);
+
+		return;
 	}
 
 	std::vector<Channel *> channels_to_join;

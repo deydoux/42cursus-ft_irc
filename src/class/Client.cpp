@@ -422,7 +422,7 @@ void Client::join(const std::string &original_channel_name, Channel &channel, co
 	}
 }
 
-void	Client::kick(const std::string &nick_to_kick, Channel &channel, const std::string &reason)
+void Client::kick(const std::string &nick_to_kick, Channel &channel, const std::string &reason)
 {
 	Server &server = get_server();
 	Client *client_to_kick = server.get_client(nick_to_kick);
@@ -463,12 +463,6 @@ void Client::part(Channel &channel, const std::string &reason)
 
 	if (channel.get_members().empty())
 		_server.delete_channel(channel.get_name());
-}
-
-void	Client::close_all_channels(std::string &reason)
-{
-	for (std::map<std::string, Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it)
-		part(*it->second, reason);
 }
 
 void Client::delete_channel(const std::string &channel_name)
