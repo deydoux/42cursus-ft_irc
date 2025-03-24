@@ -53,12 +53,12 @@ static void mode_handler(const args_t &args, Client &client, Server &server)
 
 		if (mode == 'i') {
 			if (channel->is_invite_only() == add_mode) continue ;
-			channel->set_is_invite_only(add_mode);
+			channel->set_invite_only(add_mode);
 		}
 
 		else if (mode == 't') {
 			if (channel->is_topic_protected() == add_mode) continue ;
-			channel->set_is_topic_protected(add_mode);
+			channel->set_topic_protection(add_mode);
 		}
 
 		else if (mode == 'k') {
@@ -121,7 +121,7 @@ static void mode_handler(const args_t &args, Client &client, Server &server)
 		channel->add_modes(&modes);
 
 		channel->broadcast(Client::create_cmd_reply(
-			client.get_mask(), "MODE", channel_name + ' ' + Channel::stringify_modes(&modes)
+			client.get_mask(), "MODE", channel_name + ' ' + Channel::stringify_modes(modes)
 		));
 	}
 }

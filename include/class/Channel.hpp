@@ -19,7 +19,7 @@ public:
 // Static functions
 	static bool			is_prefix(const char &c);
 	static bool			is_valid_name(const std::string &name);
-	static std::string	stringify_modes(modes_t *modes, bool add_modes_values = true);
+	static std::string	stringify_modes(const modes_t &modes, bool add_modes_values = true);
 
 // Constructors/destructors
 	Channel(Client &creator, std::string &name, const bool verbose = false);
@@ -51,9 +51,9 @@ public:
 	void	set_passkey(std::string &passkey);
 	void	set_max_members(size_t max_members);
 	void	unset_members_limit();
-	void	set_is_invite_only(bool invite_only);
-	void	set_is_topic_protected(bool is_topic_protected);
-	void	set_topic(Client &editor, const std::string topic);
+	void	set_invite_only(bool status);
+	void	set_topic_protection(bool status);
+	void	set_topic(Client &author, const std::string topic);
 	// Client
 	void	invite_client(Client &client);
 	void	add_client(Client &client);
@@ -62,7 +62,7 @@ public:
 
 	const std::string list_members();
 
-	std::string			get_modes(bool get_modes_values = true);
+	std::string	get_modes(bool get_modes_values = true);
 	void				add_modes(modes_t *modes);
 
 private:

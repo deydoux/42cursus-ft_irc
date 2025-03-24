@@ -63,9 +63,9 @@ void Channel::unset_members_limit(void)
 	_limit_members = false;
 }
 
-void Channel::set_is_invite_only(bool invite_only)
+void Channel::set_invite_only(bool status)
 {
-	_invite_only = invite_only;
+	_invite_only = status;
 }
 
 void Channel::invite_client(Client &client)
@@ -167,7 +167,7 @@ void Channel::broadcast(const std::string &message, int exclude_fd) const
 
 std::string Channel::get_modes(bool get_modes_values)
 {
-	return stringify_modes(&_modes, get_modes_values);
+	return stringify_modes(_modes, get_modes_values);
 }
 
 const std::string Channel::get_creation_time() const
@@ -175,9 +175,9 @@ const std::string Channel::get_creation_time() const
 	return _creation_timestamp;
 }
 
-void Channel::set_is_topic_protected(bool is_topic_protected)
+void Channel::set_topic_protection(bool status)
 {
-	_topic_protected = is_topic_protected;
+	_topic_protected = status;
 }
 
 bool Channel::is_topic_protected() const
@@ -191,17 +191,17 @@ void Channel::log(const std::string &message, const log_level level) const
 		::log("Channel " + _name, message, level);
 }
 
-std::string Channel::stringify_modes(Channel::modes_t *modes, bool add_modes_values)
+std::string Channel::stringify_modes(const modes_t &modes, bool add_modes_values)
 {
-	if (modes->flags.empty())
+	if (modes.flags.empty())
 		return "+";
 
 	std::string str_flags;
 	std::string str_values;
 	char current_sign = 0;
 
-	for (size_t i = 0; i < modes->flags.size(); ++i) {
-		std::string mode = modes->flags[i];
+	for (size_t i = 0; i < modes.flags.size(); ++i) {
+		std::string mode = modes.flags[i];
 
 		if (mode[0] != current_sign) {
 			current_sign = mode[0];
@@ -209,8 +209,8 @@ std::string Channel::stringify_modes(Channel::modes_t *modes, bool add_modes_val
 		}
 
 		str_flags += mode[1];
-		if (modes->values.find(mode[1]) != modes->values.end())
-			str_values += modes->values.find(mode[1])->second;
+		if (modes.values.find(mode[1]) != modes.values.end())
+			str_values += modes.values.find(mode[1])->second;
 	}
 
 	return str_flags + (add_modes_values ? " " + str_values : "");
@@ -246,10 +246,10 @@ const std::string Channel::get_topic( void ) const
 	return _topic;
 }
 
-void Channel::set_topic(Client &editor, const std::string topic)
+void Channel::set_topic(Client &author, const std::string topic)
 {
 	_topic = topic;
-	_topic_author = editor.get_nickname();
+	_topic_author = author.get_nickname();
 	_topic_edit_time = to_string(time(NULL));
 }
 
