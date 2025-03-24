@@ -12,7 +12,7 @@ class Ollama
 public:
 	typedef std::vector<size_t>	context_t;
 
-	Ollama(const std::string model, const std::string server_url);
+	Ollama(const std::string model, const std::string server_uri);
 
 	class Exception : public std::runtime_error
 	{
@@ -26,9 +26,9 @@ public:
 
 private:
 	const std::string	_model;
-	const std::string	_server_uri;
+	const std::string	_base_uri;
 
-	static Curl					_curl;
+	static Curl	_curl;
 };
 
 #endif
