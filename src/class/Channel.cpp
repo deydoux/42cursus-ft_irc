@@ -5,14 +5,14 @@
 #include <algorithm>
 
 Channel::Channel(Client &creator, std::string &name, const bool verbose):
-	_name(name),
+	_verbose(verbose),
 	_creation_timestamp(unix_timestamp()),
-	_is_invite_only(false),
-	_is_topic_protected(false),
+	_name(name),
+	_invite_only(false),
 	_limit_members(false),
+	_topic_protected(false),
 	_passkey(),
-	_topic(),
-	_verbose(verbose)
+	_topic()
 {
 	log("Created", debug);
 	creator.set_channel_operator(name);
@@ -65,7 +65,7 @@ void Channel::unset_members_limit(void)
 
 void Channel::set_is_invite_only(bool invite_only)
 {
-	_is_invite_only = invite_only;
+	_invite_only = invite_only;
 }
 
 void Channel::invite_client(Client &client)
@@ -127,7 +127,7 @@ bool	Channel::check_passkey(std::string &passkey) const
 
 bool Channel::is_invite_only() const
 {
-	return _is_invite_only;
+	return _invite_only;
 }
 
 bool Channel::is_client_banned(Client &client) const
@@ -177,12 +177,12 @@ const std::string Channel::get_creation_time() const
 
 void Channel::set_is_topic_protected(bool is_topic_protected)
 {
-	_is_topic_protected = is_topic_protected;
+	_topic_protected = is_topic_protected;
 }
 
 bool Channel::is_topic_protected() const
 {
-	return _is_topic_protected;
+	return _topic_protected;
 }
 
 void Channel::log(const std::string &message, const log_level level) const

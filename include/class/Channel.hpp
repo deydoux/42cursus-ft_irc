@@ -70,9 +70,9 @@ private:
 	const bool			_verbose;
 	const std::string	_creation_timestamp;
 	const std::string	_name;
-	bool		_is_invite_only;
-	bool		_is_topic_protected;
+	bool		_invite_only;
 	bool		_limit_members;
+	bool		_topic_protected;
 	clients_t	_invited_clients;
 	clients_t	_members;
 	modes_t		_modes;
