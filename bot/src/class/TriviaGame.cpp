@@ -356,6 +356,7 @@ void TriviaGame::_ask_trivia_question( void )
 	choices.insert(choices.end(), question.wrong_answers.begin(), question.wrong_answers.end());
 	std::random_shuffle(choices.begin(), choices.end());
 
+	_choices.clear();
 	std::string alpha = "ABCDEFGHIJ";
 	int max_len = get_max_len(choices) + 4;
 	for (size_t i = 0; i < choices.size() && i < alpha.size(); i++) {

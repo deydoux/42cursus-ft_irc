@@ -29,14 +29,7 @@ Client::~Client()
 
 void Client::handle_messages(const std::string &messages)
 {
-	std::string debug_messages = messages;
-	for (size_t pos = 0; (pos = debug_messages.find('\t', pos)) != std::string::npos; pos += 2)
-		debug_messages.replace(pos, 1, "\\t");
-	for (size_t pos = 0; (pos = debug_messages.find('\n', pos)) != std::string::npos; pos += 2)
-		debug_messages.replace(pos, 1, "\\n");
-	for (size_t pos = 0; (pos = debug_messages.find('\r', pos)) != std::string::npos; pos += 2)
-		debug_messages.replace(pos, 1, "\\r");
-	log("Received messages:\n" + debug_messages, debug);
+	log("Received messages:\n" + messages, debug);
 
 	_buffer += messages;
 	size_t pos;
@@ -55,6 +48,8 @@ void Client::log(const std::string &message, const log_level level) const
 
 ssize_t Client::send(const std::string &message) const
 {
+	log("Sending message: " + message, debug);
+
 	ssize_t bytes_sent = ::send(_fd, message.c_str(), message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
 	if (bytes_sent == -1)
 		throw std::runtime_error("Failed to send message");

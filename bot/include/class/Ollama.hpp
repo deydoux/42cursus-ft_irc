@@ -24,7 +24,9 @@ public:
 		Exception(const std::string &message);
 	};
 
-	JSON::Object	generate(const std::string &prompt, context_t &context);
+	void	check();
+
+	JSON::Object	generate(const std::string &prompt, context_t &context, const std::string system = "");
 
 private:
 	const std::string	_model;
