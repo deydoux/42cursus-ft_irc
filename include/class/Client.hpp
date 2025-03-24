@@ -51,23 +51,21 @@ public:
 // Getters
 	// Client
 	const std::string	get_nickname(bool allow_empty = true) const;
-	bool	has_disconnect_request() const;
-	bool	is_channel_operator(std::string channel_name) const;
 	bool	is_registered() const;
-	int		get_fd() const;
 	std::string	get_mask() const;
 	std::string	get_realname() const;
 	// Channel
 	const channels_t	&get_channels() const;
+	bool	is_channel_operator(std::string channel_name) const;
 	Channel	*get_channel(const std::string &name) const;
-	size_t	get_channels_count() const;
 	// Server
+	bool	has_disconnect_request() const;
+	int		get_fd() const;
 	Server	&get_server() const;
 
 // Setters
 	// Client
 	void	set_nickname(const std::string &nickname);
-	void	set_password(const std::string &password);
 	void	set_realname(const std::string &realname);
 	void	set_username(const std::string &username);
 	// Channel
@@ -75,6 +73,7 @@ public:
 	void	remove_channel_operator(const std::string &channel_name);
 	void	set_channel_operator(const std::string &channel_name);
 	// Server
+	void	set_password(const std::string &password);
 	void	set_quit_reason(const std::string &reason);
 
 private:
@@ -88,7 +87,6 @@ private:
 	bool	_registered;
 	std::string	_buffer;
 	std::string	_nickname;
-	std::string	_password;
 	std::string	_realname;
 	std::string	_username;
 	// Channel
@@ -99,6 +97,7 @@ private:
 	const std::string	_ip;
 	bool	_disconnect_request;
 	Server	&_server;
+	std::string	_password;
 	std::string	_quit_reason;
 
 // Member functions

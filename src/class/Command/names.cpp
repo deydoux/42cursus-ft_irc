@@ -23,7 +23,7 @@ static void names_handler(const args_t &args, Client &client, Server &server)
 		for (clients_t::iterator it = clients.begin(); it != clients.end(); ++it) {
 			const Client &client = *it->second;
 
-			if (client.get_channels_count() == 0) {
+			if (client.get_channels().empty()) {
 				if (!lost_clients_nicknames.empty())
 					lost_clients_nicknames += " ";
 
