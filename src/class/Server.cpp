@@ -119,7 +119,7 @@ clients_t Server::get_clients(const std::string &mask) const
 		Client *client = it->second;
 
 		if ((!has_wildcards && client->get_nickname() == mask)
-			|| (match_mask(mask, client->get_mask())))
+				|| (match_mask(mask, client->get_mask())))
 			clients[client->get_fd()] = client;
 	}
 

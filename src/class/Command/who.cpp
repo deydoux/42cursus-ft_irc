@@ -23,7 +23,7 @@ static void who_handler(const args_t &args, Client &client, Server &server)
 	std::string reply;
 	if (!operator_flag) {
 		for (clients_t::iterator it = clients.begin(); it != clients.end(); ++it) {
-			Client &found_client = *it->second;
+			const Client &found_client = *it->second;
 			reply += client.create_reply(RPL_WHOREPLY, found_client.generate_who_reply(mask), "0 " + found_client.get_realname());
 		}
 	}

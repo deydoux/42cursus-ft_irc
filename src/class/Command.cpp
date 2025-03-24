@@ -43,7 +43,7 @@ void Command::execute(const args_t &args, Client &client, Server &server)
 		return;
 	}
 
-	_command_t command = it->second;
+	const _command_t command = it->second;
 
 	switch (command.register_mode)
 	{
