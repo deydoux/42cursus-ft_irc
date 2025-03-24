@@ -96,8 +96,10 @@ void Client::broadcast(const std::string &message) const
 
 	clients_to_broadcast.erase(_fd);
 
-	for (clients_t::iterator it = clients_to_broadcast.begin(); it != clients_to_broadcast.end(); ++it)
-		it->second->send(message);
+	for (clients_t::iterator it = clients_to_broadcast.begin(); it != clients_to_broadcast.end(); ++it) {
+		const Client &client = *it->second;
+		client.send(message);
+	}
 }
 
 const std::string Client::create_motd_reply() const
@@ -255,8 +257,7 @@ void Client::_handle_message(std::string message)
 	}
 
 	std::ostringstream oss;
-	for (args_t::iterator it = args.begin(); it != args.end(); ++it)
-	{
+	for (args_t::iterator it = args.begin(); it != args.end(); ++it) {
 		oss << '"' << *it << "\"";
 		if (it + 1 != args.end())
 			oss << ", ";
@@ -384,7 +385,8 @@ Channel *Client::get_channel(const std::string &name) const
 	if (it == _channels.end())
 		return NULL;
 
-	return it->second;
+	Channel *channel = it->second;
+	return channel;
 }
 
 

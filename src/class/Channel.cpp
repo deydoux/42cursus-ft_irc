@@ -44,10 +44,9 @@ bool Channel::is_valid_name(const std::string &name)
 		return false;
 
 	// - No spaces, control chars, commas
-	for (size_t i = 0; i < name.size(); ++i) {
+	for (size_t i = 0; i < name.size(); ++i)
 		if (iscntrl(name[i]) || name[i] == ' ')
 			return false;
-	}
 
 	return true;
 }
@@ -134,10 +133,9 @@ bool Channel::is_client_banned(Client &client) const
 {
 	std::string	client_mask = client.get_mask();
 
-	for (size_t i = 0; i < _banned_user_masks.size(); ++i) {
+	for (size_t i = 0; i < _banned_user_masks.size(); ++i)
 		if (match_mask(_banned_user_masks[i], client_mask))
 			return true;
-	}
 
 	return false;
 }
@@ -160,9 +158,13 @@ bool Channel::is_client_invited(Client &client)
 
 void Channel::broadcast(const std::string &message, int exclude_fd) const
 {
-	for (clients_t::const_iterator it = _members.begin(); it != _members.end(); ++it)
-		if (it->first != exclude_fd)
-			it->second->send(message);
+	for (clients_t::const_iterator it = _members.begin(); it != _members.end(); ++it) {
+		int fd = it->first;
+		const Client &client = *it->second;
+
+		if (fd != exclude_fd)
+			client.send(message);
+	}
 }
 
 const std::string Channel::get_modes(bool values)
@@ -235,8 +237,11 @@ void Channel::add_modes(const modes_t &new_modes)
 	}
 
 	for (std::map<char, std::string>::const_iterator it = new_modes.values.begin(); it != new_modes.values.end(); ++it) {
-		if (it->first == 'o') continue;
-		_modes.values[it->first] = it->second;
+		char mode = it->first;
+		const std::string &value = it->second;
+
+		if (mode != 'o')
+			_modes.values[mode] = value;
 	}
 }
 

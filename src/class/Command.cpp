@@ -35,15 +35,15 @@ void Command::execute(const args_t &args, Client &client, Server &server)
 	if (args.empty())
 		return;
 
-	_commands_t::iterator command_it = _commands.find(to_lower(args[0]));
+	_commands_t::iterator it = _commands.find(to_lower(args[0]));
 
-	if (command_it == _commands.end()) {
+	if (it == _commands.end()) {
 		if (client.is_registered())
 			client.reply(ERR_UNKNOWNCOMMAND, args[0], "Unknown command");
 		return;
 	}
 
-	_command_t command = command_it->second;
+	_command_t command = it->second;
 
 	switch (command.register_mode)
 	{

@@ -35,11 +35,15 @@ Server::~Server()
 {
 	close(_socket);
 
-	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it)
-		delete it->second;
+	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		Client *client = it->second;
+		delete client;
+	}
 
-	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it)
-		delete it->second;
+	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		Channel *channel = it->second;
+		delete channel;
+	}
 
 	log("Destroyed", debug);
 }
@@ -95,8 +99,9 @@ const std::vector<std::string> &Server::get_motd_lines() const
 Client *Server::get_client(const std::string &nickname) const
 {
 	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
-		if (it->second->get_nickname() == nickname)
-			return it->second;
+		Client *client = it->second;
+		if (client->get_nickname() == nickname)
+			return client;
 	}
 
 	return NULL;
@@ -341,8 +346,10 @@ void Server::_read()
 
 void Server::_down()
 {
-	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it)
-		it->second->send_error("Server going down");
+	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		Client &client = *it->second;
+		client.send_error("Server going down");
+	}
 }
 
 void Server::_disconnect_client(int fd)
@@ -356,8 +363,10 @@ void Server::_disconnect_client(int fd)
 	if (!stop)
 		client->broadcast_quit();
 
-	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it)
-		it->second->remove_client(*client);
+	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		Channel &channel = *it->second;
+		channel.remove_client(*client);
+	}
 
 	delete client;
 	_clients.erase(fd);
@@ -434,9 +443,13 @@ Channel	*Server::get_channel(const std::string &channel_name) const
 {
 	const std::string &lower_channel_name = to_lower(channel_name);
 
-	for (channels_t::const_iterator it = _channels.begin(); it != _channels.end(); ++it)
-		if (to_lower(it->first) == lower_channel_name)
-			return it->second;
+	for (channels_t::const_iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		const std::string &channel_name = it->first;
+		Channel *channel = it->second;
+
+		if (to_lower(channel_name) == lower_channel_name)
+			return channel;
+	}
 
 	return NULL;
 }
