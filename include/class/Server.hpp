@@ -24,8 +24,8 @@ private:
 // Static attributes
 	static const bool	_default_verbose = false;
 	static const port_t	_default_port = 6697;
-	static const std::string _default_motd_file;
-	static const std::string _default_name;
+	static const std::string	_default_motd_file;
+	static const std::string	_default_name;
 
 public:
 // Static functions
@@ -68,12 +68,12 @@ public:
 
 private:
 // Static functions
-	static port_t			_parse_port(const std::string &port_str);
-	static sockaddr_in		_init_address(port_t port);
-	static std::string		_get_next_arg(int &i, int argc, char *argv[]);
+	static port_t	_parse_port(const std::string &port_str);
+	static void		_print_usage(int status = 1);
+	static void		_signal_handler(int sig);
+	static sockaddr_in	_init_address(port_t port);
+	static std::string	_get_next_arg(int &i, int argc, char *argv[]);
 	static struct pollfd	_init_pollfd(int fd);
-	static void				_print_usage(int status = 1);
-	static void				_signal_handler(int sig);
 
 // Attributes
 	const bool			_verbose;
