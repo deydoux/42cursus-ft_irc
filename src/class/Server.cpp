@@ -68,7 +68,6 @@ Server Server::parse_args(int argc, char *argv[])
 	return server;
 }
 
-
 Server::Server(const std::string &name, port_t port, const std::string &password, const std::string &motd, const std::string &motd_file, bool verbose):
 	_verbose(verbose),
 	_port(port),
