@@ -395,7 +395,7 @@ Channel *Client::get_channel(const std::string &name) const
 }
 
 
-bool	Client::join(Channel &channel, std::string passkey)
+bool	Client::join(Channel &channel, const std::string &passkey)
 {
 	if (channel.is_client_member(*this))
 		return (true);

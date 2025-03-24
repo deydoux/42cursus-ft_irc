@@ -41,7 +41,7 @@ public:
 	std::string	create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	std::string	generate_who_reply(const std::string &context) const;
 	// Command
-	bool	join(Channel &channel, std::string passkey);
+	bool	join(Channel &channel, const std::string &passkey);
 	void	kick(Channel &channel, const std::string &kicked_client, std::string &reason);
 	void	part(Channel &channel, std::string &reason);
 

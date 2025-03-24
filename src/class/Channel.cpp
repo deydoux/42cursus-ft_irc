@@ -120,9 +120,9 @@ void	Channel::set_passkey(std::string &passkey)
 	_passkey = passkey;
 }
 
-bool	Channel::check_passkey(std::string &passkey) const
+bool Channel::check_passkey(const std::string &passkey) const
 {
-	return _passkey == "" || _passkey == passkey;
+	return passkey == _passkey;
 }
 
 bool Channel::is_invite_only() const

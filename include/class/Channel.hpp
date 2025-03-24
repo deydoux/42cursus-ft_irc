@@ -36,7 +36,7 @@ public:
 	const std::string	get_topic_author() const;
 	const std::string	get_topic_edit_time() const;
 	const std::string	get_topic() const;
-	bool	check_passkey(std::string &passkey) const;
+	bool	check_passkey(const std::string &passkey) const;
 	bool	is_full() const;
 	bool	is_invite_only() const;
 	bool	is_topic_protected() const;
