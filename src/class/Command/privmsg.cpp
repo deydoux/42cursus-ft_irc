@@ -11,7 +11,7 @@ static void privmsg_handler(const args_t &args, Client &client, Server &server)
 	if (args.size() == 2)
 		return client.reply(ERR_NOTEXTTOSEND, "", "No text to send");
 
-	std::vector<std::string> recipients = ft_split(args[1], ',');
+	std::vector<std::string> recipients = split(args[1], ',');
 	const std::string &message = args[2];
 
 	for (std::vector<std::string>::iterator it = recipients.begin(); it != recipients.end(); ++it) {

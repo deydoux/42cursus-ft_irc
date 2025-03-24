@@ -5,8 +5,8 @@
 
 static void kick_handler(const args_t &args, Client &client, Server &server)
 {
-	std::vector<std::string> channels_name = ft_split(args[1], ',');
-	std::vector<std::string> nicks_to_kick = ft_split(args[2], ',');
+	std::vector<std::string> channels_name = split(args[1], ',');
+	std::vector<std::string> nicks_to_kick = split(args[2], ',');
 	std::string reason = args.size() == 4 ? args[3] : client.get_nickname();
 
 	std::vector<Channel *> kick_from_channels;

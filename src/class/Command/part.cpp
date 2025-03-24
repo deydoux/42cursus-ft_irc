@@ -5,7 +5,7 @@
 
 static void part_handler(const args_t &args, Client &client, Server &server)
 {
-	std::vector<std::string> channels_name = ft_split(args[1], ',');
+	std::vector<std::string> channels_name = split(args[1], ',');
 	std::string reason = args.size() == 3 ? args[2] : "Leaving";
 
 	for (size_t i = 0; i < channels_name.size(); i++)

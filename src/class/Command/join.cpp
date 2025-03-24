@@ -20,8 +20,8 @@ static void join_handler(const args_t &args, Client &client, Server &server)
 	std::vector<std::string> channels_name_to_join;
 	std::vector<std::string> passkeys;
 
-	std::vector<std::string> channels_name = ft_split(args[1], ',');
-	std::vector<std::string> input_passkeys = args_size == 3 ? ft_split(args[2], ',') : std::vector<std::string>();
+	std::vector<std::string> channels_name = split(args[1], ',');
+	std::vector<std::string> input_passkeys = args_size == 3 ? split(args[2], ',') : std::vector<std::string>();
 
 	for (size_t i = 0; i < channels_name.size(); i++)
 	{
