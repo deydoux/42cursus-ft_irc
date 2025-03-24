@@ -27,7 +27,7 @@ Client::~Client()
 	log("Closed connection");
 }
 
-void Client::handle_messages(std::string messages)
+void Client::handle_messages(const std::string &messages)
 {
 	std::string debug_messages = messages;
 	for (size_t pos = 0; (pos = debug_messages.find('\t', pos)) != std::string::npos; pos += 2)
@@ -87,7 +87,7 @@ void Client::send_error(const std::string &message)
 
 void Client::broadcast(const std::string &message) const
 {
-	clients_t clients_to_notify;
+	clients_t clients_to_broadcast;
 
 	for (channels_t::const_iterator it = _channels.begin(); it != _channels.end(); ++it) {
 		Channel *channel = it->second;
@@ -95,13 +95,13 @@ void Client::broadcast(const std::string &message) const
 		clients_t members = channel->get_members();
 		for (clients_t::iterator member = members.begin(); member != members.end(); ++member) {
 			Client *member_client = member->second;
-			clients_to_notify[member_client->get_fd()] = member_client;
+			clients_to_broadcast[member_client->get_fd()] = member_client;
 		}
 	}
 
-	clients_to_notify.erase(_fd);
+	clients_to_broadcast.erase(_fd);
 
-	for (clients_t::iterator it = clients_to_notify.begin(); it != clients_to_notify.end(); ++it)
+	for (clients_t::iterator it = clients_to_broadcast.begin(); it != clients_to_broadcast.end(); ++it)
 		it->second->send(message);
 }
 
