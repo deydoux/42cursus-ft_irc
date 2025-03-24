@@ -81,7 +81,7 @@ private:
 	std::string	_topic_author;
 	std::string	_topic_edit_time;
 	std::string	_topic;
-	std::vector<std::string>	_banned_user_masks; // eg: nick!*@* , *!*@192.168.1.* ...
+	std::vector<std::string>	_banned_user_masks; // e.g. ["nick!*@*", "*!*@192.168.1.*"]
 };
 
 #endif
