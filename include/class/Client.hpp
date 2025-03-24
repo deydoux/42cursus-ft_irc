@@ -13,7 +13,7 @@ class Client
 private:
 // Static variables
 	static const size_t	_max_channels = 50;
-	static const size_t	_max_kick_message_len = 400;
+	static const size_t	_max_kick_reason_len = 400;
 	static const size_t	_max_message_size = 512;
 	static const size_t	_max_nickname_size = 9;
 	static const size_t	_max_realname_len = 127;

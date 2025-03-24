@@ -303,7 +303,7 @@ void Client::_greet() const
 	std::string channellen = to_string(Channel::max_channel_name_size);
 	std::string nicklen = to_string(Client::_max_nickname_size);
 	std::string topiclen = to_string(Channel::max_topic_len);
-	std::string kicklen = to_string(Client::_max_kick_message_len);
+	std::string kicklen = to_string(Client::_max_kick_reason_len);
 
 	std::string clients_count = to_string(_server.get_clients_count());
 	std::string channels_count = to_string(_server.get_channels_count());
@@ -426,8 +426,8 @@ void	Client::kick(Channel &channel, const std::string &kicked_client, std::strin
 	Server &server = get_server();
 	Client *client_to_be_kicked = server.get_client(kicked_client);
 
-	if (reason.size() > _max_kick_message_len)
-		reason.resize(_max_kick_message_len);
+	if (reason.size() > _max_kick_reason_len)
+		reason.resize(_max_kick_reason_len);
 
 	if (!channel.is_client_member(*this))
 		reply(ERR_NOTONCHANNEL, channel.get_name(), "You're not on that channel");
