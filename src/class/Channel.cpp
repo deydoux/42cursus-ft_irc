@@ -165,9 +165,9 @@ void Channel::broadcast(const std::string &message, int exclude_fd) const
 			member->second->send(message);
 }
 
-std::string Channel::get_modes(bool get_modes_values)
+const std::string Channel::get_modes(bool values)
 {
-	return stringify_modes(_modes, get_modes_values);
+	return stringify_modes(_modes, values);
 }
 
 const std::string Channel::get_creation_time() const
@@ -191,7 +191,7 @@ void Channel::log(const std::string &message, const log_level level) const
 		::log("Channel " + _name, message, level);
 }
 
-std::string Channel::stringify_modes(const modes_t &modes, bool values)
+const std::string Channel::stringify_modes(const modes_t &modes, bool values)
 {
 	if (modes.flags.empty())
 		return "+";
@@ -216,16 +216,16 @@ std::string Channel::stringify_modes(const modes_t &modes, bool values)
 	return str_flags + (values ? " " + str_values : "");
 }
 
-void Channel::add_modes(modes_t *modes)
+void Channel::add_modes(const modes_t &new_modes)
 {
-	for (size_t i = 0; i < modes->flags.size(); i++)
+	for (size_t i = 0; i < new_modes.flags.size(); i++)
 	{
-		char mode = modes->flags[i][1];
+		char mode = new_modes.flags[i][1];
 		if (mode == 'o') continue;
 
-		bool is_adding = modes->flags[i][0] == '+';
+		bool is_adding = new_modes.flags[i][0] == '+';
 		if (is_adding) {
-			_modes.flags.push_back(modes->flags[i]);
+			_modes.flags.push_back(new_modes.flags[i]);
 		} else {
 			_modes.flags.erase(std::find(
 				_modes.flags.begin(),
@@ -235,13 +235,13 @@ void Channel::add_modes(modes_t *modes)
 		}
 	}
 
-	for (std::map<char, std::string>::iterator it = modes->values.begin(); it != modes->values.end(); ++it) {
+	for (std::map<char, std::string>::const_iterator it = new_modes.values.begin(); it != new_modes.values.end(); ++it) {
 		if (it->first == 'o') continue ;
 		_modes.values[it->first] = it->second;
 	}
 }
 
-const std::string Channel::get_topic( void ) const
+const std::string Channel::get_topic() const
 {
 	return _topic;
 }

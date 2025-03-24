@@ -17,9 +17,9 @@ public:
 	static const size_t max_topic_len = 490;
 
 // Static functions
-	static bool			is_prefix(const char &c);
-	static bool			is_valid_name(const std::string &name);
-	static std::string	stringify_modes(const modes_t &modes, bool values = true);
+	static const std::string	stringify_modes(const modes_t &modes, bool values = true);
+	static bool	is_prefix(const char &c);
+	static bool	is_valid_name(const std::string &name);
 
 // Constructors/destructors
 	Channel(Client &creator, std::string &name, const bool verbose = false);
@@ -33,6 +33,7 @@ public:
 	// Channel
 	const std::string	&get_name() const;
 	const std::string	get_creation_time() const;
+	const std::string	get_modes(bool values = true);
 	const std::string	get_topic_author() const;
 	const std::string	get_topic_edit_time() const;
 	const std::string	get_topic() const;
@@ -48,12 +49,13 @@ public:
 
 // Setters
 	// Channel
-	void	set_passkey(std::string &passkey);
-	void	set_max_members(size_t max_members);
-	void	unset_members_limit();
+	void	add_modes(const modes_t &new_modes);
 	void	set_invite_only(bool status);
+	void	set_max_members(size_t max_members);
+	void	set_passkey(std::string &passkey);
 	void	set_topic_protection(bool status);
 	void	set_topic(Client &author, const std::string topic);
+	void	unset_members_limit();
 	// Client
 	void	invite_client(Client &client);
 	void	add_client(Client &client);
@@ -61,9 +63,6 @@ public:
 
 
 	const std::string list_members();
-
-	std::string	get_modes(bool get_modes_values = true);
-	void				add_modes(modes_t *modes);
 
 private:
 // Attributes

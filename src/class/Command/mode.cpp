@@ -118,7 +118,7 @@ static void mode_handler(const args_t &args, Client &client, Server &server)
 			.values = modes_values
 		};
 
-		channel->add_modes(&modes);
+		channel->add_modes(modes);
 
 		channel->broadcast(Client::create_cmd_reply(
 			client.get_mask(), "MODE", channel_name + ' ' + Channel::stringify_modes(modes)
