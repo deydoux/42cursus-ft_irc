@@ -54,7 +54,7 @@ public:
 	void	set_invite_only(bool status);
 	void	set_max_members(size_t max_members);
 	void	set_passkey(std::string &passkey);
-	void	set_topic_protection(bool status);
+	void	set_topic_protected(bool status);
 	void	set_topic(Client &author, const std::string topic);
 	void	unset_members_limit();
 	// Client

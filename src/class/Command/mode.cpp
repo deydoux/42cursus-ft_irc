@@ -58,7 +58,7 @@ static void mode_handler(const args_t &args, Client &client, Server &server)
 
 		else if (mode == 't') {
 			if (channel->is_topic_protected() == add_mode) continue;
-			channel->set_topic_protection(add_mode);
+			channel->set_topic_protected(add_mode);
 		}
 
 		else if (mode == 'k') {

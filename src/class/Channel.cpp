@@ -4,28 +4,29 @@
 
 #include <algorithm>
 
-Channel::Channel(Client &creator, std::string &name, const bool verbose):
-	_verbose(verbose),
-	_creation_timestamp(to_string(time(NULL))),
-	_name(name),
-	_invite_only(false),
-	_limit_members(false),
-	_topic_protected(false),
-	_passkey(),
-	_topic()
+const std::string Channel::stringify_modes(const modes_t &modes, bool values)
 {
-	log("Created", debug);
-	creator.set_channel_operator(name);
-}
+	if (modes.flags.empty())
+		return "+";
 
-Channel::~Channel()
-{
-	log("Destroyed", debug);
-}
+	std::string str_flags;
+	std::string str_values;
+	char current_sign = 0;
 
-const std::string	&Channel::get_name() const
-{
-	return _name;
+	for (size_t i = 0; i < modes.flags.size(); ++i) {
+		std::string mode = modes.flags[i];
+
+		if (mode[0] != current_sign) {
+			current_sign = mode[0];
+			str_flags += current_sign;
+		}
+
+		str_flags += mode[1];
+		if (modes.values.find(mode[1]) != modes.values.end())
+			str_values += modes.values.find(mode[1])->second;
+	}
+
+	return str_flags + (values ? " " + str_values : "");
 }
 
 bool Channel::is_prefix(const char &c)
@@ -51,40 +52,90 @@ bool Channel::is_valid_name(const std::string &name)
 	return true;
 }
 
-void	Channel::set_max_members(size_t max_members)
+Channel::Channel(Client &creator, std::string &name, const bool verbose):
+	_verbose(verbose),
+	_creation_timestamp(to_string(time(NULL))),
+	_name(name),
+	_invite_only(false),
+	_limit_members(false),
+	_topic_protected(false),
+	_passkey(),
+	_topic()
 {
-	_limit_members = true;
-	_max_members = max_members;
+	log("Created", debug);
+	creator.set_channel_operator(name);
 }
 
-void Channel::unset_members_limit()
+Channel::~Channel()
 {
-	_limit_members = false;
+	log("Destroyed", debug);
 }
 
-void Channel::set_invite_only(bool status)
+void Channel::log(const std::string &message, const log_level level) const
 {
-	_invite_only = status;
+	if (_verbose || level != debug)
+		::log("Channel " + _name, message, level);
 }
 
-void Channel::invite_client(Client &client)
+void Channel::broadcast(const std::string &message, int exclude_fd) const
 {
-	_invited_clients[client.get_fd()] = &client;
+	for (clients_t::const_iterator it = _members.begin(); it != _members.end(); ++it) {
+		int fd = it->first;
+		const Client &client = *it->second;
+
+		if (fd != exclude_fd)
+			client.send(message);
+	}
 }
 
-void Channel::add_client(Client &client)
+const std::string &Channel::get_name() const
 {
-	_members[client.get_fd()] = &client;
+	return _name;
 }
 
-void Channel::remove_client(Client &client)
+const std::string Channel::get_creation_time() const
 {
-	int client_fd = client.get_fd();
+	return _creation_timestamp;
+}
 
-	_members.erase(client_fd);
-	_invited_clients.erase(client_fd);
+const std::string Channel::get_modes(bool values)
+{
+	return stringify_modes(_modes, values);
+}
 
-	client.remove_channel_operator(_name);
+const std::string Channel::get_topic_author() const
+{
+	return _topic_author;
+}
+
+const std::string Channel::get_topic_edit_time() const
+{
+	return _topic_edit_time;
+}
+
+const std::string Channel::get_topic() const
+{
+	return _topic;
+}
+
+bool Channel::check_passkey(const std::string &passkey) const
+{
+	return _passkey.empty() || passkey == _passkey;
+}
+
+bool Channel::is_full() const
+{
+	return _limit_members && _max_members <= _members.size();
+}
+
+bool Channel::is_invite_only() const
+{
+	return _invite_only;
+}
+
+bool Channel::is_topic_protected() const
+{
+	return _topic_protected;
 }
 
 const clients_t &Channel::get_members() const
@@ -109,26 +160,6 @@ const std::string Channel::get_names() const
 	return result;
 }
 
-bool Channel::is_full() const
-{
-	return _limit_members && _max_members <= _members.size();
-}
-
-void	Channel::set_passkey(std::string &passkey)
-{
-	_passkey = passkey;
-}
-
-bool Channel::check_passkey(const std::string &passkey) const
-{
-	return _passkey.empty() || passkey == _passkey;
-}
-
-bool Channel::is_invite_only() const
-{
-	return _invite_only;
-}
-
 bool Channel::is_client_banned(Client &client) const
 {
 	std::string	client_mask = client.get_mask();
@@ -138,11 +169,6 @@ bool Channel::is_client_banned(Client &client) const
 			return true;
 
 	return false;
-}
-
-bool Channel::is_client_member(Client &client) const
-{
-	return _members.find(client.get_fd()) != _members.end();
 }
 
 bool Channel::is_client_invited(Client &client)
@@ -156,66 +182,9 @@ bool Channel::is_client_invited(Client &client)
 	return true;
 }
 
-void Channel::broadcast(const std::string &message, int exclude_fd) const
+bool Channel::is_client_member(Client &client) const
 {
-	for (clients_t::const_iterator it = _members.begin(); it != _members.end(); ++it) {
-		int fd = it->first;
-		const Client &client = *it->second;
-
-		if (fd != exclude_fd)
-			client.send(message);
-	}
-}
-
-const std::string Channel::get_modes(bool values)
-{
-	return stringify_modes(_modes, values);
-}
-
-const std::string Channel::get_creation_time() const
-{
-	return _creation_timestamp;
-}
-
-void Channel::set_topic_protection(bool status)
-{
-	_topic_protected = status;
-}
-
-bool Channel::is_topic_protected() const
-{
-	return _topic_protected;
-}
-
-void Channel::log(const std::string &message, const log_level level) const
-{
-	if (_verbose || level != debug)
-		::log("Channel " + _name, message, level);
-}
-
-const std::string Channel::stringify_modes(const modes_t &modes, bool values)
-{
-	if (modes.flags.empty())
-		return "+";
-
-	std::string str_flags;
-	std::string str_values;
-	char current_sign = 0;
-
-	for (size_t i = 0; i < modes.flags.size(); ++i) {
-		std::string mode = modes.flags[i];
-
-		if (mode[0] != current_sign) {
-			current_sign = mode[0];
-			str_flags += current_sign;
-		}
-
-		str_flags += mode[1];
-		if (modes.values.find(mode[1]) != modes.values.end())
-			str_values += modes.values.find(mode[1])->second;
-	}
-
-	return str_flags + (values ? " " + str_values : "");
+	return _members.find(client.get_fd()) != _members.end();
 }
 
 void Channel::add_modes(const modes_t &new_modes)
@@ -245,9 +214,25 @@ void Channel::add_modes(const modes_t &new_modes)
 	}
 }
 
-const std::string Channel::get_topic() const
+void Channel::set_invite_only(bool status)
 {
-	return _topic;
+	_invite_only = status;
+}
+
+void Channel::set_max_members(size_t max_members)
+{
+	_limit_members = true;
+	_max_members = max_members;
+}
+
+void Channel::set_passkey(std::string &passkey)
+{
+	_passkey = passkey;
+}
+
+void Channel::set_topic_protected(bool status)
+{
+	_topic_protected = status;
 }
 
 void Channel::set_topic(Client &author, const std::string topic)
@@ -257,12 +242,27 @@ void Channel::set_topic(Client &author, const std::string topic)
 	_topic_edit_time = to_string(time(NULL));
 }
 
-const std::string Channel::get_topic_edit_time() const
+void Channel::unset_members_limit()
 {
-	return _topic_edit_time;
+	_limit_members = false;
 }
 
-const std::string Channel::get_topic_author() const
+void Channel::invite_client(Client &client)
 {
-	return _topic_author;
+	_invited_clients[client.get_fd()] = &client;
+}
+
+void Channel::add_client(Client &client)
+{
+	_members[client.get_fd()] = &client;
+}
+
+void Channel::remove_client(Client &client)
+{
+	int client_fd = client.get_fd();
+
+	_members.erase(client_fd);
+	_invited_clients.erase(client_fd);
+
+	client.remove_channel_operator(_name);
 }
