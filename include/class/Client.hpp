@@ -72,8 +72,8 @@ public:
 	void	set_username(const std::string &username);
 	// Channel
 	void	delete_channel(const std::string &channel_name);
-	void	remove_channel_operator(std::string channel_name);
-	void	set_channel_operator(std::string channel_name);
+	void	remove_channel_operator(const std::string &channel_name);
+	void	set_channel_operator(const std::string &channel_name);
 	// Server
 	void	set_quit_reason(const std::string &reason);
 

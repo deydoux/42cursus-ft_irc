@@ -148,13 +148,13 @@ const bool &Client::has_disconnect_request() const
 	return _disconnect_request;
 }
 
-void	Client::set_channel_operator(std::string channel)
+void Client::set_channel_operator(const std::string &channel)
 {
 	if (!is_channel_operator(channel))
 		_channel_operator.push_back(channel);
 }
 
-void Client::remove_channel_operator(std::string channel)
+void Client::remove_channel_operator(const std::string &channel)
 {
 	std::vector<std::string>::iterator it = std::find(_channel_operator.begin(), _channel_operator.end(), channel);
 
