@@ -284,7 +284,7 @@ std::string Client::create_reply(reply_code code, const std::string &arg, const 
 void Client::_check_registration()
 {
 	if (_nickname.empty() || _username.empty())
-		return ;
+		return;
 
 	if (!_server.check_password(_password))
 		return send_error("Access denied: Bad password?");
