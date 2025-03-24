@@ -29,26 +29,26 @@ public:
 
 // Member functions
 	const std::string	create_motd_reply() const;
-	ssize_t				send(const std::string &message) const;
-	std::string			create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
-	std::string			generate_who_reply(const std::string &context) const;
-	void				broadcast(const std::string &message) const;
-	void				cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg = "", const std::string &message = "") const;
-	void				handle_messages(std::string messages);
-	void				log(const std::string &message, const log_level level = info) const;
-	void				notify_quit() const;
-	void				reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
-	void				send_error(const std::string &message);
+	ssize_t	send(const std::string &message) const;
+	void	broadcast(const std::string &message) const;
+	void	cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg = "", const std::string &message = "") const;
+	void	handle_messages(std::string messages);
+	void	log(const std::string &message, const log_level level = info) const;
+	void	notify_quit() const;
+	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
+	void	send_error(const std::string &message);
+	std::string	create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
+	std::string	generate_who_reply(const std::string &context) const;
 
 // Getters
 	// Client
-	const bool			&has_disconnect_request() const;
-	const bool			&is_registered() const;
-	const int			&get_fd();
+	const bool	&has_disconnect_request() const;
+	const bool	&is_registered() const;
+	const int	&get_fd();
 	const std::string	&get_nickname(bool allow_empty = true) const;
-	bool				is_channel_operator(std::string channel_name) const;
-	std::string			get_mask() const;
-	std::string			get_realname() const;
+	bool	is_channel_operator(std::string channel_name) const;
+	std::string	get_mask() const;
+	std::string	get_realname() const;
 	// Channel
 	const channels_t	&get_channels() const;
 	Channel	*get_channel(const std::string &name) const;
@@ -65,21 +65,23 @@ public:
 	// Channel
 	bool	join_channel(Channel &channel, std::string passkey);
 	void	close_all_channels(std::string &reason);
+	void	delete_channel(const std::string &channel_name);
 	void	kick_channel(Channel &channel, const std::string &kicked_client, std::string &reason);
 	void	part_channel(Channel &channel, std::string &reason);
 	void	remove_channel_operator(std::string channel_name);
 	void	set_channel_operator(std::string channel_name);
+	// Server
 	void	set_quit_reason(const std::string &reason);
 
 private:
 // Static functions
-	static bool			_is_valid_nickname(const std::string &nickname);
-	static bool			_is_valid_username(const std::string &username);
+	static bool	_is_valid_nickname(const std::string &nickname);
+	static bool	_is_valid_username(const std::string &username);
 	static std::string	_create_line(const std::string &content);
 
 // Variables
 	// Client
-	bool		_registered;
+	bool	_registered;
 	std::string	_buffer;
 	std::string	_nickname;
 	std::string	_password;
@@ -89,10 +91,10 @@ private:
 	channels_t	_channels;
 	std::vector<std::string>	_channel_operator;
 	// Server
-	const int			_fd;
+	const int	_fd;
 	const std::string	_ip;
-	bool		_disconnect_request;
-	Server		&_server;
+	bool	_disconnect_request;
+	Server	&_server;
 	std::string	_quit_reason;
 
 // Member functions

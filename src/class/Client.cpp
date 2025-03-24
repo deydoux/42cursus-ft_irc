@@ -447,7 +447,7 @@ void	Client::kick_channel(Channel &channel, const std::string &kicked_client, st
 			get_mask(), "KICK", channel.get_name() + ' ' + kicked_client, reason
 		));
 		channel.remove_client(*client_to_be_kicked);
-		client_to_be_kicked->get_channels().erase(channel.get_name());
+		client_to_be_kicked->delete_channel(channel.get_name());
 	}
 }
 
@@ -468,6 +468,13 @@ void	Client::close_all_channels(std::string &reason)
 {
 	for (std::map<std::string, Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it)
 		part_channel(*it->second, reason);
+}
+
+void Client::delete_channel(const std::string &channel_name)
+{
+	Channel *channel = get_channel(channel_name);
+	if (channel)
+		_channels.erase(channel->get_name());
 }
 
 void Client::notify_quit() const
