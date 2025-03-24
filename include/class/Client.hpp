@@ -44,7 +44,7 @@ public:
 	std::string	generate_who_reply(const std::string &context) const;
 	// Command
 	bool	join(Channel &channel, const std::string &passkey);
-	void	kick(Channel &channel, const std::string &kicked_client, const std::string &reason);
+	void	kick(const std::string &nick_to_kick, Channel &channel, const std::string &reason);
 	void	part(Channel &channel, const std::string &reason);
 
 // Getters

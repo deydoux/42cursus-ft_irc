@@ -421,25 +421,25 @@ bool	Client::join(Channel &channel, const std::string &passkey)
 	return (false);
 }
 
-void	Client::kick(Channel &channel, const std::string &kicked_client, const std::string &reason)
+void	Client::kick(const std::string &nick_to_kick, Channel &channel, const std::string &reason)
 {
 	Server &server = get_server();
-	Client *client_to_be_kicked = server.get_client(kicked_client);
+	Client *client_to_kick = server.get_client(nick_to_kick);
 
 	if (!channel.is_client_member(*this))
 		reply(ERR_NOTONCHANNEL, channel.get_name(), "You're not on that channel");
 	else if (!is_channel_operator(channel.get_name()))
 		reply(ERR_CHANOPRIVSNEEDED, channel.get_name(), "You're not channel operator");
-	else if (!client_to_be_kicked)
+	else if (!client_to_kick)
 		reply(ERR_NOSUCHNICK, channel.get_name(), "No such nick/channel");
-	else if (!channel.is_client_member(*client_to_be_kicked))
+	else if (!channel.is_client_member(*client_to_kick))
 		reply(ERR_USERNOTINCHANNEL, channel.get_name(), "They aren't on that channel");
 	else {
 		channel.broadcast(create_cmd_reply(
-			get_mask(), "KICK", channel.get_name() + ' ' + kicked_client, reason
+			get_mask(), "KICK", channel.get_name() + ' ' + nick_to_kick, reason
 		));
-		channel.remove_client(*client_to_be_kicked);
-		client_to_be_kicked->delete_channel(channel.get_name());
+		channel.remove_client(*client_to_kick);
+		client_to_kick->delete_channel(channel.get_name());
 	}
 }
 
