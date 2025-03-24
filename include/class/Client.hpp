@@ -43,7 +43,7 @@ public:
 	// Command
 	bool	join(Channel &channel, const std::string &passkey);
 	void	kick(Channel &channel, const std::string &kicked_client, std::string &reason);
-	void	part(Channel &channel, std::string &reason);
+	void	part(Channel &channel, const std::string &reason);
 
 // Getters
 	// Client

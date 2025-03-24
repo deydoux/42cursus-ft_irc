@@ -451,7 +451,7 @@ void	Client::kick(Channel &channel, const std::string &kicked_client, std::strin
 	}
 }
 
-void	Client::part(Channel &channel, std::string &reason)
+void Client::part(Channel &channel, const std::string &reason)
 {
 	channel.send_broadcast(create_cmd_reply(
 		get_mask(), "PART", channel.get_name() , reason
