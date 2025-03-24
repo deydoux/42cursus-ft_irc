@@ -18,11 +18,14 @@ std::string html_decode(const std::string &str)
 		entities["&gt;"] = ">";
 		entities["&icirc;"] = "î";
 		entities["&iuml;"] = "ï";
+		entities["&ldquo;"] = "“";
 		entities["&lt;"] = "<";
 		entities["&ocirc;"] = "ô";
 		entities["&oelig;"] = "œ";
 		entities["&ouml;"] = "ö";
 		entities["&quot;"] = "\"";
+		entities["&rdquo;"] = "”";
+		entities["&rsquo;"] = "’";
 		entities["&ucirc;"] = "û";
 		entities["&ugrave;"] = "ù";
 		entities["&uuml;"] = "ü";
