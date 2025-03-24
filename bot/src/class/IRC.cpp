@@ -10,18 +10,20 @@
 #include <algorithm>
 
 // -- STATIC ATTRIBUTES
+const std::string IRC::_default_ollama_server_uri = "http://localhost:11434";
+const std::string IRC::_default_ollama_model = "llama3.2:1b";
 const std::string IRC::_default_hostname = "127.0.0.1";
 const std::string IRC::_default_nickname = "hkitty";
 const std::string IRC::_default_username = "hellokitty";
 const std::string IRC::_default_realname = "Hello Kitty";
 
 bool IRC::stop = false;
-Ollama IRC::_ollama("llama3.2:1b");
 
 // -- CONSTRUCTOR + DESTRUCTOR
 
-IRC::IRC(const std::string hostname, const port_t port, const std::string pass, bool verbose) :
+IRC::IRC(const std::string hostname, const port_t port, const std::string pass, const std::string ollama_model, const std::string ollama_server_uri, bool verbose) :
 	is_connected(false),
+	_ollama(ollama_model, ollama_server_uri),
 	_server_port(port),
 	_server_hostname(hostname),
 	_server_password(pass),
@@ -92,6 +94,8 @@ IRC IRC::launch_irc_client(int argc, char **argv)
 	port_t port = _default_port;
 	std::string hostname = _default_hostname;
 	bool verbose = _default_verbose;
+	std::string ollama_server_uri = _default_ollama_server_uri;
+	std::string ollama_model = _default_ollama_model;
 
 	bool is_hostname_set = false;
 	bool is_port_set = false;
@@ -115,6 +119,10 @@ IRC IRC::launch_irc_client(int argc, char **argv)
 		} else if (arg == "-P" || arg == "--pass" || arg == "--password") {
 			password = _get_next_arg(argc, argv, i);
 			is_pass_set = true;
+		} else if (arg == "-o" || arg == "--ollama" || arg == "--ollama-uri") {
+			ollama_server_uri = _get_next_arg(argc, argv, i);
+		} else if (arg == "-m" || arg == "--model" || arg == "--ollama-model") {
+			ollama_model = _get_next_arg(argc, argv, i);
 		} else if (arg[0] == '-') {
 			_print_usage();
 		}
@@ -134,7 +142,7 @@ IRC IRC::launch_irc_client(int argc, char **argv)
 			_print_usage();
 	}
 
-	IRC irc_client = IRC(hostname, port, password, verbose);
+	IRC irc_client = IRC(hostname, port, password, ollama_model, ollama_server_uri, verbose);
 
 	if (!is_hostname_set)
 		irc_client.log("Using default hostname: " + hostname, warning);
@@ -549,7 +557,9 @@ void IRC::_print_usage(int status)
 			  << "  -H, --hostname <hostname>          Hostname (ip adress of the server host)" << std::endl
 			  << "  -p, --port <port>                  Port to listen on (default: 6697)" << std::endl
 			  << "  -P, --pass, --password <password>  Password required to connect (default: None)" << std::endl
-			  << "  -v, --verbose                      Enable verbose output" << std::endl;
+			  << "  -v, --verbose                      Enable verbose output" << std::endl
+			  << "  -o, --ollama, --ollama-uri         Ollama server url" << std::endl
+			  << "  -m, --model, --ollama-model        AI Model used for Ollama" << std::endl;
 
 	throw status;
 }

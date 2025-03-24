@@ -7,16 +7,12 @@
 #include <string>
 #include <vector>
 
-#ifndef OLLAMA_BASE_URI
-# define OLLAMA_BASE_URI "http://localhost:11434"
-#endif
-
 class Ollama
 {
 public:
 	typedef std::vector<size_t>	context_t;
 
-	Ollama(const std::string &model);
+	Ollama(const std::string model, const std::string server_url);
 
 	class Exception : public std::runtime_error
 	{
@@ -30,9 +26,9 @@ public:
 
 private:
 	const std::string	_model;
+	const std::string	_server_uri;
 
 	static Curl					_curl;
-	static const std::string	_base_uri;
 };
 
 #endif

@@ -32,7 +32,7 @@ class IRC
 		bool	is_connected;
 
 		// -- CONSTRUCTOR + DESTRUCTOR
-		IRC(const std::string hostname, const port_t port, const std::string pass, bool verbose);
+		IRC(const std::string hostname, const port_t port, const std::string pass, const std::string ollama_server_uri, const std::string ollama_model, bool verbose);
 		~IRC();
 
 		// -- PUBLIC METHODS
@@ -57,6 +57,7 @@ class IRC
 		trivias_t			_ongoing_trivia_games;
 		std::map<std::string, Ollama::context_t>	_ollama_contexts;
 		std::vector<std::string>	_trivia_request_sent;
+		Ollama				_ollama;
 
 		// -- PRIVATE CONSTANTS
 		const port_t		_server_port;
@@ -88,11 +89,12 @@ class IRC
 		// -- PRIVATE STATIC CONSTANTS + ATTRIBUTES
 		static const bool			_default_verbose = true;
 		static const port_t			_default_port = 6697;
+		static const std::string	_default_ollama_server_uri;
+		static const std::string	_default_ollama_model;
 		static const std::string	_default_hostname;
 		static const std::string	_default_nickname;
 		static const std::string	_default_realname;
 		static const std::string	_default_username;
-		static Ollama				_ollama;
 
 
 		// -- PRIVATE STATIC METHODS
