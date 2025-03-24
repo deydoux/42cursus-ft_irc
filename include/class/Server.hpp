@@ -53,8 +53,8 @@ public:
 	size_t	get_max_clients() const;
 	size_t	get_max_connections() const;
 	// Channel
-	Channel		*get_channel(const std::string &channel_name) const;
-	channels_t	get_channels() const;
+	const channels_t	&get_channels() const;
+	Channel	*get_channel(const std::string &channel_name) const;
 	// Client
 	Client		*get_client(const std::string &nickname) const;
 	clients_t	get_clients(const std::string &mask) const;
@@ -106,7 +106,7 @@ private:
 	void	_init();
 	void	_listen();
 	void	_loop();
-	void	_read();
+	void	_receive();
 	void	_set_signal_handler();
 	void	_set_start_time();
 

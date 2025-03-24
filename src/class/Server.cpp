@@ -11,145 +11,10 @@
 #include <iostream>
 #include <sstream>
 
+bool Server::stop = false;
+
 const std::string Server::_default_motd_file = "kittirc.motd";
 const std::string Server::_default_name = "kittirc";
-
-Server::Server(const std::string &name, port_t port, const std::string &password, const std::string &motd, const std::string &motd_file, bool verbose):
-	_verbose(verbose),
-	_port(port),
-	_address(_init_address(_port)),
-	_motd_file(motd_file),
-	_motd(motd),
-	_name(name),
-	_password(password),
-	_connections(0),
-	_max_connections(0),
-	_max_registered_clients(0),
-	_registered_clients_count(0)
-{
-	Command::init();
-	log("Constructed", debug);
-}
-
-Server::~Server()
-{
-	close(_socket);
-
-	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it) {
-		Client *client = it->second;
-		delete client;
-	}
-
-	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it) {
-		Channel *channel = it->second;
-		delete channel;
-	}
-
-	log("Destroyed", debug);
-}
-
-void Server::log(const std::string &message, const log_level level) const
-{
-	if (_verbose || level != debug)
-		::log("Server", message, level);
-}
-
-void Server::start()
-{
-	_init();
-
-	while (!stop)
-		_loop();
-
-	_down();
-
-	log("Stopped");
-}
-
-bool Server::check_password(const std::string &password) const
-{
-	return password == _password;
-}
-
-void Server::register_client()
-{
-	_max_registered_clients = std::max(_max_registered_clients, ++_registered_clients_count);
-}
-
-const std::string &Server::get_name() const
-{
-	return _name;
-}
-
-bool Server::is_verbose() const
-{
-	return _verbose;
-}
-
-const std::string &Server::get_start_time() const
-{
-	return _start_time;
-}
-
-const std::vector<std::string> &Server::get_motd_lines() const
-{
-	return _motd_lines;
-}
-
-Client *Server::get_client(const std::string &nickname) const
-{
-	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
-		Client *client = it->second;
-		if (client->get_nickname() == nickname)
-			return client;
-	}
-
-	return NULL;
-}
-
-clients_t Server::get_clients(const std::string &mask) const
-{
-	if (mask == "*")
-		return _clients;
-
-	clients_t clients;
-
-	bool has_wildcards = mask.find_first_of("*?") != std::string::npos;
-	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
-		Client *client = it->second;
-
-		if ((!has_wildcards && client->get_nickname() == mask)
-				|| (match_mask(mask, client->get_mask())))
-			clients[client->get_fd()] = client;
-	}
-
-	return clients;
-}
-
-size_t Server::get_connections() const
-{
-	return _connections;
-}
-
-size_t Server::get_max_connections() const
-{
-	return _max_connections;
-}
-
-size_t Server::get_clients_count() const
-{
-	return _registered_clients_count;
-}
-
-size_t Server::get_max_clients() const
-{
-	return _max_registered_clients;
-}
-
-size_t Server::get_channels_count() const
-{
-	return _channels.size();
-}
 
 Server Server::parse_args(int argc, char *argv[])
 {
@@ -203,89 +68,238 @@ Server Server::parse_args(int argc, char *argv[])
 	return server;
 }
 
-bool Server::stop = false;
 
-void Server::_init_motd()
+Server::Server(const std::string &name, port_t port, const std::string &password, const std::string &motd, const std::string &motd_file, bool verbose):
+	_verbose(verbose),
+	_port(port),
+	_address(_init_address(_port)),
+	_motd_file(motd_file),
+	_motd(motd),
+	_name(name),
+	_password(password),
+	_connections(0),
+	_max_connections(0),
+	_max_registered_clients(0),
+	_registered_clients_count(0)
 {
-	if (!_motd.empty())
-		return _motd_lines.push_back(_motd);
-
-	std::ifstream file(_motd_file.c_str());
-	if (file.fail())
-		return log("Failed to open MOTD file", warning);
-
-	std::string line;
-	while (std::getline(file, line))
-		_motd_lines.push_back(line);
-
-	file.close();
+	Command::init();
+	log("Constructed", debug);
 }
 
-void Server::_set_start_time()
+Server::~Server()
 {
-	time_t now = std::time(NULL);
-	struct tm *tm = std::gmtime(&now);
+	close(_socket);
 
-	char datetime[64];
-	std::strftime(datetime, sizeof(datetime), "%a %b %d %Y at %H:%M:%S (UTC)", tm);
+	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		Client *client = it->second;
+		delete client;
+	}
 
-	_start_time = datetime;
+	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		Channel *channel = it->second;
+		delete channel;
+	}
+
+	log("Destroyed", debug);
 }
 
-void Server::_set_signal_handler()
+void Server::log(const std::string &message, const log_level level) const
 {
-	struct sigaction act = {};
-	act.sa_handler = _signal_handler;
-	sigaction(SIGINT, &act, NULL);
+	if (_verbose || level != debug)
+		::log("Server", message, level);
 }
 
-void Server::_init_socket()
+void Server::start()
 {
-	_socket = socket(AF_INET, SOCK_STREAM, 0);
-	if (_socket == -1)
-		throw std::runtime_error("Failed to create socket");
+	_init();
 
-	int opt = 1;
-	if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
-		throw std::runtime_error("Failed to set socket options");
+	while (!stop)
+		_loop();
 
-	_pollfds.push_back(_init_pollfd(_socket));
-	log("Socket created", debug);
+	_down();
+
+	log("Stopped");
 }
 
-void Server::_bind()
+const std::string &Server::get_name() const
 {
-	if (bind(_socket, (sockaddr *)&_address, sizeof(_address)) == -1)
-		throw std::runtime_error("Failed to bind socket");
-	log("Socket bound", debug);
+	return _name;
 }
 
-void Server::_listen()
+const std::string &Server::get_start_time() const
 {
-	if (listen(_socket, SOMAXCONN) == -1)
-		throw std::runtime_error("Failed to listen on socket");
-	log("Listening on port " + to_string(_port));
+	return _start_time;
 }
 
-void Server::_init()
+const std::vector<std::string> &Server::get_motd_lines() const
 {
-	_init_motd();
-	_set_start_time();
-	_set_signal_handler();
-	_init_socket();
-	_bind();
-	_listen();
+	return _motd_lines;
 }
 
-void Server::_loop()
+bool Server::check_password(const std::string &password) const
 {
-	log("Polling sockets", debug);
-	if (poll(_pollfds.data(), _pollfds.size(), -1) == -1 && !stop)
-		throw std::runtime_error("Failed to poll sockets");
-	log("Polled sockets", debug);
+	return password == _password;
+}
 
-	_accept();
-	_read();
+bool Server::is_verbose() const
+{
+	return _verbose;
+}
+
+size_t Server::get_channels_count() const
+{
+	return _channels.size();
+}
+
+size_t Server::get_clients_count() const
+{
+	return _registered_clients_count;
+}
+
+size_t Server::get_connections() const
+{
+	return _connections;
+}
+
+size_t Server::get_max_clients() const
+{
+	return _max_registered_clients;
+}
+
+size_t Server::get_max_connections() const
+{
+	return _max_connections;
+}
+
+const channels_t	&Server::get_channels() const
+{
+	return _channels;
+}
+
+Channel	*Server::get_channel(const std::string &channel_name) const
+{
+	const std::string &lower_channel_name = to_lower(channel_name);
+
+	for (channels_t::const_iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		const std::string &channel_name = it->first;
+		Channel *channel = it->second;
+
+		if (to_lower(channel_name) == lower_channel_name)
+			return channel;
+	}
+
+	return NULL;
+}
+
+Client *Server::get_client(const std::string &nickname) const
+{
+	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		Client *client = it->second;
+		if (client->get_nickname() == nickname)
+			return client;
+	}
+
+	return NULL;
+}
+
+clients_t Server::get_clients(const std::string &mask) const
+{
+	if (mask == "*")
+		return _clients;
+
+	clients_t clients;
+
+	bool has_wildcards = mask.find_first_of("*?") != std::string::npos;
+	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		Client *client = it->second;
+
+		if ((!has_wildcards && client->get_nickname() == mask)
+				|| (match_mask(mask, client->get_mask())))
+			clients[client->get_fd()] = client;
+	}
+
+	return clients;
+}
+
+void Server::register_client()
+{
+	_max_registered_clients = std::max(_max_registered_clients, ++_registered_clients_count);
+}
+
+void	Server::add_channel(Channel &new_channel)
+{
+	_channels[new_channel.get_name()] = &new_channel;
+}
+
+void	Server::delete_channel(const std::string &channel_name)
+{
+	Channel *channel = get_channel(channel_name);
+
+	if (!channel)
+		return;
+
+	_channels.erase(channel->get_name());
+	delete channel;
+}
+
+Server::port_t Server::_parse_port(const std::string &port_str)
+{
+	std::istringstream iss(port_str);
+	Server::port_t port;
+	iss >> port;
+
+	if (!iss.eof() || iss.fail())
+		_print_usage();
+
+	return port;
+}
+
+void Server::_print_usage(int status)
+{
+	std::cerr << "Usage: ./ircserv [options]... [port] [password]" << std::endl
+			  << "  -h, --help                         Show this help message" << std::endl
+			  << "  -n, --name <name>                  Name of the server (default: kittirc)" << std::endl
+			  << "  -P, --pass, --password <password>  Password required to connect (default: None)" << std::endl
+			  << "  -p, --port <port>                  Port to listen on (default: " << _default_port << ")" << std::endl
+			  << "  -m, --motd <message>               Message of the Day" << std::endl
+			  << "  -M, --motd-file <file>             MOTD file (default: kittirc.motd)" << std::endl
+			  << "  -v, --verbose                      Enable verbose output" << std::endl;
+
+	throw status;
+}
+
+void Server::_signal_handler(int)
+{
+	stop = true;
+}
+
+sockaddr_in Server::_init_address(port_t port)
+{
+	return (sockaddr_in) {
+		.sin_family = AF_INET,
+		.sin_port = htons(port),
+		.sin_addr = (struct in_addr) {
+			.s_addr = INADDR_ANY
+		},
+		.sin_zero = {},
+	};
+}
+
+std::string Server::_get_next_arg(int &i, int argc, char *argv[])
+{
+	if (++i >= argc)
+		_print_usage();
+
+	return argv[i];
+}
+
+pollfd Server::_init_pollfd(int fd)
+{
+	return (struct pollfd) {
+		.fd = fd,
+		.events = POLLIN,
+		.revents = 0
+	};
 }
 
 void Server::_accept()
@@ -310,7 +324,80 @@ void Server::_accept()
 	_clients[fd] = new Client(fd, ip, *this);
 }
 
-void Server::_read()
+void Server::_bind()
+{
+	if (bind(_socket, (sockaddr *)&_address, sizeof(_address)) == -1)
+		throw std::runtime_error("Failed to bind socket");
+	log("Socket bound", debug);
+}
+
+void Server::_down()
+{
+	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		Client &client = *it->second;
+		client.send_error("Server going down");
+	}
+}
+
+void Server::_init_motd()
+{
+	if (!_motd.empty())
+		return _motd_lines.push_back(_motd);
+
+	std::ifstream file(_motd_file.c_str());
+	if (file.fail())
+		return log("Failed to open MOTD file", warning);
+
+	std::string line;
+	while (std::getline(file, line))
+		_motd_lines.push_back(line);
+
+	file.close();
+}
+
+void Server::_init_socket()
+{
+	_socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (_socket == -1)
+		throw std::runtime_error("Failed to create socket");
+
+	int opt = 1;
+	if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+		throw std::runtime_error("Failed to set socket options");
+
+	_pollfds.push_back(_init_pollfd(_socket));
+	log("Socket created", debug);
+}
+
+void Server::_init()
+{
+	_init_motd();
+	_set_start_time();
+	_set_signal_handler();
+	_init_socket();
+	_bind();
+	_listen();
+}
+
+void Server::_listen()
+{
+	if (listen(_socket, SOMAXCONN) == -1)
+		throw std::runtime_error("Failed to listen on socket");
+	log("Listening on port " + to_string(_port));
+}
+
+void Server::_loop()
+{
+	log("Polling sockets", debug);
+	if (poll(_pollfds.data(), _pollfds.size(), -1) == -1 && !stop)
+		throw std::runtime_error("Failed to poll sockets");
+	log("Polled sockets", debug);
+
+	_accept();
+	_receive();
+}
+
+void Server::_receive()
 {
 	for (_pollfds_t::iterator it = _pollfds.begin() + 1; it != _pollfds.end(); ++it) {
 		if (!(it->revents & POLLIN))
@@ -344,12 +431,22 @@ void Server::_read()
 	}
 }
 
-void Server::_down()
+void Server::_set_signal_handler()
 {
-	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it) {
-		Client &client = *it->second;
-		client.send_error("Server going down");
-	}
+	struct sigaction act = {};
+	act.sa_handler = _signal_handler;
+	sigaction(SIGINT, &act, NULL);
+}
+
+void Server::_set_start_time()
+{
+	time_t now = std::time(NULL);
+	struct tm *tm = std::gmtime(&now);
+
+	char datetime[64];
+	std::strftime(datetime, sizeof(datetime), "%a %b %d %Y at %H:%M:%S (UTC)", tm);
+
+	_start_time = datetime;
 }
 
 void Server::_disconnect_client(int fd)
@@ -377,100 +474,4 @@ void Server::_disconnect_client(int fd)
 			break;
 		}
 	}
-}
-
-std::string Server::_get_next_arg(int &i, int argc, char *argv[])
-{
-	if (++i >= argc)
-		_print_usage();
-
-	return argv[i];
-}
-
-Server::port_t Server::_parse_port(const std::string &port_str)
-{
-	std::istringstream iss(port_str);
-	Server::port_t port;
-	iss >> port;
-
-	if (!iss.eof() || iss.fail())
-		_print_usage();
-
-	return port;
-}
-
-void Server::_print_usage(int status)
-{
-	std::cerr << "Usage: ./ircserv [options]... [port] [password]" << std::endl
-			  << "  -h, --help                         Show this help message" << std::endl
-			  << "  -n, --name <name>                  Name of the server (default: kittirc)" << std::endl
-			  << "  -P, --pass, --password <password>  Password required to connect (default: None)" << std::endl
-			  << "  -p, --port <port>                  Port to listen on (default: " << _default_port << ")" << std::endl
-			  << "  -m, --motd <message>               Message of the Day" << std::endl
-			  << "  -M, --motd-file <file>             MOTD file (default: kittirc.motd)" << std::endl
-			  << "  -v, --verbose                      Enable verbose output" << std::endl;
-
-	throw status;
-}
-
-sockaddr_in Server::_init_address(port_t port)
-{
-	return (sockaddr_in) {
-		.sin_family = AF_INET,
-		.sin_port = htons(port),
-		.sin_addr = (struct in_addr) {
-			.s_addr = INADDR_ANY
-		},
-		.sin_zero = {},
-	};
-}
-
-pollfd Server::_init_pollfd(int fd)
-{
-	return (struct pollfd) {
-		.fd = fd,
-		.events = POLLIN,
-		.revents = 0
-	};
-}
-
-void Server::_signal_handler(int)
-{
-	stop = true;
-}
-
-Channel	*Server::get_channel(const std::string &channel_name) const
-{
-	const std::string &lower_channel_name = to_lower(channel_name);
-
-	for (channels_t::const_iterator it = _channels.begin(); it != _channels.end(); ++it) {
-		const std::string &channel_name = it->first;
-		Channel *channel = it->second;
-
-		if (to_lower(channel_name) == lower_channel_name)
-			return channel;
-	}
-
-	return NULL;
-}
-
-channels_t	Server::get_channels() const
-{
-	return _channels;
-}
-
-void	Server::add_channel(Channel &new_channel)
-{
-	_channels[new_channel.get_name()] = &new_channel;
-}
-
-void	Server::delete_channel(const std::string &channel_name)
-{
-	Channel *channel = get_channel(channel_name);
-
-	if (!channel)
-		return;
-
-	_channels.erase(channel->get_name());
-	delete channel;
 }
