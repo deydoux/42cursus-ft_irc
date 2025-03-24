@@ -36,15 +36,15 @@ public:
 	const std::string	get_topic_author() const;
 	const std::string	get_topic_edit_time() const;
 	const std::string	get_topic() const;
-	bool				check_passkey(std::string &passkey) const;
-	bool				is_full() const;
-	bool				is_invite_only() const;
-	bool				is_topic_protected() const;
+	bool	check_passkey(std::string &passkey) const;
+	bool	is_full() const;
+	bool	is_invite_only() const;
+	bool	is_topic_protected() const;
 	// Client
-	bool			is_client_banned(Client &client) const;
-	bool			is_client_invited(Client &client);
-	bool			is_client_member(Client &client) const;
 	const clients_t	&get_members() const;
+	bool	is_client_banned(Client &client) const;
+	bool	is_client_invited(Client &client);
+	bool	is_client_member(Client &client) const;
 
 // Setters
 	// Channel

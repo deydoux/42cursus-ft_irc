@@ -375,7 +375,7 @@ std::string Client::get_mask(void) const
 	return std::string(_nickname + "!" + _get_username() + "@" + _ip);
 }
 
-channels_t &Client::get_channels()
+const channels_t &Client::get_channels() const
 {
 	return _channels;
 }

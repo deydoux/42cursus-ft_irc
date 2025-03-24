@@ -50,9 +50,9 @@ public:
 	std::string			get_mask() const;
 	std::string			get_realname() const;
 	// Channel
-	Channel		*get_channel(const std::string &name) const;
-	channels_t	&get_channels();
-	size_t		get_channels_count() const;
+	const channels_t	&get_channels() const;
+	Channel	*get_channel(const std::string &name) const;
+	size_t	get_channels_count() const;
 	// Server
 	Server	&get_server() const;
 
