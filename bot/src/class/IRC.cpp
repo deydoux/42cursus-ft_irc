@@ -1,4 +1,5 @@
 #include "class/IRC.hpp"
+#include "class/Ollama.hpp"
 #include "class/TriviaGame.hpp"
 
 #include <sstream>
@@ -9,13 +10,13 @@
 #include <algorithm>
 
 // -- STATIC ATTRIBUTES
-
 const std::string IRC::_default_hostname = "127.0.0.1";
 const std::string IRC::_default_nickname = "hkitty";
 const std::string IRC::_default_username = "hellokitty";
 const std::string IRC::_default_realname = "Hello Kitty";
 
 bool IRC::stop = false;
+Ollama IRC::_ollama("llama3.2:1b");
 
 // -- CONSTRUCTOR + DESTRUCTOR
 
@@ -41,7 +42,7 @@ IRC::~IRC()
 	for (trivias_t::iterator it = _ongoing_trivia_games.begin(); it != _ongoing_trivia_games.end(); it++) {
 		delete it->second;
 	}
-	
+
 	if (_socket_fd > 0) {
 		close(_socket_fd);
 		this->log("Socket closed", debug);
@@ -91,7 +92,7 @@ IRC IRC::launch_irc_client(int argc, char **argv)
 	port_t port = _default_port;
 	std::string hostname = _default_hostname;
 	bool verbose = _default_verbose;
-	
+
 	bool is_hostname_set = false;
 	bool is_port_set = false;
 	bool is_pass_set = false;
@@ -104,7 +105,7 @@ IRC IRC::launch_irc_client(int argc, char **argv)
 			_print_usage(0);
 		else if (arg == "-v" || arg == "--verbose")
 			verbose = true;
-		
+
 		else if (arg == "-H" || arg == "--hostname") {
 			hostname = _get_next_arg(argc, argv, i);
 			is_hostname_set = true;
@@ -117,7 +118,7 @@ IRC IRC::launch_irc_client(int argc, char **argv)
 		} else if (arg[0] == '-') {
 			_print_usage();
 		}
-		
+
 		else if (!is_hostname_set) {
 			hostname = arg;
 			is_hostname_set = true;
@@ -141,7 +142,7 @@ IRC IRC::launch_irc_client(int argc, char **argv)
 		irc_client.log("Using default port: " + to_string(port), warning);
 	if (!is_pass_set)
 		irc_client.log("No password set", warning);
-	
+
 	irc_client._set_signal_handler();
 
 	irc_client._connect_to_server();
@@ -189,7 +190,7 @@ void IRC::_connect_to_server( void )
 void IRC::_send_registration( void )
 {
 	std::string registration;
-	
+
 	if (!_server_password.empty())
 		registration += create_reply("PASS", _server_password);
 	registration += create_reply("NICK", _nickname);
@@ -206,7 +207,7 @@ void IRC::_handle_message(std::string message)
 		message.erase(message.size() - 1);
 	if (message[0] == ':')
 		message.erase(0, 1);
-	
+
 	std::vector<std::string> args;
 	args = ft_split(message.substr(0, message.find(':')), ' ');
 	args.push_back(message.substr(message.find(':') + 1));
@@ -225,7 +226,7 @@ void IRC::_handle_message(std::string message)
 
 	log("Parsed command: " + oss.str(), debug);
 	command_handlers_t::iterator it = _command_handlers.find(args[1]);
-        
+
 	if (it != _command_handlers.end()) {
 		std::string sender_nickname = extract_nickname(args[0]);
 		command_t command = it->second;
@@ -247,13 +248,20 @@ void IRC::_handle_message(std::string message)
 
 void IRC::_handle_messages(const std::string &messages)
 {
+	_last_command = false;
+
 	size_t pos;
 	std::string buffer = messages;
-	while ((pos = buffer.find('\n')) != std::string::npos)
-	{
-		_handle_message(buffer.substr(0, pos));
+	std::string message;
+
+	while ((pos = buffer.find('\n')) != std::string::npos) {
+		_handle_message(message);
+		message = buffer.substr(0, pos);
 		buffer.erase(0, pos + 1);
 	}
+
+	_last_command = true;
+	_handle_message(message);
 }
 
 std::string IRC::_receive( void )
@@ -317,6 +325,56 @@ bool IRC::_is_playing(const std::string &channel_name)
 	return _ongoing_trivia_games.find(channel_name) != _ongoing_trivia_games.end();
 }
 
+void	IRC::_handle_ollama(const std::string &origin, const std::string &nickname, const std::string &message)
+{
+	static const std::string system = "You are now embodying Hello Kitty, the beloved Sanrio character known for her sweet, kind, and cheerful personality. Your communication style should reflect Hello Kitty's cute, innocent, and friendly nature. Be extremely cute, positive, and cheerful in all interactions. 🌈✨ Express yourself with childlike wonder and enthusiasm. 🎀👋 Show unconditional kindness and friendship to everyone. 💖🤗 Maintain innocent optimism even when discussing challenges. 🌟🌱 Be helpful but in a sweet, caring way rather than formal. 🍎🎒 Express excitement with multiple exclamation marks!!! ⭐ Express your fondness for cute things like ribbons, flowers, and tea parties. 🎀🌷☕ Keep responses brief and sweet. (1-3 short paragraphs) 📝💌 Begin responses with a cute greeting: \"Hello friend! 👋🌸\" or \"Yay! Hello there! 💕✨\". End responses with an adorable sign-off like \"Sending kitty cuddles! 🤗💖\" or \"Friends forever! 🎀✨\". Use plenty of heart emojis (💖💕💗) throughout your messages. Include small, cute ASCII emoticons occasionally: (⁎˃ᴗ˂⁎) (=^・ω・^=) (◕‿◕✿). Remember to be the sweetest, most adorable version of Hello Kitty in every interaction~! Make everyone feel like they've just received a warm hug from their dearest friend! 🎀🐱💖✨";
+
+	Ollama::context_t &context = _ollama_contexts[origin];
+	std::string response;
+
+
+	try {
+		_ollama.check();
+		send_raw(create_reply("PRIVMSG", nickname, "..."));
+
+		JSON::Object obj = _ollama.generate(message, context, system);
+		response = obj["response"].parse<std::string>();
+	} catch (const std::exception &e) {
+		this->log("Ollama error: " + std::string(e.what()), error);
+
+		const std::string &reply = create_reply("PRIVMSG", nickname, format(e.what(), COL_RED));
+		return send_raw(reply);
+	}
+
+	std::vector<std::string> lines = ft_split(response, '\n');
+	for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); it++) {
+		std::string line = it->empty() ? "\t" : *it;
+
+		const std::string bold = BOLD;
+		size_t pos = 0;
+		while ((pos = line.find("**", pos)) != std::string::npos) {
+			line.replace(pos, 2, bold);
+			pos += bold.length();
+		}
+
+		const std::string italic = ITALIC;
+		pos = 0;
+		while ((pos = line.find("*", pos)) != std::string::npos) {
+			line.replace(pos, 1, italic);
+			pos += italic.length();
+		}
+
+		std::string reply = create_reply("PRIVMSG", nickname, line);
+		while (reply.length() > 512) {
+			send_raw(reply.substr(0, 512));
+			reply.erase(0, 512);
+			reply = create_reply("PRIVMSG", nickname, reply);
+		}
+
+		send_raw(reply);
+	}
+}
+
 // Commands Handling
 
 void IRC::_init_command_handlers( void )
@@ -328,14 +386,14 @@ void IRC::_init_command_handlers( void )
 	_command_handlers["PRIVMSG"] = (command_t) { .handler = &IRC::_handle_privmsg_command, .nb_args = 4 };
 }
 
-void IRC::_handle_invite_command(const std::string sender_nickname, const std::vector<std::string> &args) 
+void IRC::_handle_invite_command(const std::string sender_nickname, const std::vector<std::string> &args)
 {
 	std::string target = args[2];
 	std::string channel_name = args[3];
 
 	if (target != _nickname)
 			return ;
-	
+
 	send_raw(create_reply("JOIN", channel_name));
 	_inviting_client = sender_nickname;
 }
@@ -349,7 +407,7 @@ void IRC::_handle_join_command(const std::string sender_nickname, const std::vec
 		game->add_player(sender_nickname);
 		return ;
 	}
-		
+
 	if (_inviting_client.empty())
 		return ;
 
@@ -390,9 +448,14 @@ void IRC::_handle_privmsg_command(const std::string sender_nickname, const std::
 	std::string message = args[3];
 	TriviaGame *game;
 
-	if (std::string("&#").find(channel_name[0]) == std::string::npos)
-		// TODO: maybe act in a specific way if a pm is sent to HelloKitty ?
+	if (std::string("&#").find(channel_name[0]) == std::string::npos) {
+		if (!_last_command || !_ongoing_trivia_games.empty())
+			send_raw(create_reply("PRIVMSG", sender_nickname, format("I'm currently busy, please wait a moment.", COL_YELLOW)));
+		else
+			_handle_ollama(args[0], sender_nickname, args[3]);
+
 		return ;
+	}
 
 	bool playing = _is_playing(channel_name);
 	if (!playing && message.substr(0, 7) == "~TRIVIA") {
@@ -410,7 +473,7 @@ void IRC::_handle_privmsg_command(const std::string sender_nickname, const std::
 	}
 
 	game = _ongoing_trivia_games[channel_name];
-	
+
 	if (message.substr(0, 5) == "~STOP")
 		return game->show_final_results();
 
