@@ -37,7 +37,7 @@ static void topic_handler(const args_t &args, Client &client, Server &server)
 		new_topic.resize(Channel::max_topic_len);
 
 	channel->set_topic(client, new_topic);
-	channel->send_broadcast(
+	channel->broadcast(
 		client.create_cmd_reply(client.get_mask(), "TOPIC", channel_name, new_topic)
 	);
 }

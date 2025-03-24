@@ -27,7 +27,7 @@ public:
 
 // Methods
 	void	log(const std::string &message, const log_level level = info) const;
-	void	send_broadcast(const std::string &message, int exclude_fd = -1) const;
+	void	broadcast(const std::string &message, int exclude_fd = -1) const;
 
 // Getters
 	// Channel

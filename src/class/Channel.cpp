@@ -158,7 +158,7 @@ bool Channel::is_client_invited(Client &client)
 	return true;
 }
 
-void Channel::send_broadcast(const std::string &message, int exclude_fd) const
+void Channel::broadcast(const std::string &message, int exclude_fd) const
 {
 	for (clients_t::const_iterator member = _members.begin(); member != _members.end(); member++)
 		if (member->first != exclude_fd)

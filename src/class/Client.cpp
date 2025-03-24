@@ -438,7 +438,7 @@ void	Client::kick(Channel &channel, const std::string &kicked_client, std::strin
 	else if (!channel.is_client_member(*client_to_be_kicked))
 		reply(ERR_USERNOTINCHANNEL, channel.get_name(), "They aren't on that channel");
 	else {
-		channel.send_broadcast(create_cmd_reply(
+		channel.broadcast(create_cmd_reply(
 			get_mask(), "KICK", channel.get_name() + ' ' + kicked_client, reason
 		));
 		channel.remove_client(*client_to_be_kicked);
@@ -448,7 +448,7 @@ void	Client::kick(Channel &channel, const std::string &kicked_client, std::strin
 
 void Client::part(Channel &channel, const std::string &reason)
 {
-	channel.send_broadcast(create_cmd_reply(
+	channel.broadcast(create_cmd_reply(
 		get_mask(), "PART", channel.get_name() , reason
 	));
 	channel.remove_client(*this);

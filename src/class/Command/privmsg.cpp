@@ -28,7 +28,7 @@ static void privmsg_handler(const args_t &args, Client &client, Server &server)
 
 			else {
 				std::string reply = Client::create_cmd_reply(client.get_mask(), "PRIVMSG", channel->get_name(), message);
-				channel->send_broadcast(reply, client.get_fd());
+				channel->broadcast(reply, client.get_fd());
 			}
 		}
 

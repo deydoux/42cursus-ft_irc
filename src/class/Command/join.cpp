@@ -50,7 +50,7 @@ static void join_handler(const args_t &args, Client &client, Server &server)
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
 
 		if (client.join(*channel, passkey)) {
-			channel->send_broadcast(
+			channel->broadcast(
 				Client::create_cmd_reply(client_mask, "JOIN", "", channel_name)
 			);
 
