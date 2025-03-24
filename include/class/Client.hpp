@@ -13,13 +13,15 @@ class Client
 private:
 // Static variables
 	static const size_t	_max_channels = 50;
-	static const size_t	_max_kick_reason_len = 400;
 	static const size_t	_max_message_size = 512;
 	static const size_t	_max_nickname_size = 9;
 	static const size_t	_max_realname_len = 127;
 	static const size_t	_max_username_len = 18;
 
 public:
+// Static variables
+	static const size_t	max_kick_reason_len = 400;
+
 // Static functions
 	static const std::string	create_cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg = "", const std::string &message = "");
 
@@ -42,7 +44,7 @@ public:
 	std::string	generate_who_reply(const std::string &context) const;
 	// Command
 	bool	join(Channel &channel, const std::string &passkey);
-	void	kick(Channel &channel, const std::string &kicked_client, std::string &reason);
+	void	kick(Channel &channel, const std::string &kicked_client, const std::string &reason);
 	void	part(Channel &channel, const std::string &reason);
 
 // Getters

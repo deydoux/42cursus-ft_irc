@@ -21,6 +21,9 @@ static void kick_handler(const args_t &args, Client &client, Server &server)
 			channels_to_kick_from.push_back(new_channel);
 	}
 
+	if (reason.size() > Client::max_kick_reason_len)
+		reason.resize(Client::max_kick_reason_len);
+
 	for (size_t i = 0; i < kicked_client.size(); i++)
 		for (size_t j = 0; j < channels_to_kick_from.size(); j++)
 			client.kick(*channels_to_kick_from[j], kicked_client[i], reason);

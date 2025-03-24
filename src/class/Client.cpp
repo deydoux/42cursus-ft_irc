@@ -301,15 +301,15 @@ void Client::_greet() const
 {
 	std::string chanlimit = to_string(Client::_max_channels);
 	std::string channellen = to_string(Channel::max_channel_name_size);
+	std::string kicklen = to_string(Client::max_kick_reason_len);
 	std::string nicklen = to_string(Client::_max_nickname_size);
 	std::string topiclen = to_string(Channel::max_topic_len);
-	std::string kicklen = to_string(Client::_max_kick_reason_len);
 
-	std::string clients_count = to_string(_server.get_clients_count());
 	std::string channels_count = to_string(_server.get_channels_count());
+	std::string clients_count = to_string(_server.get_clients_count());
+	std::string connections = to_string(_server.get_connections());
 	std::string max_clients = to_string(_server.get_max_clients());
 	std::string max_connections = to_string(_server.get_max_connections());
-	std::string connections = to_string(_server.get_connections());
 
 	std::string reply = // https://modern.ircdocs.horse/#rplwelcome-001
 		create_reply(RPL_WELCOME, "", "Welcome to the Internet Relay Network " + get_mask())
@@ -421,13 +421,10 @@ bool	Client::join(Channel &channel, const std::string &passkey)
 	return (false);
 }
 
-void	Client::kick(Channel &channel, const std::string &kicked_client, std::string &reason)
+void	Client::kick(Channel &channel, const std::string &kicked_client, const std::string &reason)
 {
 	Server &server = get_server();
 	Client *client_to_be_kicked = server.get_client(kicked_client);
-
-	if (reason.size() > _max_kick_reason_len)
-		reason.resize(_max_kick_reason_len);
 
 	if (!channel.is_client_member(*this))
 		reply(ERR_NOTONCHANNEL, channel.get_name(), "You're not on that channel");
