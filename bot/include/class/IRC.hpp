@@ -13,7 +13,6 @@
 
 #define RPL_NAMREPLY 353
 
-class Ollama;
 class TriviaGame;
 
 class IRC
