@@ -41,11 +41,11 @@ public:
 
 // Getters
 	// Server
-	bool				check_password(const std::string &password) const;
-	bool				is_verbose() const;
 	const std::string	&get_name() const;
 	const std::string	&get_start_time() const;
 	const std::vector<std::string>	&get_motd_lines() const;
+	bool	check_password(const std::string &password) const;
+	bool	is_verbose() const;
 	// Server stats
 	size_t	get_channels_count() const;
 	size_t	get_clients_count() const;
@@ -83,8 +83,8 @@ private:
 	const std::string	_motd;
 	const std::string	_name;
 	const std::string	_password;
+	int	_socket;
 	_pollfds_t	_pollfds;
-	int			_socket;
 	std::string	_start_time;
 	std::vector<std::string>	_motd_lines;
 	// Server stats
