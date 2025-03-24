@@ -88,9 +88,9 @@ void Client::broadcast(const std::string &message) const
 		Channel *channel = it->second;
 
 		clients_t members = channel->get_members();
-		for (clients_t::iterator member = members.begin(); member != members.end(); ++member) {
-			Client *member_client = member->second;
-			clients_to_broadcast[member_client->get_fd()] = member_client;
+		for (clients_t::iterator it = members.begin(); it != members.end(); ++it) {
+			Client *client = it->second;
+			clients_to_broadcast[client->get_fd()] = client;
 		}
 	}
 

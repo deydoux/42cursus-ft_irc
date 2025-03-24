@@ -11,7 +11,7 @@ static void kick_handler(const args_t &args, Client &client, Server &server)
 
 	std::vector<Channel *> kick_from_channels;
 
-	for (size_t i = 0; i < channels_name.size(); i++) {
+	for (size_t i = 0; i < channels_name.size(); ++i) {
 		std::string channel_name = channels_name[i];
 		Channel *channel = server.get_channel(channel_name);
 

@@ -27,7 +27,7 @@ static void names_handler(const args_t &args, Client &client, Server &server)
 		reply += client.create_reply(RPL_ENDOFNAMES, "*", "End of NAMES list");
 	} else {
 		std::vector<std::string> channel_names = split(args[1], ',');
-		for (size_t i = 0; i < channel_names.size(); i++) {
+		for (size_t i = 0; i < channel_names.size(); ++i) {
 			std::string &channel_name = channel_names[i];
 			Channel *channel = server.get_channel(channel_name);
 

@@ -27,7 +27,7 @@ static void mode_handler(const args_t &args, Client &client, Server &server)
 	char sign, mode;
 
 	sign = '+';
-	for (size_t i = 0; i < args[2].size(); i++)
+	for (size_t i = 0; i < args[2].size(); ++i)
 	{
 		mode = args[2][i];
 		if (mode == '-' || mode == '+') {
@@ -108,7 +108,7 @@ static void mode_handler(const args_t &args, Client &client, Server &server)
 		applied_flags.push_back(flag + mode);
 
 		if (mode == 'k' || mode == 'l')
-			argument_index++;
+			++argument_index;
 	}
 
 	if (!applied_flags.empty())

@@ -23,7 +23,7 @@ static void join_handler(const args_t &args, Client &client, Server &server)
 	std::vector<std::string> channels_name = split(args[1], ',');
 	std::vector<std::string> input_passkeys = args_size == 3 ? split(args[2], ',') : std::vector<std::string>();
 
-	for (size_t i = 0; i < channels_name.size(); i++)
+	for (size_t i = 0; i < channels_name.size(); ++i)
 	{
 		std::string channel_name = channels_name[i];
 		if (Channel::is_valid_name(channel_name)) {
@@ -46,8 +46,7 @@ static void join_handler(const args_t &args, Client &client, Server &server)
 
 	std::string client_mask = client.get_mask();
 
-	for (size_t i = 0; i < channels_to_join.size(); i++)
-	{
+	for (size_t i = 0; i < channels_to_join.size(); ++i) {
 		Channel *channel = channels_to_join[i];
 		std::string &channel_name = channels_name_to_join[i];
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";

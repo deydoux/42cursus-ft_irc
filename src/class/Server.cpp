@@ -158,7 +158,7 @@ Server Server::parse_args(int argc, char *argv[])
 	bool port_set = false;
 	bool password_set = false;
 
-	for (int i = 1; i < argc; i++) {
+	for (int i = 1; i < argc; ++i) {
 		std::string arg = argv[i];
 
 		if (arg == "-h" || arg == "--help")
