@@ -117,7 +117,7 @@ const std::string Client::create_motd_reply() const
 	return reply;
 }
 
-const bool &Client::is_registered() const
+bool Client::is_registered() const
 {
 	return _registered;
 }
@@ -141,7 +141,7 @@ const std::string Client::get_nickname(bool allow_empty) const
 	return _nickname;
 }
 
-const bool &Client::has_disconnect_request() const
+bool Client::has_disconnect_request() const
 {
 	return _disconnect_request;
 }
@@ -358,7 +358,7 @@ Server &Client::get_server( void ) const
 	return _server;
 }
 
-const int &Client::get_fd( void )
+int Client::get_fd() const
 {
 	return _fd;
 }

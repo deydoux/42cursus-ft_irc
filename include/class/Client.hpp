@@ -50,11 +50,11 @@ public:
 
 // Getters
 	// Client
-	const bool	&has_disconnect_request() const;
-	const bool	&is_registered() const;
-	const int	&get_fd();
 	const std::string	get_nickname(bool allow_empty = true) const;
+	bool	has_disconnect_request() const;
 	bool	is_channel_operator(std::string channel_name) const;
+	bool	is_registered() const;
+	int		get_fd() const;
 	std::string	get_mask() const;
 	std::string	get_realname() const;
 	// Channel
