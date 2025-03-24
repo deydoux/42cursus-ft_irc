@@ -5,10 +5,10 @@
 
 static void part_handler(const args_t &args, Client &client, Server &server)
 {
-	std::vector<std::string> channels_name = ft_split(args[1], ',');
+	std::vector<std::string> channels_name = split(args[1], ',');
 	std::string reason = args.size() == 3 ? args[2] : "Leaving";
 
-	for (size_t i = 0; i < channels_name.size(); i++)
+	for (size_t i = 0; i < channels_name.size(); ++i)
 	{
 		std::string channel_name = channels_name[i];
 		Channel *new_channel = server.get_channel(channel_name);
@@ -24,7 +24,7 @@ static void part_handler(const args_t &args, Client &client, Server &server)
 		if (!new_channel->is_client_member(client))
 			return client.reply(ERR_NOTONCHANNEL, channel_name, "You're not on that channel");
 
-		client.part_channel(*new_channel, reason);
+		client.part(*new_channel, reason);
 	}
 }
 

@@ -10,30 +10,38 @@ static void names_handler(const args_t &args, Client &client, Server &server)
 	if (args.size() == 1) {
 		channels_t channels = server.get_channels();
 
-		for (channels_t::iterator it = channels.begin(); it != channels.end(); it++)
-			reply += client.create_reply(RPL_NAMREPLY, "= " + it->first, it->second->list_members());
+		for (channels_t::iterator it = channels.begin(); it != channels.end(); ++it) {
+			const std::string &channel_name = it->first;
+			const Channel &channel = *it->second;
+
+			reply += client.create_reply(RPL_NAMREPLY, "= " + channel_name, channel.get_names());
+		}
 
 		std::string lost_clients_nicknames;
 		clients_t clients = server.get_clients("*");
 
-		for (clients_t::iterator it = clients.begin(); it != clients.end(); it++) {
-			if (it->second->get_channels_count() == 0) {
-				if (!lost_clients_nicknames.empty()) lost_clients_nicknames += " ";
-				lost_clients_nicknames += it->second->get_nickname();
+		for (clients_t::iterator it = clients.begin(); it != clients.end(); ++it) {
+			const Client &client = *it->second;
+
+			if (client.get_channels().empty()) {
+				if (!lost_clients_nicknames.empty())
+					lost_clients_nicknames += " ";
+
+				lost_clients_nicknames += client.get_nickname();
 			}
 		}
 
 		reply += client.create_reply(RPL_NAMREPLY, "* *", lost_clients_nicknames);
 		reply += client.create_reply(RPL_ENDOFNAMES, "*", "End of NAMES list");
 	} else {
-		std::vector<std::string> channel_names = ft_split(args[1], ',');
-		for (size_t i = 0; i < channel_names.size(); i++) {
+		std::vector<std::string> channel_names = split(args[1], ',');
+		for (size_t i = 0; i < channel_names.size(); ++i) {
 			std::string &channel_name = channel_names[i];
 			Channel *channel = server.get_channel(channel_name);
 
 			if (channel) {
 				channel_name = channel->get_name();
-				reply += client.create_reply(RPL_NAMREPLY, "= " + channel_name, channel->list_members());
+				reply += client.create_reply(RPL_NAMREPLY, "= " + channel_name, channel->get_names());
 			}
 
 			reply += client.create_reply(RPL_ENDOFNAMES, channel_name, "End of NAMES list");

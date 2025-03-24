@@ -9,17 +9,23 @@ static void join_handler(const args_t &args, Client &client, Server &server)
 
 	if (args_size == 2 && args[1] == "0") {
 		std::string reason = client.get_nickname();
-		return client.close_all_channels(reason);
+
+		for (channels_t::const_iterator it = client.get_channels().begin(); it != client.get_channels().end(); ++it) {
+			Channel &channel = *it->second;
+			client.part(channel, reason);
+		}
+
+		return;
 	}
 
 	std::vector<Channel *> channels_to_join;
 	std::vector<std::string> channels_name_to_join;
 	std::vector<std::string> passkeys;
 
-	std::vector<std::string> channels_name = ft_split(args[1], ',');
-	std::vector<std::string> input_passkeys = args_size == 3 ? ft_split(args[2], ',') : std::vector<std::string>();
+	std::vector<std::string> channels_name = split(args[1], ',');
+	std::vector<std::string> input_passkeys = args_size == 3 ? split(args[2], ',') : std::vector<std::string>();
 
-	for (size_t i = 0; i < channels_name.size(); i++)
+	for (size_t i = 0; i < channels_name.size(); ++i)
 	{
 		std::string channel_name = channels_name[i];
 		if (Channel::is_valid_name(channel_name)) {
@@ -42,24 +48,12 @@ static void join_handler(const args_t &args, Client &client, Server &server)
 
 	std::string client_mask = client.get_mask();
 
-	for (size_t i = 0; i < channels_to_join.size(); i++)
-	{
+	for (size_t i = 0; i < channels_to_join.size(); ++i) {
 		Channel *channel = channels_to_join[i];
 		std::string &channel_name = channels_name_to_join[i];
-
 		std::string passkey = args_size == 3 && passkeys.size() > i ? passkeys[i] : "";
 
-		if (client.join_channel(*channel, passkey)) {
-			channel->send_broadcast(
-				Client::create_cmd_reply(client_mask, "JOIN", "", channel_name)
-			);
-
-			args_t names_args;
-			names_args.push_back("NAMES");
-			names_args.push_back(channel_name);
-
-			Command::execute(names_args, client, server);
-		}
+		client.join(channel_name, *channel, passkey);
 	}
 }
 
