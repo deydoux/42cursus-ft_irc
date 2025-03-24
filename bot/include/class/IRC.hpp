@@ -51,6 +51,7 @@ class IRC
 
 	private:
 		// -- PRIVATE ATTRIBUTES
+		bool				_last_command;
 		command_handlers_t	_command_handlers;
 		int					_socket_fd;
 		std::string			_inviting_client;
@@ -75,7 +76,6 @@ class IRC
 		void	_set_signal_handler( void );
 		void	_update_games( void );
 		bool	_is_playing(const std::string &channel_name);
-
 		void	_handle_ollama(const std::string &origin, const std::string &nickname, const std::string &message);
 
 		void	_handle_invite_command(const std::string sender_nickname, const std::vector<std::string> &args);
