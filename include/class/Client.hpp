@@ -32,6 +32,8 @@ public:
 // Member functions
 	// Client
 	const std::string	create_motd_reply() const;
+	const std::string	create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
+	const std::string	generate_who_reply(const std::string &context) const;
 	ssize_t	send(const std::string &message) const;
 	void	broadcast_quit() const;
 	void	broadcast(const std::string &message) const;
@@ -40,8 +42,6 @@ public:
 	void	log(const std::string &message, const log_level level = info) const;
 	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
 	void	send_error(const std::string &message);
-	std::string	create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
-	std::string	generate_who_reply(const std::string &context) const;
 	// Command
 	void	join(const std::string &original_channel_name, Channel &channel, const std::string &passkey);
 	void	kick(const std::string &nick_to_kick, Channel &channel, const std::string &reason);

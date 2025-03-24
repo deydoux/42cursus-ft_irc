@@ -266,7 +266,7 @@ void Client::_handle_message(std::string message)
 	Command::execute(args, *this, _server);
 }
 
-std::string Client::create_reply(reply_code code, const std::string &arg, const std::string &message) const
+const std::string Client::create_reply(reply_code code, const std::string &arg, const std::string &message) const
 {
 	std::ostringstream oss;
 
@@ -353,7 +353,7 @@ bool Client::_is_valid_username(const std::string &username)
 	return true;
 }
 
-Server &Client::get_server( void ) const
+Server &Client::get_server() const
 {
 	return _server;
 }
@@ -363,7 +363,7 @@ int Client::get_fd() const
 	return _fd;
 }
 
-std::string Client::get_mask(void) const
+std::string Client::get_mask() const
 {
 	return std::string(_nickname + "!" + _get_username() + "@" + _ip);
 }
@@ -373,7 +373,7 @@ const channels_t &Client::get_channels() const
 	return _channels;
 }
 
-size_t Client::get_channels_count(void) const
+size_t Client::get_channels_count() const
 {
 	return _channels.size();
 }
@@ -397,7 +397,7 @@ void Client::join(const std::string &original_channel_name, Channel &channel, co
 		reply(ERR_CHANNELISFULL, channel.get_name(), "Cannot join channel (+l)");
 
 	else if (!channel.check_passkey(passkey))
-		reply(ERR_BADCHANNELKEY, channel.get_name(), "Cannot join channel (+k) - bad key");
+		reply(ERR_BADCHANNELKEY, channel.get_name(), "Cannot join channel (+k) -- Wrong channel key");
 
 	else if (channel.is_client_banned(*this))
 		reply(ERR_BANNEDFROMCHAN, channel.get_name(), "Cannot join channel (+b)");
@@ -427,12 +427,16 @@ void Client::kick(const std::string &nick_to_kick, Channel &channel, const std::
 
 	if (!channel.is_client_member(*this))
 		reply(ERR_NOTONCHANNEL, channel.get_name(), "You're not on that channel");
+
 	else if (!is_channel_operator(channel.get_name()))
 		reply(ERR_CHANOPRIVSNEEDED, channel.get_name(), "You're not channel operator");
+
 	else if (!client_to_kick)
 		reply(ERR_NOSUCHNICK, channel.get_name(), "No such nick/channel");
+
 	else if (!channel.is_client_member(*client_to_kick))
 		reply(ERR_USERNOTINCHANNEL, channel.get_name(), "They aren't on that channel");
+
 	else {
 		channel.broadcast(create_cmd_reply(
 			get_mask(), "KICK", channel.get_name() + ' ' + nick_to_kick, reason
@@ -488,12 +492,12 @@ std::string Client::_create_line(const std::string &content)
 	return line;
 }
 
-std::string Client::get_realname( void ) const
+std::string Client::get_realname() const
 {
 	return _realname;
 }
 
-std::string Client::generate_who_reply(const std::string &context) const
+const std::string Client::generate_who_reply(const std::string &context) const
 {
 	std::ostringstream oss;
 

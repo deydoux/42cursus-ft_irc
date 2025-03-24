@@ -58,7 +58,7 @@ void	Channel::set_max_members(size_t max_members)
 	_max_members = max_members;
 }
 
-void Channel::unset_members_limit(void)
+void Channel::unset_members_limit()
 {
 	_limit_members = false;
 }
@@ -122,7 +122,7 @@ void	Channel::set_passkey(std::string &passkey)
 
 bool Channel::check_passkey(const std::string &passkey) const
 {
-	return passkey == _passkey;
+	return _passkey.empty() || passkey == _passkey;
 }
 
 bool Channel::is_invite_only() const
@@ -223,10 +223,9 @@ void Channel::add_modes(const modes_t &new_modes)
 		char mode = new_modes.flags[i][1];
 		if (mode == 'o') continue;
 
-		bool is_adding = new_modes.flags[i][0] == '+';
-		if (is_adding) {
+		if (new_modes.flags[i][0] == '+')
 			_modes.flags.push_back(new_modes.flags[i]);
-		} else {
+		else {
 			_modes.flags.erase(std::find(
 				_modes.flags.begin(),
 				_modes.flags.end(),
