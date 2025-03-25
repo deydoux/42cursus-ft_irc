@@ -4,7 +4,7 @@
 </div>
 
 ## About the project
-ft_irc is a project that challenges students to create an **Internet Relay Chat (IRC)** server from scratch in C++98. The server must implement the core functionality of the IRC protocol as defined in **[RFC 1459](https://www.rfc-editor.org/rfc/rfc1459.html)** and be compatible with official IRC clients. This project explores network programming, socket management, and concurrent client handling.
+ft_irc is a project that challenges students to create an **Internet Relay Chat (IRC)** server from scratch in **C++98**. The server must implement the core functionality of the IRC protocol as defined in **[RFC 1459](https://www.rfc-editor.org/rfc/rfc1459.html)** and be compatible with official IRC clients. This project explores network programming, socket management, and concurrent client handling.
 
 ### Key Requirements
 - Implementation in C++98 standard
@@ -33,7 +33,7 @@ ft_irc is a project that challenges students to create an **Internet Relay Chat 
 - Error handling in distributed systems
 - Parsing and command processing
 
-## Functionality
+## Implementation
 ### Commands
 Our IRC server implements a comprehensive set of commands that enable users to connect, communicate, and manage channels effectively. These commands are divided into mandatory commands (required by the IRC protocol) and additional commands that enhance usability. All commands follow standard IRC syntax and are compatible with official IRC clients. Each command serves a specific purpose in user authentication, channel management, or communication functionality.
 
