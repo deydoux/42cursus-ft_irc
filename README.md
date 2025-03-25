@@ -26,7 +26,6 @@ ft_irc is a project that challenges students to create an **Internet Relay Chat 
 - Network programming with sockets
 - Concurrent programming and I/O multiplexing
 - Protocol implementation
-- Event-driven architecture
 - Client-server model
 - Resource management in C++
 - Error handling in distributed systems
@@ -46,6 +45,7 @@ The server processes these commands efficiently with proper error handling and p
 - **NICK**: Changes the user's nickname. Usage: `/NICK [new_nickname]`
 - **PASS**: Sets a password for server access. Usage: `/PASS [password]`
 - **PRIVMSG**: Sends a private message to a user or channel. Usage: `/PRIVMSG [#channel|nickname] :[message]`
+- **TOPIC**: Sets the channel topic. Usage: `/TOPIC [#channel] (new_topic)`
 - **USER**: Sets the user's username and realname. Usage: `/USER [username] 0 * :[realname]`
 
 **Additional:**
@@ -54,7 +54,6 @@ The server processes these commands efficiently with proper error handling and p
 - **PART**: Leaves a channel. Usage: `/PART [#channel] (reason)`
 - **PING**: Pings the server. Usage: `/PING [message]`
 - **QUIT**: Disconnects from the server. Usage: `/QUIT (reason)`
-- **TOPIC**: Sets the channel topic. Usage: `/TOPIC [#channel] (new_topic)`
 - **WHO**: Lists users in the server. Usage: `/WHO (#channel)`
 
 ### Modes
