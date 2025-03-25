@@ -104,11 +104,7 @@ static void mode_handler(const args_t &args, Client &client, Server &server)
 			else
 				new_op->remove_channel_operator(channel_name);
 
-			channel->broadcast(
-				Client::create_cmd_reply(client.get_mask(), "MODE", channel_name + ' ' + (add_mode ? '+' : '-') + "o " + new_op->get_nickname())
-			);
-
-			continue;
+			modes_values[mode] = value;
 		}
 
 		std::string flag = add_mode ? "+" : "-";
