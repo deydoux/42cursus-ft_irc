@@ -8,20 +8,19 @@ ft_irc is a project that challenges students to create an **Internet Relay Chat 
 
 ### Key Requirements
 - Implementation in C++98 standard
+- TCP/IP (IPv4) communication
 - Non-blocking I/O operations with `poll()`
 - Support for multiple simultaneous clients
-- Password protection for server access
 - Channel and user management
-- TCP/IP (IPv4) communication
 - Proper error handling and graceful disconnection
 - Implementation of essential [IRC commands](#commands)
 - Support for [channel modes](#modes)
 
 ### Bonus features
-- File transfer capabilities
-- Bot functionality
-- Custom IRC client implementation
 - Additional IRC features beyond the basic requirements
+- Improved error handling and logging
+- File transfer capabilities (DCC)
+- Bot functionality
 
 ### Skills Learned
 - Network programming with sockets
