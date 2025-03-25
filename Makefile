@@ -52,9 +52,12 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp Makefile
 
 -include $(DEP)
 
-.PHONY: all clean fclean re run
+.PHONY: all bonus clean fclean re run
 
 all: $(NAME)
+
+bonus:
+	@$(MAKE) -C bot
 
 clean:
 	$(RM) $(BUILD_DIR)
