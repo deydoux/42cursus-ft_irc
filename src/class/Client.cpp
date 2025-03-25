@@ -97,7 +97,11 @@ ssize_t Client::send(const std::string &message) const
 
 void Client::broadcast_quit() const
 {
-	broadcast(create_cmd_reply(get_mask(), "QUIT", "", _quit_reason));
+	try {
+		broadcast(create_cmd_reply(get_mask(), "QUIT", "", _quit_reason));
+	} catch (std::exception &e) {
+		log(e.what(), error);
+	}
 }
 
 void Client::broadcast(const std::string &message) const
