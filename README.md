@@ -37,7 +37,7 @@ Our IRC server implements a comprehensive set of commands that enable users to c
 
 The server processes these commands efficiently with proper error handling and provides appropriate responses according to the IRC protocol specifications. Below is a detailed list of all available commands with their usage syntax:
 
-**Mandatory Commands:**
+**Mandatory:**
 - **INVITE**: Invites a user to join a channel. Usage: `/INVITE [nickname] [#channel]`
 - **JOIN**: Joins a channel. Usage: `/JOIN [#channel]`
 - **KICK**: Kicks a user from a channel. Usage: `/KICK [#channel] [nickname] (reason)`
@@ -47,7 +47,7 @@ The server processes these commands efficiently with proper error handling and p
 - **PRIVMSG**: Sends a private message to a user or channel. Usage: `/PRIVMSG [#channel|nickname] :[message]`
 - **USER**: Sets the user's username and realname. Usage: `/USER [username] 0 * :[realname]`
 
-**Additional Commands:**
+**Additional:**
 - **MOTD**: Displays the server's message of the day. Usage: `/MOTD`
 - **NAMES**: Lists users in a channel. Usage: `/NAMES (#channel)`
 - **PART**: Leaves a channel. Usage: `/PART [#channel] (reason)`
