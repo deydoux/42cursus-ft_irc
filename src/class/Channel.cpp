@@ -226,11 +226,13 @@ void Channel::add_modes(modes_t *modes)
 		if (is_adding) {
 			_modes.flags.push_back(modes->flags[i]);
 		} else {
-			_modes.flags.erase(std::find(
+			args_t::iterator pos = std::find(
 				_modes.flags.begin(),
 				_modes.flags.end(),
 				std::string("-") + mode
-			));
+			);
+			if (pos != _modes.flags.end())
+				_modes.flags.erase(pos);
 		}
 	}
 
