@@ -456,8 +456,13 @@ void Server::_disconnect_client(int fd)
 	if (client->is_registered())
 		_registered_clients_count--;
 
-	if (!stop)
-		client->broadcast_quit();
+	if (!stop) {
+		try {
+			client->broadcast_quit();
+		} catch (std::exception &e) {
+			client->log(e.what(), error);
+		}
+	}
 
 	for (channels_t::iterator it = _channels.begin(); it != _channels.end();) {
 		Channel *channel = it->second;
