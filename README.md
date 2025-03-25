@@ -41,7 +41,7 @@ The server processes these commands efficiently with proper error handling and p
 - **INVITE**: Invites a user to join a channel. Usage: `/INVITE [nickname] [#channel]`
 - **JOIN**: Joins a channel. Usage: `/JOIN [#channel]`
 - **KICK**: Kicks a user from a channel. Usage: `/KICK [#channel] [nickname] (reason)`
-- **MODE**: Sets channel modes. [More details](#implemented-modes)
+- **MODE**: Sets channel modes. [More details](#modes)
 - **NICK**: Changes the user's nickname. Usage: `/NICK [new_nickname]`
 - **PASS**: Sets a password for server access. Usage: `/PASS [password]`
 - **PRIVMSG**: Sends a private message to a user or channel. Usage: `/PRIVMSG [#channel|nickname] :[message]`
