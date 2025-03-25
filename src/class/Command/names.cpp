@@ -31,7 +31,8 @@ static void names_handler(const args_t &args, Client &client, Server &server)
 			}
 		}
 
-		reply += client.create_reply(RPL_NAMREPLY, "* *", lost_clients_nicknames);
+		if (!lost_clients_nicknames.empty())
+			reply += client.create_reply(RPL_NAMREPLY, "* *", lost_clients_nicknames);
 		reply += client.create_reply(RPL_ENDOFNAMES, "*", "End of NAMES list");
 	} else {
 		std::vector<std::string> channel_names = split(args[1], ',');
