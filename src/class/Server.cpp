@@ -459,9 +459,18 @@ void Server::_disconnect_client(int fd)
 	if (!stop)
 		client->broadcast_quit();
 
-	for (channels_t::iterator it = _channels.begin(); it != _channels.end(); ++it) {
-		Channel &channel = *it->second;
-		channel.remove_client(*client);
+	for (channels_t::iterator it = _channels.begin(); it != _channels.end();) {
+		Channel *channel = it->second;
+
+		channel->remove_client(*client);
+
+		if (channel->get_members().empty()) {
+			_channels.erase(it++);
+			delete channel;
+			continue;
+		}
+
+		++it;
 	}
 
 	delete client;
