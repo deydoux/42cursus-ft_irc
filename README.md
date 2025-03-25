@@ -58,19 +58,19 @@ The server processes these commands efficiently with proper error handling and p
 
 ### Modes
 - **i (Invite-only)**: When set, users can only join the channel if they are explicitly invited by a channel operator. This restricts channel access to invited users only. Usage:
-	- `/MODE [#channel] +i`
-	- `/MODE [#channel] -i`
+  - `/MODE [#channel] +i`
+  - `/MODE [#channel] -i`
 - **t (Topic protection)**: When enabled, only channel operators can change the channel topic. This prevents regular users from modifying the topic. Usage:
-	- `/MODE [#channel] +t`
-	- `/MODE [#channel] -t`
+  - `/MODE [#channel] +t`
+  - `/MODE [#channel] -t`
 - **k (Key/Password)**: Requires users to provide the correct password when joining the channel. Usage:
-	- `/MODE [#channel] +k [password]`
-	- `/MODE [#channel] -k`
+  - `/MODE [#channel] +k [password]`
+  - `/MODE [#channel] -k`
 - **o (Operator)**: Grants operator status to a user, providing them with administrative privileges in the channel. Operators can set modes, kick users, etc. Usage:
-	- `/MODE [#channel] +o [nickname]`
-	- `/MODE [#channel] -o [nickname]`
+  - `/MODE [#channel] +o [nickname]`
+  - `/MODE [#channel] -o [nickname]`
 - **l (User limit)**: Sets a maximum number of users who can join the channel. Once this limit is reached, no more users can join until someone leaves. Usage:
-	- `/MODE [#channel] +l [limit]`
-	- `/MODE [#channel] -l`
+  - `/MODE [#channel] +l [limit]`
+  - `/MODE [#channel] -l`
 
 To set these modes, use the MODE command with the appropriate parameters. Multiple modes can be set at once, for example: `/MODE #channel +itk password`
