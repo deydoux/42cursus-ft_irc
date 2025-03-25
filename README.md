@@ -1,5 +1,7 @@
-# ft_irc
-Create your own IRC server in C++, fully compatible with an official client.
+<div align="center">
+  <h1>ft_irc</h1>
+  <p>Create your own IRC server in C++, fully compatible with an official client.</p>
+</div>
 
 ## About the project
 ft_irc is a project that challenges students to create an **Internet Relay Chat (IRC)** server from scratch in C++98. The server must implement the core functionality of the IRC protocol as defined in **[RFC 1459](https://www.rfc-editor.org/rfc/rfc1459.html)** and be compatible with official IRC clients. This project explores network programming, socket management, and concurrent client handling.
