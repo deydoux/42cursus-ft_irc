@@ -392,6 +392,7 @@ void IRC::_init_command_handlers( void )
 	_command_handlers["KICK"] = (command_t) { .handler = &IRC::_handle_kick_command, .nb_args = 5 };
 	_command_handlers["PART"] = (command_t) { .handler = &IRC::_handle_part_command, .nb_args = 4 };
 	_command_handlers["PRIVMSG"] = (command_t) { .handler = &IRC::_handle_privmsg_command, .nb_args = 4 };
+	_command_handlers["QUIT"] = (command_t) { .handler = &IRC::_handle_quit_command, .nb_args = 3 };
 }
 
 void IRC::_handle_invite_command(const std::string sender_nickname, const std::vector<std::string> &args)
@@ -489,6 +490,16 @@ void IRC::_handle_privmsg_command(const std::string sender_nickname, const std::
 		game->mark_user_as_ready(sender_nickname);
 	if (game->is_waiting_for_answers())
 		game->store_answer(message, sender_nickname);
+}
+
+void IRC::_handle_quit_command(const std::string sender_nickname, const std::vector<std::string> &args)
+{
+	std::string channel_name = args[2];
+	
+	for (trivias_t::iterator it = _ongoing_trivia_games.begin(); it != _ongoing_trivia_games.end(); it++) {
+		TriviaGame &game = *it->second;
+		game.remove_player(sender_nickname);
+	}
 }
 
 void IRC::_handle_numerics(int numeric, const std::vector<std::string> &args)

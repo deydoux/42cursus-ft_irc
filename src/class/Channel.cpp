@@ -197,11 +197,14 @@ void Channel::add_modes(const modes_t &new_modes)
 		if (new_modes.flags[i][0] == '+')
 			_modes.flags.push_back(new_modes.flags[i]);
 		else {
-			_modes.flags.erase(std::find(
+			args_t::iterator pos = std::find(
 				_modes.flags.begin(),
 				_modes.flags.end(),
 				std::string("-") + mode
-			));
+			);
+
+			if (pos != _modes.flags.end())
+				_modes.flags.erase(pos);
 		}
 	}
 

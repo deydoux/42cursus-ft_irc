@@ -61,8 +61,14 @@ void TriviaGame::remove_player(const std::string &client_nickname)
 	if (!player)
 		return ;
 	player->is_in_channel = false;
-	
-	if (_players.size() < 2) {
+
+	int active_players_count = 0;
+	for (size_t i = 0; i < _players.size(); i++) {
+		if (_players[i].is_in_channel)
+			active_players_count++;
+	}
+
+	if (active_players_count < 2) {
 		std::string alert_message = TriviaGame::early_leaving_warning_part1 + _players[0].nickname + TriviaGame::early_leaving_warning_part2;
 		_send(alert_message);
 		show_final_results();
