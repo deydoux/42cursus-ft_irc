@@ -83,6 +83,7 @@ class IRC
 		void	_handle_kick_command(const std::string sender_nickname, const std::vector<std::string> &args);
 		void	_handle_part_command(const std::string sender_nickname, const std::vector<std::string> &args);
 		void	_handle_privmsg_command(const std::string sender_nickname, const std::vector<std::string> &args);
+		void	_handle_quit_command(const std::string sender_nickname, const std::vector<std::string> &args);
 		void	_handle_numerics(int numeric, const std::vector<std::string> &args);
 		void	_init_command_handlers( void );
 
