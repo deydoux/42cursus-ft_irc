@@ -85,7 +85,8 @@ static void mode_handler(const args_t &args, Client &client, Server &server)
 		}
 
 		else if (mode == 'o') {
-			if (value.empty()) continue;
+			if (value.empty())
+				continue;
 
 			Client *new_op = server.get_client(value);
 			if (!new_op) {
@@ -102,6 +103,8 @@ static void mode_handler(const args_t &args, Client &client, Server &server)
 				new_op->set_channel_operator(channel_name);
 			else
 				new_op->remove_channel_operator(channel_name);
+
+			modes_values[mode] = value;
 		}
 
 		std::string flag = add_mode ? "+" : "-";
@@ -117,7 +120,6 @@ static void mode_handler(const args_t &args, Client &client, Server &server)
 			.flags = applied_flags,
 			.values = modes_values
 		};
-
 		channel->add_modes(modes);
 
 		channel->broadcast(Client::create_cmd_reply(
