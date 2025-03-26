@@ -202,12 +202,22 @@ clients_t Server::get_clients(const std::string &mask) const
 
 	clients_t clients;
 
-	bool has_wildcards = mask.find_first_of("*?") != std::string::npos;
+	if (mask.empty())
+		return clients;
+
+	else if (Client::is_valid_nickname(mask)) {
+		Client *client = get_client(mask);
+
+		if (client)
+			clients[client->get_fd()] = client;
+
+		return clients;
+	}
+
 	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
 		Client *client = it->second;
 
-		if ((!has_wildcards && client->get_nickname() == mask)
-				|| (match_mask(client->get_mask(), mask)))
+		if (mask_compare(mask, client->get_mask()))
 			clients[client->get_fd()] = client;
 	}
 

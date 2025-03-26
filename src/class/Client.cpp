@@ -24,6 +24,18 @@ const std::string Client::create_cmd_reply(const std::string &prefix, const std:
 	return _create_line(oss.str());
 }
 
+bool Client::is_valid_nickname(const std::string &nickname)
+{
+	if (std::isdigit(nickname[0]) || nickname[0] == '-')
+		return false;
+
+	for (std::string::const_iterator it = nickname.begin(); it != nickname.end(); ++it)
+		if (!std::isalnum(*it) && std::string("_-[]{}\\`^|").find(*it) == std::string::npos)
+			return false;
+
+	return true;
+}
+
 Client::Client(const int fd, const std::string ip, Server &server):
 	_registered(false),
 	_fd(fd),
@@ -316,7 +328,7 @@ void Client::set_nickname(const std::string &nickname)
 	if (nickname.size() > _max_nickname_size)
 		return reply(ERR_ERRONEUSNICKNAME, nickname, "Nickname too long, max. 9 characters");
 
-	if (!_is_valid_nickname(nickname))
+	if (!is_valid_nickname(nickname))
 		return reply(ERR_ERRONEUSNICKNAME, nickname, "Erroneous nickname");
 
 	if (_server.get_client(nickname) != NULL)
@@ -384,18 +396,6 @@ void Client::set_password(const std::string &password)
 void Client::set_quit_reason(const std::string &reason)
 {
 	_quit_reason = reason;
-}
-
-bool Client::_is_valid_nickname(const std::string &nickname)
-{
-	if (std::isdigit(nickname[0]) || nickname[0] == '-')
-		return false;
-
-	for (std::string::const_iterator it = nickname.begin(); it != nickname.end(); ++it)
-		if (!std::isalnum(*it) && std::string("_-[]{}\\`^|").find(*it) == std::string::npos)
-			return false;
-
-	return true;
 }
 
 bool Client::_is_valid_username(const std::string &username)

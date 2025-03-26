@@ -24,6 +24,8 @@ public:
 
 // Static functions
 	static const std::string	create_cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg = "", const std::string &message = "");
+	static bool	is_valid_nickname(const std::string &nickname);
+
 
 // Constructors/destructors
 	Client(const int fd, const std::string ip, Server &server);
@@ -78,7 +80,6 @@ public:
 
 private:
 // Static functions
-	static bool	_is_valid_nickname(const std::string &nickname);
 	static bool	_is_valid_username(const std::string &username);
 	static std::string	_create_line(const std::string &content);
 

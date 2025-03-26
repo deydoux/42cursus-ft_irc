@@ -162,10 +162,10 @@ const std::string Channel::get_names() const
 
 bool Channel::is_client_banned(Client &client) const
 {
-	std::string	client_mask = client.get_mask();
+	const std::string	&client_mask = client.get_mask();
 
 	for (size_t i = 0; i < _banned_user_masks.size(); ++i)
-		if (match_mask(client_mask, _banned_user_masks[i]))
+		if (mask_compare(_banned_user_masks[i], client_mask))
 			return true;
 
 	return false;

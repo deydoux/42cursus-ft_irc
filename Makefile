@@ -24,7 +24,7 @@ SRC = \
 	class/Command/who.cpp \
 	class/Server.cpp \
 	lib/log.cpp \
-	lib/match_mask.cpp \
+	lib/mask_compare.cpp \
 	lib/split.cpp \
 	lib/to_lower.cpp \
 	main.cpp
