@@ -49,6 +49,7 @@ The server processes these commands efficiently with proper error handling and p
 - **USER**: Sets the user's username and realname. Usage: `/USER [username] 0 * :[realname]`
 
 **Additional:**
+- **LIST**: Lists channels and their topics. Usage: `/LIST (#channel_mask)`
 - **MOTD**: Displays the server's message of the day. Usage: `/MOTD`
 - **NAMES**: Lists users in a channel. Usage: `/NAMES (#channel)`
 - **PART**: Leaves a channel. Usage: `/PART [#channel] (reason)`
