@@ -8,6 +8,7 @@ static void list_handler(const args_t &args, Client &client, Server &server)
 	if (args.size() == 3 && args[2] != server.get_name())
 		return client.reply(ERR_NOSUCHSERVER, args[2], "No such server");
 
+	const std::string &mask = args.size() == 1 ? "*" : args[1];
 	std::string reply = client.create_reply(RPL_LISTSTART, "Channel", "Users Name");
 
 	for (channels_t::const_iterator it = server.get_channels().begin(); it != server.get_channels().end(); ++it) {

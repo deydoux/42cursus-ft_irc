@@ -25,7 +25,7 @@ typedef std::map<int, Client *>	clients_t; // clients_t[fd] = Client *
 typedef std::map<std::string, Channel *>	channels_t; // channels_t[name] = Channel *
 typedef std::vector<std::string>	args_t;
 
-bool	match_mask(const std::string& mask, const std::string& user_string);
+bool	match_mask(const std::string &mask, const std::string& user_string);
 void	log(const std::string &context, const std::string &message, const log_level level = info);
 std::string	to_lower(const std::string &str);
 std::vector<std::string>	split(const std::string &str, char separator);

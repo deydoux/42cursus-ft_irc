@@ -179,6 +179,11 @@ Channel	*Server::get_channel(const std::string &channel_name) const
 	return NULL;
 }
 
+const clients_t	&Server::get_clients() const
+{
+	return _clients;
+}
+
 Client *Server::get_client(const std::string &nickname) const
 {
 	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
@@ -190,7 +195,7 @@ Client *Server::get_client(const std::string &nickname) const
 	return NULL;
 }
 
-clients_t Server::get_clients(const std::string mask) const
+clients_t Server::get_clients(const std::string &mask) const
 {
 	if (mask == "*")
 		return _clients;

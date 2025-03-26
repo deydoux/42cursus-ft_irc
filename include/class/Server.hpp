@@ -54,8 +54,9 @@ public:
 	const channels_t	&get_channels() const;
 	Channel	*get_channel(const std::string &channel_name) const;
 	// Client
+	const clients_t	&get_clients() const;
 	Client		*get_client(const std::string &nickname) const;
-	clients_t	get_clients(const std::string mask = "*") const;
+	clients_t	get_clients(const std::string &mask) const;
 
 // Setters
 	// Server stats
