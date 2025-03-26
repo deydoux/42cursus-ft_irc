@@ -14,6 +14,7 @@ void Command::init()
 	_commands["invite"] = _invite;
 	_commands["join"] = _join;
 	_commands["kick"] = _kick;
+	_commands["list"] = _list;
 	_commands["mode"] = _mode;
 	_commands["motd"] = _motd;
 	_commands["names"] = _names;

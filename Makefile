@@ -9,6 +9,7 @@ SRC = \
 	class/Command/invite.cpp \
 	class/Command/join.cpp \
 	class/Command/kick.cpp \
+	class/Command/list.cpp \
 	class/Command/mode.cpp \
 	class/Command/motd.cpp \
 	class/Command/names.cpp \
