@@ -76,8 +76,7 @@ Server::Server(const std::string &name, port_t port, const std::string &password
 	_motd(motd),
 	_name(name),
 	_password(password),
-	_connections(0),
-	_max_connections(0),
+	_max_clients(0),
 	_max_registered_clients(0),
 	_registered_clients_count(0)
 {
@@ -145,29 +144,19 @@ bool Server::is_verbose() const
 	return _verbose;
 }
 
-size_t Server::get_channels_count() const
-{
-	return _channels.size();
-}
-
-size_t Server::get_clients_count() const
-{
-	return _registered_clients_count;
-}
-
-size_t Server::get_connections() const
-{
-	return _connections;
-}
-
 size_t Server::get_max_clients() const
+{
+	return _max_clients;
+}
+
+size_t Server::get_max_registered_clients() const
 {
 	return _max_registered_clients;
 }
 
-size_t Server::get_max_connections() const
+size_t Server::get_registered_clients_count() const
 {
-	return _max_connections;
+	return _registered_clients_count;
 }
 
 const channels_t	&Server::get_channels() const
@@ -201,7 +190,7 @@ Client *Server::get_client(const std::string &nickname) const
 	return NULL;
 }
 
-clients_t Server::get_clients(const std::string &mask) const
+clients_t Server::get_clients(const std::string mask) const
 {
 	if (mask == "*")
 		return _clients;
@@ -317,10 +306,9 @@ void Server::_accept()
 	if (!ip)
 		return log("Failed to get client IP", error);
 
-	_max_connections = std::max(_max_connections, ++_connections);
-
 	_pollfds.push_back(_init_pollfd(fd));
 	_clients[fd] = new Client(fd, ip, *this);
+	_max_clients = std::max(_max_clients, _clients.size());
 }
 
 void Server::_bind()
@@ -452,7 +440,6 @@ void Server::_disconnect_client(int fd)
 {
 	Client *client = _clients[fd];
 
-	_connections--;
 	if (client->is_registered())
 		_registered_clients_count--;
 

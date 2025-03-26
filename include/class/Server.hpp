@@ -47,17 +47,15 @@ public:
 	bool	check_password(const std::string &password) const;
 	bool	is_verbose() const;
 	// Server stats
-	size_t	get_channels_count() const;
-	size_t	get_clients_count() const;
-	size_t	get_connections() const;
 	size_t	get_max_clients() const;
-	size_t	get_max_connections() const;
+	size_t	get_max_registered_clients() const;
+	size_t	get_registered_clients_count() const;
 	// Channel
 	const channels_t	&get_channels() const;
 	Channel	*get_channel(const std::string &channel_name) const;
 	// Client
 	Client		*get_client(const std::string &nickname) const;
-	clients_t	get_clients(const std::string &mask) const;
+	clients_t	get_clients(const std::string mask = "*") const;
 
 // Setters
 	// Server stats
@@ -88,8 +86,7 @@ private:
 	std::string	_start_time;
 	std::vector<std::string>	_motd_lines;
 	// Server stats
-	size_t	_connections;
-	size_t	_max_connections;
+	size_t	_max_clients;
 	size_t	_max_registered_clients;
 	size_t	_registered_clients_count;
 	// Channels
