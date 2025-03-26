@@ -12,6 +12,7 @@ static void who_handler(const args_t &args, Client &client, Server &server)
 
 	if (Channel::is_prefix(mask[0])) {
 		Channel *channel = server.get_channel(mask);
+
 		if (channel) {
 			clients = channel->get_members();
 			mask = channel->get_name();
