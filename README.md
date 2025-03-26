@@ -55,7 +55,7 @@ The server processes these commands efficiently with proper error handling and p
 - **PART**: Leaves a channel. Usage: `/PART [#channel] (reason)`
 - **PING**: Pings the server. Usage: `/PING [message]`
 - **QUIT**: Disconnects from the server. Usage: `/QUIT (reason)`
-- **WHO**: Lists users in the server. Usage: `/WHO (#channel)`
+- **WHO**: Lists users in the server. Usage: `/WHO (#channel|user_mask)`
 
 ### Modes
 - **i (Invite-only)**: When set, users can only join the channel if they are explicitly invited by a channel operator. This restricts channel access to invited users only. Usage:
