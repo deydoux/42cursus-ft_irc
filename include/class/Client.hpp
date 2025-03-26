@@ -34,7 +34,7 @@ public:
 // Member functions
 	// Client
 	const std::string	create_motd_reply() const;
-	const std::string	create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
+	const std::string	create_reply(reply_code code, const std::string &arg = "", const std::string &message = "", const bool colon = false) const;
 	const std::string	generate_who_reply(const std::string &context) const;
 	ssize_t	send(const std::string &message) const;
 	void	broadcast_quit() const;

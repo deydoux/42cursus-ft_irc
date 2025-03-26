@@ -70,7 +70,7 @@ const std::string Client::create_motd_reply() const
 	return reply;
 }
 
-const std::string Client::create_reply(reply_code code, const std::string &arg, const std::string &message) const
+const std::string Client::create_reply(reply_code code, const std::string &arg, const std::string &message, const bool colon) const
 {
 	std::ostringstream oss;
 
@@ -79,8 +79,9 @@ const std::string Client::create_reply(reply_code code, const std::string &arg, 
 	if (!arg.empty())
 		oss << ' ' << arg;
 
-	if (!message.empty())
-		oss << " :" << message;
+	if (!message.empty() || colon)
+		oss << " :";
+	oss << message;
 
 	return _create_line(oss.str());
 }

@@ -164,6 +164,24 @@ const channels_t	&Server::get_channels() const
 	return _channels;
 }
 
+const channels_t	Server::get_channels(const std::string &mask) const
+{
+	if (mask == "*")
+		return _channels;
+
+	channels_t channels;
+
+	for (channels_t::const_iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		Channel *channel = it->second;
+
+		if (mask_compare(mask, channel->get_name())) {
+			channels[channel->get_name()] = channel;
+		}
+	}
+
+	return channels;
+}
+
 Channel	*Server::get_channel(const std::string &channel_name) const
 {
 	const std::string &lower_channel_name = to_lower(channel_name);

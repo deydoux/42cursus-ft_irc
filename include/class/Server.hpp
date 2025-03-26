@@ -52,6 +52,7 @@ public:
 	size_t	get_registered_clients_count() const;
 	// Channel
 	const channels_t	&get_channels() const;
+	const channels_t	get_channels(const std::string &mask) const;
 	Channel	*get_channel(const std::string &channel_name) const;
 	// Client
 	const clients_t	&get_clients() const;
