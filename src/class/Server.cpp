@@ -174,7 +174,7 @@ const channels_t	Server::get_channels(const std::string &mask) const
 	for (channels_t::const_iterator it = _channels.begin(); it != _channels.end(); ++it) {
 		Channel *channel = it->second;
 
-		if (mask_compare(mask, channel->get_name())) {
+		if (_mask_compare(mask, channel->get_name())) {
 			channels[channel->get_name()] = channel;
 		}
 	}
@@ -224,7 +224,7 @@ const clients_t Server::get_clients(const std::string &mask) const
 	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
 		Client *client = it->second;
 
-		if (mask_compare(mask, client->get_mask()))
+		if (_mask_compare(mask, client->get_mask()))
 			clients[client->get_fd()] = client;
 	}
 
@@ -261,6 +261,39 @@ void	Server::delete_channel(const std::string &channel_name)
 
 	_channels.erase(channel->get_name());
 	delete channel;
+}
+
+bool Server::_mask_compare(const std::string &mask, const std::string &str)
+{
+	size_t mask_pos = 0;
+
+	size_t prev_pos;
+	size_t wildcard_pos = std::string::npos;
+	for (size_t pos = 0; pos < str.size();)
+	{
+		if (mask_pos < mask.size() && (mask[mask_pos] == str[pos] || mask[mask_pos] == '?')) {
+			++mask_pos;
+			++pos;
+		}
+
+		else if (mask_pos < mask.size() && mask[mask_pos] == '*') {
+			wildcard_pos = mask_pos++;
+			prev_pos = pos;
+		}
+
+		else if (wildcard_pos != std::string::npos) {
+			mask_pos = wildcard_pos + 1;
+			pos = ++prev_pos;
+		}
+
+		else
+			return false;
+	}
+
+	while (mask_pos < mask.size() && mask[mask_pos] == '*')
+		++mask_pos;
+
+	return mask_pos == mask.size();
 }
 
 Server::port_t Server::_parse_port(const std::string &port_str)

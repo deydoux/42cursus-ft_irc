@@ -68,6 +68,7 @@ public:
 
 private:
 // Static functions
+	static bool		_mask_compare(const std::string &mask, const std::string &str);
 	static port_t	_parse_port(const std::string &port_str);
 	static void		_print_usage(int status = 1);
 	static void		_signal_handler(int sig);
