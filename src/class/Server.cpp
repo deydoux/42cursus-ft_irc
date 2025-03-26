@@ -184,18 +184,7 @@ const clients_t	&Server::get_clients() const
 	return _clients;
 }
 
-Client *Server::get_client(const std::string &nickname) const
-{
-	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
-		Client *client = it->second;
-		if (client->get_nickname() == nickname)
-			return client;
-	}
-
-	return NULL;
-}
-
-clients_t Server::get_clients(const std::string &mask) const
+const clients_t Server::get_clients(const std::string &mask) const
 {
 	if (mask == "*")
 		return _clients;
@@ -222,6 +211,17 @@ clients_t Server::get_clients(const std::string &mask) const
 	}
 
 	return clients;
+}
+
+Client *Server::get_client(const std::string &nickname) const
+{
+	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		Client *client = it->second;
+		if (client->get_nickname() == nickname)
+			return client;
+	}
+
+	return NULL;
 }
 
 void Server::register_client()

@@ -18,9 +18,9 @@ static void names_handler(const args_t &args, Client &client, Server &server)
 		}
 
 		std::string lost_clients_nicknames;
-		clients_t clients = server.get_clients("*");
+		const clients_t &clients = server.get_clients();
 
-		for (clients_t::iterator it = clients.begin(); it != clients.end(); ++it) {
+		for (clients_t::const_iterator it = clients.begin(); it != clients.end(); ++it) {
 			const Client &client = *it->second;
 
 			if (client.get_channels().empty()) {
