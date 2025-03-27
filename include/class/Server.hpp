@@ -57,7 +57,7 @@ public:
 	// Client
 	const clients_t	&get_clients() const;
 	const clients_t	get_clients(const std::string &mask) const;
-	Client		*get_client(const std::string &nickname) const;
+	Client	*get_client(const std::string &nickname) const;
 
 // Setters
 	// Server stats

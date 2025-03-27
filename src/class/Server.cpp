@@ -235,6 +235,7 @@ Client *Server::get_client(const std::string &nickname) const
 {
 	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
 		Client *client = it->second;
+
 		if (client->get_nickname() == nickname)
 			return client;
 	}
