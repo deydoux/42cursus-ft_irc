@@ -224,7 +224,7 @@ const clients_t Server::get_clients(const std::string &mask) const
 	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
 		Client *client = it->second;
 
-		if (_mask_compare(mask, client->get_mask()))
+		if (_mask_compare(mask, client->get_nickname()) || _mask_compare(mask, client->get_mask()))
 			clients[client->get_fd()] = client;
 	}
 
