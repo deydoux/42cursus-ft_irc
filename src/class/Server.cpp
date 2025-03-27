@@ -171,10 +171,14 @@ const channels_t	Server::get_channels(const std::string &mask) const
 
 	channels_t channels;
 
+	if (mask.empty())
+		return channels;
+
+	const std::string &lower_mask = to_lower(mask);
 	for (channels_t::const_iterator it = _channels.begin(); it != _channels.end(); ++it) {
 		Channel *channel = it->second;
 
-		if (_mask_compare(mask, channel->get_name())) {
+		if (_mask_compare(lower_mask, to_lower(channel->get_name()))) {
 			channels[channel->get_name()] = channel;
 		}
 	}
@@ -221,10 +225,11 @@ const clients_t Server::get_clients(const std::string &mask) const
 		return clients;
 	}
 
+	const std::string &lower_mask = to_lower(mask);
 	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
 		Client *client = it->second;
 
-		if (_mask_compare(mask, client->get_nickname()) || _mask_compare(mask, client->get_mask()))
+		if (_mask_compare(lower_mask, to_lower(client->get_nickname())) || _mask_compare(lower_mask, to_lower(client->get_mask())))
 			clients[client->get_fd()] = client;
 	}
 

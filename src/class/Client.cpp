@@ -232,7 +232,7 @@ void Client::kick(const std::string &nick_to_kick, Channel &channel, const std::
 			get_mask(), "KICK", channel.get_name() + ' ' + nick_to_kick, reason
 		));
 		channel.remove_client(*client_to_kick);
-		client_to_kick->delete_channel(channel.get_name());
+		client_to_kick->delete_channel(channel);
 	}
 }
 
@@ -296,16 +296,6 @@ bool Client::is_channel_operator(std::string channel_name) const
 	return false;
 }
 
-Channel *Client::get_channel(const std::string &name) const
-{
-	channels_t::const_iterator it = _channels.find(name);
-	if (it == _channels.end())
-		return NULL;
-
-	Channel *channel = it->second;
-	return channel;
-}
-
 bool Client::has_disconnect_request() const
 {
 	return _disconnect_request;
@@ -365,11 +355,9 @@ void Client::set_username(const std::string &username)
 	_check_registration();
 }
 
-void Client::delete_channel(const std::string &channel_name)
+void Client::delete_channel(const Channel &channel)
 {
-	Channel *channel = get_channel(channel_name);
-	if (channel)
-		_channels.erase(channel->get_name());
+	_channels.erase(channel.get_name());
 }
 
 void Client::remove_channel_operator(const std::string &channel)

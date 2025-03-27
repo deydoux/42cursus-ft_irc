@@ -59,7 +59,6 @@ public:
 	// Channel
 	const channels_t	&get_channels() const;
 	bool	is_channel_operator(std::string channel_name) const;
-	Channel	*get_channel(const std::string &name) const;
 	// Server
 	bool	has_disconnect_request() const;
 	int		get_fd() const;
@@ -71,7 +70,7 @@ public:
 	void	set_realname(const std::string &realname);
 	void	set_username(const std::string &username);
 	// Channel
-	void	delete_channel(const std::string &channel_name);
+	void	delete_channel(const Channel &channel);
 	void	remove_channel_operator(const std::string &channel_name);
 	void	set_channel_operator(const std::string &channel_name);
 	// Server
