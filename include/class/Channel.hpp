@@ -44,7 +44,6 @@ public:
 	// Client
 	const clients_t	&get_members() const;
 	const std::string	get_names() const;
-	bool	is_client_banned(Client &client) const;
 	bool	is_client_invited(Client &client);
 	bool	is_client_member(Client &client) const;
 
@@ -78,7 +77,6 @@ private:
 	std::string	_topic_author;
 	std::string	_topic_edit_time;
 	std::string	_topic;
-	std::vector<std::string>	_banned_user_masks; // e.g. ["nick!*@*", "*!*@192.168.1.*"]
 };
 
 #endif

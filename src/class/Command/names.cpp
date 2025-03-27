@@ -18,9 +18,9 @@ static void names_handler(const args_t &args, Client &client, Server &server)
 		}
 
 		std::string lost_clients_nicknames;
-		clients_t clients = server.get_clients("*");
+		const clients_t &clients = server.get_clients();
 
-		for (clients_t::iterator it = clients.begin(); it != clients.end(); ++it) {
+		for (clients_t::const_iterator it = clients.begin(); it != clients.end(); ++it) {
 			const Client &client = *it->second;
 
 			if (client.get_channels().empty()) {
@@ -34,7 +34,9 @@ static void names_handler(const args_t &args, Client &client, Server &server)
 		if (!lost_clients_nicknames.empty())
 			reply += client.create_reply(RPL_NAMREPLY, "* *", lost_clients_nicknames);
 		reply += client.create_reply(RPL_ENDOFNAMES, "*", "End of NAMES list");
-	} else {
+	}
+
+	else {
 		std::vector<std::string> channel_names = split(args[1], ',');
 		for (size_t i = 0; i < channel_names.size(); ++i) {
 			std::string &channel_name = channel_names[i];

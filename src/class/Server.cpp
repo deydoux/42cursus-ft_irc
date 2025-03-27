@@ -76,8 +76,7 @@ Server::Server(const std::string &name, port_t port, const std::string &password
 	_motd(motd),
 	_name(name),
 	_password(password),
-	_connections(0),
-	_max_connections(0),
+	_max_clients(0),
 	_max_registered_clients(0),
 	_registered_clients_count(0)
 {
@@ -145,34 +144,46 @@ bool Server::is_verbose() const
 	return _verbose;
 }
 
-size_t Server::get_channels_count() const
-{
-	return _channels.size();
-}
-
-size_t Server::get_clients_count() const
-{
-	return _registered_clients_count;
-}
-
-size_t Server::get_connections() const
-{
-	return _connections;
-}
-
 size_t Server::get_max_clients() const
+{
+	return _max_clients;
+}
+
+size_t Server::get_max_registered_clients() const
 {
 	return _max_registered_clients;
 }
 
-size_t Server::get_max_connections() const
+size_t Server::get_registered_clients_count() const
 {
-	return _max_connections;
+	return _registered_clients_count;
 }
 
 const channels_t	&Server::get_channels() const
 {
 	return _channels;
+}
+
+const channels_t	Server::get_channels(const std::string &mask) const
+{
+	if (mask == "*")
+		return _channels;
+
+	channels_t channels;
+
+	if (mask.empty())
+		return channels;
+
+	const std::string &lower_mask = to_lower(mask);
+	for (channels_t::const_iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		Channel *channel = it->second;
+
+		if (_mask_compare(lower_mask, to_lower(channel->get_name()))) {
+			channels[channel->get_name()] = channel;
+		}
+	}
+
+	return channels;
 }
 
 Channel	*Server::get_channel(const std::string &channel_name) const
@@ -183,41 +194,60 @@ Channel	*Server::get_channel(const std::string &channel_name) const
 		const std::string &channel_name = it->first;
 		Channel *channel = it->second;
 
-		if (to_lower(channel_name) == lower_channel_name)
+		if (lower_channel_name == to_lower(channel_name))
 			return channel;
 	}
 
 	return NULL;
 }
 
-Client *Server::get_client(const std::string &nickname) const
+const clients_t	&Server::get_clients() const
 {
-	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
-		Client *client = it->second;
-		if (client->get_nickname() == nickname)
-			return client;
-	}
-
-	return NULL;
+	return _clients;
 }
 
-clients_t Server::get_clients(const std::string &mask) const
+const clients_t Server::get_clients(const std::string &mask) const
 {
 	if (mask == "*")
 		return _clients;
 
 	clients_t clients;
 
-	bool has_wildcards = mask.find_first_of("*?") != std::string::npos;
+	if (mask.empty())
+		return clients;
+
+	else if (Client::is_valid_nickname(mask)) {
+		Client *client = get_client(mask);
+
+		if (client)
+			clients[client->get_fd()] = client;
+
+		return clients;
+	}
+
+	const std::string &lower_mask = to_lower(mask);
 	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
 		Client *client = it->second;
 
-		if ((!has_wildcards && client->get_nickname() == mask)
-				|| (match_mask(mask, client->get_mask())))
+		if (_mask_compare(lower_mask, to_lower(client->get_nickname())) || _mask_compare(lower_mask, to_lower(client->get_mask())))
 			clients[client->get_fd()] = client;
 	}
 
 	return clients;
+}
+
+Client *Server::get_client(const std::string &nickname) const
+{
+	const std::string &lower_nickname = to_lower(nickname);
+
+	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		Client *client = it->second;
+
+		if (lower_nickname == to_lower(client->get_nickname()))
+			return client;
+	}
+
+	return NULL;
 }
 
 void Server::register_client()
@@ -239,6 +269,39 @@ void	Server::delete_channel(const std::string &channel_name)
 
 	_channels.erase(channel->get_name());
 	delete channel;
+}
+
+bool Server::_mask_compare(const std::string &mask, const std::string &str)
+{
+	size_t mask_pos = 0;
+
+	size_t prev_pos;
+	size_t wildcard_pos = std::string::npos;
+	for (size_t pos = 0; pos < str.size();)
+	{
+		if (mask_pos < mask.size() && (mask[mask_pos] == str[pos] || mask[mask_pos] == '?')) {
+			++mask_pos;
+			++pos;
+		}
+
+		else if (mask_pos < mask.size() && mask[mask_pos] == '*') {
+			wildcard_pos = mask_pos++;
+			prev_pos = pos;
+		}
+
+		else if (wildcard_pos != std::string::npos) {
+			mask_pos = wildcard_pos + 1;
+			pos = ++prev_pos;
+		}
+
+		else
+			return false;
+	}
+
+	while (mask_pos < mask.size() && mask[mask_pos] == '*')
+		++mask_pos;
+
+	return mask_pos == mask.size();
 }
 
 Server::port_t Server::_parse_port(const std::string &port_str)
@@ -317,10 +380,9 @@ void Server::_accept()
 	if (!ip)
 		return log("Failed to get client IP", error);
 
-	_max_connections = std::max(_max_connections, ++_connections);
-
 	_pollfds.push_back(_init_pollfd(fd));
 	_clients[fd] = new Client(fd, ip, *this);
+	_max_clients = std::max(_max_clients, _clients.size());
 }
 
 void Server::_bind()
@@ -452,7 +514,6 @@ void Server::_disconnect_client(int fd)
 {
 	Client *client = _clients[fd];
 
-	_connections--;
 	if (client->is_registered())
 		_registered_clients_count--;
 

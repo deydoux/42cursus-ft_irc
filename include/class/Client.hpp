@@ -24,6 +24,8 @@ public:
 
 // Static functions
 	static const std::string	create_cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg = "", const std::string &message = "");
+	static bool	is_valid_nickname(const std::string &nickname);
+
 
 // Constructors/destructors
 	Client(const int fd, const std::string ip, Server &server);
@@ -32,7 +34,7 @@ public:
 // Member functions
 	// Client
 	const std::string	create_motd_reply() const;
-	const std::string	create_reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
+	const std::string	create_reply(reply_code code, const std::string &arg = "", const std::string &message = "", const bool colon = false) const;
 	const std::string	generate_who_reply(const std::string &context) const;
 	ssize_t	send(const std::string &message) const;
 	void	broadcast_quit() const;
@@ -57,7 +59,6 @@ public:
 	// Channel
 	const channels_t	&get_channels() const;
 	bool	is_channel_operator(std::string channel_name) const;
-	Channel	*get_channel(const std::string &name) const;
 	// Server
 	bool	has_disconnect_request() const;
 	int		get_fd() const;
@@ -69,7 +70,7 @@ public:
 	void	set_realname(const std::string &realname);
 	void	set_username(const std::string &username);
 	// Channel
-	void	delete_channel(const std::string &channel_name);
+	void	delete_channel(const Channel &channel);
 	void	remove_channel_operator(const std::string &channel_name);
 	void	set_channel_operator(const std::string &channel_name);
 	// Server
@@ -78,7 +79,6 @@ public:
 
 private:
 // Static functions
-	static bool	_is_valid_nickname(const std::string &nickname);
 	static bool	_is_valid_username(const std::string &username);
 	static std::string	_create_line(const std::string &content);
 

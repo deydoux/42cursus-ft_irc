@@ -28,6 +28,7 @@ private:
 	static const _command_t	_invite;
 	static const _command_t	_join;
 	static const _command_t	_kick;
+	static const _command_t	_list;
 	static const _command_t	_mode;
 	static const _command_t	_motd;
 	static const _command_t	_names;

@@ -160,17 +160,6 @@ const std::string Channel::get_names() const
 	return result;
 }
 
-bool Channel::is_client_banned(Client &client) const
-{
-	std::string	client_mask = client.get_mask();
-
-	for (size_t i = 0; i < _banned_user_masks.size(); ++i)
-		if (match_mask(_banned_user_masks[i], client_mask))
-			return true;
-
-	return false;
-}
-
 bool Channel::is_client_invited(Client &client)
 {
 	clients_t::iterator it = _invited_clients.find(client.get_fd());

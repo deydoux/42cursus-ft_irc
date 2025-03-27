@@ -9,6 +9,7 @@ SRC = \
 	class/Command/invite.cpp \
 	class/Command/join.cpp \
 	class/Command/kick.cpp \
+	class/Command/list.cpp \
 	class/Command/mode.cpp \
 	class/Command/motd.cpp \
 	class/Command/names.cpp \
@@ -23,7 +24,6 @@ SRC = \
 	class/Command/who.cpp \
 	class/Server.cpp \
 	lib/log.cpp \
-	lib/match_mask.cpp \
 	lib/split.cpp \
 	lib/to_lower.cpp \
 	main.cpp

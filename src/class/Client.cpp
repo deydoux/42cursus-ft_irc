@@ -24,6 +24,18 @@ const std::string Client::create_cmd_reply(const std::string &prefix, const std:
 	return _create_line(oss.str());
 }
 
+bool Client::is_valid_nickname(const std::string &nickname)
+{
+	if (std::isdigit(nickname[0]) || nickname[0] == '-')
+		return false;
+
+	for (std::string::const_iterator it = nickname.begin(); it != nickname.end(); ++it)
+		if (!std::isalnum(*it) && std::string("_-[]{}\\`^|").find(*it) == std::string::npos)
+			return false;
+
+	return true;
+}
+
 Client::Client(const int fd, const std::string ip, Server &server):
 	_registered(false),
 	_fd(fd),
@@ -58,7 +70,7 @@ const std::string Client::create_motd_reply() const
 	return reply;
 }
 
-const std::string Client::create_reply(reply_code code, const std::string &arg, const std::string &message) const
+const std::string Client::create_reply(reply_code code, const std::string &arg, const std::string &message, const bool colon) const
 {
 	std::ostringstream oss;
 
@@ -67,8 +79,9 @@ const std::string Client::create_reply(reply_code code, const std::string &arg, 
 	if (!arg.empty())
 		oss << ' ' << arg;
 
-	if (!message.empty())
-		oss << " :" << message;
+	if (!message.empty() || colon)
+		oss << " :";
+	oss << message;
 
 	return _create_line(oss.str());
 }
@@ -174,19 +187,16 @@ void Client::join(const std::string &original_channel_name, Channel &channel, co
 		return;
 
 	if (channel.is_full())
-		reply(ERR_CHANNELISFULL, channel.get_name(), "Cannot join channel (+l)");
+		reply(ERR_CHANNELISFULL, channel.get_name(), "Cannot join channel (+l) -- Channel is full, try later");
 
 	else if (!channel.check_passkey(passkey))
 		reply(ERR_BADCHANNELKEY, channel.get_name(), "Cannot join channel (+k) -- Wrong channel key");
-
-	else if (channel.is_client_banned(*this))
-		reply(ERR_BANNEDFROMCHAN, channel.get_name(), "Cannot join channel (+b)");
 
 	else if (_channels.size() >= Client::_max_channels)
 		reply(ERR_TOOMANYCHANNELS, channel.get_name(), "You have joined too many channels");
 
 	else if (!channel.is_client_invited(*this) && channel.is_invite_only())
-		reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i)");
+		reply(ERR_INVITEONLYCHAN, channel.get_name(), "Cannot join channel (+i) -- Invited users only");
 
 	else {
 		channel.add_client(*this);
@@ -222,7 +232,7 @@ void Client::kick(const std::string &nick_to_kick, Channel &channel, const std::
 			get_mask(), "KICK", channel.get_name() + ' ' + nick_to_kick, reason
 		));
 		channel.remove_client(*client_to_kick);
-		client_to_kick->delete_channel(channel.get_name());
+		client_to_kick->delete_channel(channel);
 	}
 }
 
@@ -286,16 +296,6 @@ bool Client::is_channel_operator(std::string channel_name) const
 	return false;
 }
 
-Channel *Client::get_channel(const std::string &name) const
-{
-	channels_t::const_iterator it = _channels.find(name);
-	if (it == _channels.end())
-		return NULL;
-
-	Channel *channel = it->second;
-	return channel;
-}
-
 bool Client::has_disconnect_request() const
 {
 	return _disconnect_request;
@@ -316,7 +316,7 @@ void Client::set_nickname(const std::string &nickname)
 	if (nickname.size() > _max_nickname_size)
 		return reply(ERR_ERRONEUSNICKNAME, nickname, "Nickname too long, max. 9 characters");
 
-	if (!_is_valid_nickname(nickname))
+	if (!is_valid_nickname(nickname))
 		return reply(ERR_ERRONEUSNICKNAME, nickname, "Erroneous nickname");
 
 	if (_server.get_client(nickname) != NULL)
@@ -355,11 +355,9 @@ void Client::set_username(const std::string &username)
 	_check_registration();
 }
 
-void Client::delete_channel(const std::string &channel_name)
+void Client::delete_channel(const Channel &channel)
 {
-	Channel *channel = get_channel(channel_name);
-	if (channel)
-		_channels.erase(channel->get_name());
+	_channels.erase(channel.get_name());
 }
 
 void Client::remove_channel_operator(const std::string &channel)
@@ -384,18 +382,6 @@ void Client::set_password(const std::string &password)
 void Client::set_quit_reason(const std::string &reason)
 {
 	_quit_reason = reason;
-}
-
-bool Client::_is_valid_nickname(const std::string &nickname)
-{
-	if (std::isdigit(nickname[0]) || nickname[0] == '-')
-		return false;
-
-	for (std::string::const_iterator it = nickname.begin(); it != nickname.end(); ++it)
-		if (!std::isalnum(*it) && std::string("_-[]{}\\`^|").find(*it) == std::string::npos)
-			return false;
-
-	return true;
 }
 
 bool Client::_is_valid_username(const std::string &username)
@@ -442,11 +428,11 @@ void Client::_greet() const
 	std::string nicklen = to_string(Client::_max_nickname_size);
 	std::string topiclen = to_string(Channel::max_topic_len);
 
-	std::string channels_count = to_string(_server.get_channels_count());
-	std::string clients_count = to_string(_server.get_clients_count());
-	std::string connections = to_string(_server.get_connections());
+	std::string channels_count = to_string(_server.get_channels().size());
+	std::string clients_count = to_string(_server.get_clients().size());
 	std::string max_clients = to_string(_server.get_max_clients());
-	std::string max_connections = to_string(_server.get_max_connections());
+	std::string max_registred_clients = to_string(_server.get_max_registered_clients());
+	std::string registred_clients_count = to_string(_server.get_registered_clients_count());
 
 	std::string reply = // https://modern.ircdocs.horse/#rplwelcome-001
 		create_reply(RPL_WELCOME, "", "Welcome to the Internet Relay Network " + get_mask())
@@ -455,12 +441,12 @@ void Client::_greet() const
 		+ create_reply(RPL_MYINFO, _server.get_name() + " " VERSION " o iklt")
 		+ create_reply(RPL_ISUPPORT, "RFC2812 IRCD=ft_irc CHARSET=UTF-8 CASEMAPPING=ascii PREFIX=(o)@ CHANTYPES=#& CHANMODES=,k,l,it", "are supported on this server")
 		+ create_reply(RPL_ISUPPORT, "CHANLIMIT=#&:" + chanlimit + " CHANNELLEN=" + channellen + " NICKLEN=" + nicklen + " TOPICLEN=" + topiclen + " KICKLEN=" + kicklen, "are supported on this server")
-		+ create_reply(RPL_LUSERCLIENT, "", "There are " + clients_count + " users and 0 services on 1 servers")
+		+ create_reply(RPL_LUSERCLIENT, "", "There are " + registred_clients_count + " users and 0 services on 1 servers")
 		+ create_reply(RPL_LUSERCHANNELS, channels_count, "channels formed")
-		+ create_reply(RPL_LUSERME, "", "I have " + clients_count + " users, 0 services and 0 servers")
-		+ create_reply(RPL_LOCALUSERS, clients_count + ' ' + max_clients, "Current local users: " + clients_count + ", Max: " + max_clients)
-		+ create_reply(RPL_LOCALUSERS, clients_count + ' ' + max_clients, "Current global users: " + clients_count + ", Max: " + max_clients)
-		+ create_reply(RPL_STATSDLINE, "", "Highest connection count: " + max_connections + " (" + connections + " connections received)")
+		+ create_reply(RPL_LUSERME, "", "I have " + registred_clients_count + " users, 0 services and 0 servers")
+		+ create_reply(RPL_LOCALUSERS, registred_clients_count + ' ' + max_registred_clients, "Current local users: " + registred_clients_count + ", Max: " + max_registred_clients)
+		+ create_reply(RPL_LOCALUSERS, registred_clients_count + ' ' + max_registred_clients, "Current global users: " + registred_clients_count + ", Max: " + max_registred_clients)
+		+ create_reply(RPL_STATSDLINE, "", "Highest connection count: " + max_clients + " (" + clients_count + " connections received)")
 		+ create_motd_reply();
 
 	send(reply);
