@@ -194,7 +194,7 @@ Channel	*Server::get_channel(const std::string &channel_name) const
 		const std::string &channel_name = it->first;
 		Channel *channel = it->second;
 
-		if (to_lower(channel_name) == lower_channel_name)
+		if (lower_channel_name == to_lower(channel_name))
 			return channel;
 	}
 
@@ -238,10 +238,12 @@ const clients_t Server::get_clients(const std::string &mask) const
 
 Client *Server::get_client(const std::string &nickname) const
 {
+	const std::string &lower_nickname = to_lower(nickname);
+
 	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
 		Client *client = it->second;
 
-		if (client->get_nickname() == nickname)
+		if (lower_nickname == to_lower(client->get_nickname()))
 			return client;
 	}
 
