@@ -81,7 +81,7 @@ void Channel::broadcast(const std::string &message, int exclude_fd) const
 {
 	for (clients_t::const_iterator it = _members.begin(); it != _members.end(); ++it) {
 		int fd = it->first;
-		const Client &client = *it->second;
+		Client &client = *it->second;
 
 		if (fd != exclude_fd)
 			client.send(message);
