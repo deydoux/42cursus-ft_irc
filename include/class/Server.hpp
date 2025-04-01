@@ -100,6 +100,7 @@ private:
 // Methods
 	void	_accept();
 	void	_bind();
+	void	_clean();
 	void	_down();
 	void	_init_motd();
 	void	_init_socket();

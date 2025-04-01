@@ -97,24 +97,23 @@ const std::string Client::generate_who_reply(const std::string &context) const
 	return context + ' ' + _get_username() + ' ' + _ip + ' ' + _server.get_name() + ' ' + _nickname + ' ' + status_flags;
 }
 
-ssize_t Client::send(const std::string &message) const
+ssize_t Client::send(const std::string &message)
 {
 	log("Sending message: " + message, debug);
 
 	ssize_t bytes_sent = ::send(_fd, message.c_str(), message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
-	if (bytes_sent == -1)
-		throw std::runtime_error("Failed to send message");
+	if (bytes_sent == -1) {
+		log("Failed to send message", error);
+		if (!_disconnect_request)
+			send_error("Internal server error");
+	}
 
 	return bytes_sent;
 }
 
 void Client::broadcast_quit() const
 {
-	try {
-		broadcast(create_cmd_reply(get_mask(), "QUIT", "", _quit_reason));
-	} catch (std::exception &e) {
-		log(e.what(), error);
-	}
+	broadcast(create_cmd_reply(get_mask(), "QUIT", "", _quit_reason));
 }
 
 void Client::broadcast(const std::string &message) const
@@ -134,12 +133,12 @@ void Client::broadcast(const std::string &message) const
 	clients_to_broadcast.erase(_fd);
 
 	for (clients_t::iterator it = clients_to_broadcast.begin(); it != clients_to_broadcast.end(); ++it) {
-		const Client &client = *it->second;
+		Client &client = *it->second;
 		client.send(message);
 	}
 }
 
-void Client::cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg, const std::string &message) const
+void Client::cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg, const std::string &message)
 {
 	send(create_cmd_reply(prefix, cmd, arg, message));
 }
@@ -163,7 +162,7 @@ void Client::log(const std::string &message, const log_level level) const
 		::log("Client " + to_string(_fd), message, level);
 }
 
-void Client::reply(reply_code code, const std::string &arg, const std::string &message) const
+void Client::reply(reply_code code, const std::string &arg, const std::string &message)
 {
 	send(create_reply(code, arg, message));
 }
@@ -176,9 +175,8 @@ void Client::send_error(const std::string &message)
 	if (!message.empty())
 		oss << " (" << message << ')';
 
-	send(_create_line(oss.str()));
-
 	_disconnect_request = true;
+	send(_create_line(oss.str()));
 }
 
 void Client::join(const std::string &original_channel_name, Channel &channel, const std::string &passkey)
@@ -420,7 +418,7 @@ void Client::_check_registration()
 	_greet();
 }
 
-void Client::_greet() const
+void Client::_greet()
 {
 	std::string chanlimit = to_string(Client::_max_channels);
 	std::string channellen = to_string(Channel::max_channel_name_size);

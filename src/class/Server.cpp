@@ -392,6 +392,24 @@ void Server::_bind()
 	log("Socket bound", debug);
 }
 
+void Server::_clean()
+{
+	std::vector<int> fds_to_disconnect;
+
+	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		const int &fd = it->first;
+		const Client &client = *it->second;
+
+		if (client.has_disconnect_request())
+			fds_to_disconnect.push_back(fd);
+	}
+
+	for (std::vector<int>::const_iterator it = fds_to_disconnect.begin(); it != fds_to_disconnect.end(); ++it) {
+		int fd = *it;
+		_disconnect_client(fd);
+	}
+}
+
 void Server::_down()
 {
 	for (clients_t::iterator it = _clients.begin(); it != _clients.end(); ++it) {
@@ -456,6 +474,7 @@ void Server::_loop()
 
 	_accept();
 	_receive();
+	_clean();
 }
 
 void Server::_receive()
@@ -472,22 +491,9 @@ void Server::_receive()
 			continue;
 		}
 
-		bool disconnect_request;
-		try {
-			_clients[it->fd]->handle_messages(std::string(buffer, bytes_read));
-			disconnect_request = _clients[it->fd]->has_disconnect_request();
-		} catch (std::exception &e) {
-			disconnect_request = true;
-			_clients[it->fd]->log(e.what(), error);
-
-			try {
-				_clients[it->fd]->send_error("Internal server error");
-			} catch (std::exception &e) {
-				_clients[it->fd]->log(e.what(), error);
-			}
-		}
-
-		if (disconnect_request)
+		Client &client = *_clients[it->fd];
+		client.handle_messages(std::string(buffer, bytes_read));
+		if (client.has_disconnect_request())
 			_disconnect_client((it--)->fd);
 	}
 }

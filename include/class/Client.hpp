@@ -36,13 +36,13 @@ public:
 	const std::string	create_motd_reply() const;
 	const std::string	create_reply(reply_code code, const std::string &arg = "", const std::string &message = "", const bool colon = false) const;
 	const std::string	generate_who_reply(const std::string &context) const;
-	ssize_t	send(const std::string &message) const;
+	ssize_t	send(const std::string &message);
 	void	broadcast_quit() const;
 	void	broadcast(const std::string &message) const;
-	void	cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg = "", const std::string &message = "") const;
+	void	cmd_reply(const std::string &prefix, const std::string &cmd, const std::string &arg = "", const std::string &message = "");
 	void	handle_messages(const std::string &messages);
 	void	log(const std::string &message, const log_level level = info) const;
-	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "") const;
+	void	reply(reply_code code, const std::string &arg = "", const std::string &message = "");
 	void	send_error(const std::string &message);
 	// Command
 	void	join(const std::string &original_channel_name, Channel &channel, const std::string &passkey);
@@ -102,7 +102,7 @@ private:
 
 // Member functions
 	void	_check_registration();
-	void	_greet() const;
+	void	_greet();
 	void	_handle_message(std::string message);
 
 // Getters
