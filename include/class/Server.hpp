@@ -47,17 +47,17 @@ public:
 	bool	check_password(const std::string &password) const;
 	bool	is_verbose() const;
 	// Server stats
-	size_t	get_channels_count() const;
-	size_t	get_clients_count() const;
-	size_t	get_connections() const;
 	size_t	get_max_clients() const;
-	size_t	get_max_connections() const;
+	size_t	get_max_registered_clients() const;
+	size_t	get_registered_clients_count() const;
 	// Channel
 	const channels_t	&get_channels() const;
+	const channels_t	get_channels(const std::string &mask) const;
 	Channel	*get_channel(const std::string &channel_name) const;
 	// Client
-	Client		*get_client(const std::string &nickname) const;
-	clients_t	get_clients(const std::string &mask) const;
+	const clients_t	&get_clients() const;
+	const clients_t	get_clients(const std::string &mask) const;
+	Client	*get_client(const std::string &nickname) const;
 
 // Setters
 	// Server stats
@@ -68,6 +68,7 @@ public:
 
 private:
 // Static functions
+	static bool		_mask_compare(const std::string &mask, const std::string &str);
 	static port_t	_parse_port(const std::string &port_str);
 	static void		_print_usage(int status = 1);
 	static void		_signal_handler(int sig);
@@ -88,8 +89,7 @@ private:
 	std::string	_start_time;
 	std::vector<std::string>	_motd_lines;
 	// Server stats
-	size_t	_connections;
-	size_t	_max_connections;
+	size_t	_max_clients;
 	size_t	_max_registered_clients;
 	size_t	_registered_clients_count;
 	// Channels
