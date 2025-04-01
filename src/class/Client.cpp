@@ -104,10 +104,8 @@ ssize_t Client::send(const std::string &message)
 	ssize_t bytes_sent = ::send(_fd, message.c_str(), message.size(), MSG_DONTWAIT | MSG_NOSIGNAL);
 	if (bytes_sent == -1) {
 		log("Failed to send message", error);
-
-		try {
+		if (!_disconnect_request)
 			send_error("Internal server error");
-		} catch (const std::exception &e) {}
 	}
 
 	return bytes_sent;
@@ -177,9 +175,8 @@ void Client::send_error(const std::string &message)
 	if (!message.empty())
 		oss << " (" << message << ')';
 
-	send(_create_line(oss.str()));
-
 	_disconnect_request = true;
+	send(_create_line(oss.str()));
 }
 
 void Client::join(const std::string &original_channel_name, Channel &channel, const std::string &passkey)
