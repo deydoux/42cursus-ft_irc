@@ -364,6 +364,26 @@ pollfd Server::_init_pollfd(int fd)
 	};
 }
 
+bool Server::_clean()
+{
+	std::vector<int> fds_to_disconnect;
+
+	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		const int &fd = it->first;
+		const Client &client = *it->second;
+
+		if (client.has_disconnect_request())
+			fds_to_disconnect.push_back(fd);
+	}
+
+	for (std::vector<int>::const_iterator it = fds_to_disconnect.begin(); it != fds_to_disconnect.end(); ++it) {
+		int fd = *it;
+		_disconnect_client(fd);
+	}
+
+	return !fds_to_disconnect.empty();
+}
+
 void Server::_accept()
 {
 	if (!(_pollfds[0].revents & POLLIN))
@@ -390,24 +410,6 @@ void Server::_bind()
 	if (bind(_socket, (sockaddr *)&_address, sizeof(_address)) == -1)
 		throw std::runtime_error("Failed to bind socket");
 	log("Socket bound", debug);
-}
-
-void Server::_clean()
-{
-	std::vector<int> fds_to_disconnect;
-
-	for (clients_t::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
-		const int &fd = it->first;
-		const Client &client = *it->second;
-
-		if (client.has_disconnect_request())
-			fds_to_disconnect.push_back(fd);
-	}
-
-	for (std::vector<int>::const_iterator it = fds_to_disconnect.begin(); it != fds_to_disconnect.end(); ++it) {
-		int fd = *it;
-		_disconnect_client(fd);
-	}
 }
 
 void Server::_down()
@@ -474,7 +476,7 @@ void Server::_loop()
 
 	_accept();
 	_receive();
-	_clean();
+	while (_clean());
 }
 
 void Server::_receive()
