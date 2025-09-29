@@ -20,7 +20,8 @@ ft_irc is a project that challenges students to create an **Internet Relay Chat 
 - Additional IRC features beyond the basic requirements
 - Improved error handling and logging
 - File transfer capabilities (DCC)
-- Bot functionality
+- AI chatbot integration
+- JSON parser
 
 ### Skills Learned
 - Network programming with sockets
