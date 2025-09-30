@@ -1,4 +1,5 @@
 <div align="center">
+  <img height="64" src="https://github.com/user-attachments/assets/87e625e6-84f7-4567-9a02-cf4def9dd5c7">
   <h1>ft_irc</h1>
   <p>Create your own IRC server in C++, fully compatible with an official client.</p>
 </div>
