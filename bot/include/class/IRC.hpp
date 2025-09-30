@@ -89,7 +89,7 @@ class IRC
 
 		// -- PRIVATE STATIC CONSTANTS + ATTRIBUTES
 		static const bool			_default_verbose = true;
-		static const port_t			_default_port = 6697;
+		static const port_t			_default_port = 6667;
 		static const std::string	_default_hostname;
 		static const std::string	_default_nickname;
 		static const std::string	_default_ollama_model;
