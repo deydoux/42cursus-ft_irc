@@ -495,7 +495,7 @@ void IRC::_handle_privmsg_command(const std::string sender_nickname, const std::
 void IRC::_handle_quit_command(const std::string sender_nickname, const std::vector<std::string> &args)
 {
 	std::string channel_name = args[2];
-	
+
 	for (trivias_t::iterator it = _ongoing_trivia_games.begin(); it != _ongoing_trivia_games.end(); it++) {
 		TriviaGame &game = *it->second;
 		game.remove_player(sender_nickname);
@@ -566,7 +566,7 @@ void IRC::_print_usage(int status)
 	std::cerr << "Usage: ./ircbot [options]... [hostname] [port] [password]" << std::endl
 			  << "  -h, --help                         Show this help message" << std::endl
 			  << "  -H, --hostname <ip>                IP address of IRC server" << std::endl
-			  << "  -p, --port <port>                  Port to listen on (default: 6697)" << std::endl
+			  << "  -p, --port <port>                  Port to listen on (default: 6667)" << std::endl
 			  << "  -P, --pass, --password <password>  Password required to connect (default: None)" << std::endl
 			  << "  -o, --ollama <uri>                 Ollama server URI (default: "+ _default_ollama_uri + ")" << std::endl
 			  << "  -m, --model <model>                Model to use for Ollama (default: " + to_string(_default_ollama_model) + ")" << std::endl
