@@ -87,8 +87,12 @@ The server processes these commands efficiently with proper error handling and p
 To set these modes, use the **MODE** command with the appropriate parameters. Multiple modes can be set at once, for example: `/MODE #channel +itk password`
 
 ## References
+<img align="right" src="https://github.com/user-attachments/assets/5dbfe00e-5a88-4a49-8932-70b8ba45ec15">
+
 - [Socket Programming in C](https://geeksforgeeks.org/c/socket-programming-cc/)
 - [Modern IRC Client Protocol](https://modern.ircdocs.horse/)
+
+### RFCs
 - [RFC 1459 "Internet Relay Chat Protocol"](https://datatracker.ietf.org/doc/html/rfc1459)
 - [RFC 2810 "Internet Relay Chat: Architecture"](https://datatracker.ietf.org/doc/html/rfc2810)
 - [RFC 2811 "Internet Relay Chat: Channel Management"](https://datatracker.ietf.org/doc/html/rfc2811)
